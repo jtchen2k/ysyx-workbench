@@ -1,8 +1,26 @@
-all:
-	@echo "Write this Makefile by your self."
+VBIN=$(VERILATOR_ROOT)/bin
+VERILOG_SRC=$(wildcard vsrc/*.v)
+CSRC=$(wildcard csrc/*.cpp csrc/*.c csrc/*.h csrc/*.hpp)
+TARGET=$(patsubst vsrc/%.v,V%,$(VERILOG_SRC))
+BUILD_DIR=build
 
-sim:
+all: $(VBIN)/verilator sim
+
+$(VBIN)/verilator:
+	@echo "Could not found verilator binary in $(VBIN)."
+	@exit 1
+
+$(TARGET):
+	@mkdir -p $(BUILD_DIR)
+	$(VBIN)/verilator --cc --exe --build -j 0 -Wall --Mdir $(BUILD_DIR) $(CSRC) $(VERILOG_SRC)
+
+.PHONY: sim
+sim: $(TARGET)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	@echo "Write this Makefile by your self."
+	./build/$(TARGET)
+
+
+clean:
+	rm -rf build
 
 include ../Makefile

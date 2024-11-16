@@ -19,7 +19,6 @@ sim: $(TARGET)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	./build/$(TARGET)
 
-
 clean:
 	rm -rf build
 

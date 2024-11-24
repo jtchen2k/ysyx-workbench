@@ -22,4 +22,6 @@ sim: $(TARGET)
 clean:
 	rm -rf build
 
+test: $(VBIN)/verilator
+	$(VBIN)/verilator --version
 include ../Makefile

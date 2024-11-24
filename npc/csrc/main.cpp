@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <assert.h>
+#include <memory>
 #include "verilated.h"
 #include "Vtop.h"
 
 
 int main(int argc, char** argv) {
-  VerilatedContext *contextp = new VerilatedContext();
+  const std::unique_ptr<VerilatedContext> contextp {new VerilatedContext()};
   contextp->commandArgs(argc, argv);
-  Vtop *top = new Vtop(contextp);
+  const std::unique_ptr<Vtop> top {new Vtop{contextp.get()}};
+  contextp->randReset(43);
   int n = 10;
   while (n--) {
     int a = rand() & 1;

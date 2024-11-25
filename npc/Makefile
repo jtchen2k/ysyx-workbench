@@ -12,7 +12,7 @@ $(VBIN)/verilator:
 
 $(TARGET):
 	@mkdir -p $(BUILD_DIR)
-	$(VBIN)/verilator --cc --exe --build -j 0 -Wall --Mdir $(BUILD_DIR) $(CSRC) $(VERILOG_SRC)
+	$(VBIN)/verilator --trace --cc --exe --build -j 0 -Wall --Mdir $(BUILD_DIR) $(CSRC) $(VERILOG_SRC)
 
 .PHONY: sim
 sim: $(TARGET)

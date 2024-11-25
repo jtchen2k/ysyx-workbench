@@ -5,31 +5,35 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#define MAX_SIM_TIME 20
-vluint64_t sim_time = 0;
+#define MAX_SIM_TIME 30
 
 int main(int argc, char **argv) {
-    VerilatedContext *contextp = new VerilatedContext();
-    contextp->traceEverOn(true);
+    VerilatedContext *contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
+    contextp->randReset(43);
+    Verilated::traceEverOn(true);
 
     Vtop *top = new Vtop(contextp);
-    contextp->randReset(43);
 
     VerilatedVcdC *m_trace = new VerilatedVcdC();
     m_trace->open("waveform.vcd");
 
-    while (sim_time < MAX_SIM_TIME) {
+    top->trace(m_trace, 5);
+
+    while (contextp->time() < MAX_SIM_TIME && !contextp->gotFinish()) {
+        contextp->timeInc(1);
         int a = rand() & 1;
         int b = rand() & 1;
         top->a = a;
         top->b = b;
         top->eval();
-        m_trace->dump(sim_time);
+        m_trace->dump(contextp->time());
         printf("a = %d, b = %d, f = %d\n", a, b, top->f);
         assert(top->f == (a ^ b));
-        sim_time++;
     }
     printf("Verification complete.\n");
-    return 0;
+
+    m_trace->close();
+    delete top;
+    exit(EXIT_SUCCESS);
 }

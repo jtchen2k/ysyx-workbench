@@ -15,10 +15,11 @@ int main(int argc, char **argv) {
 
     Vtop *top = new Vtop(contextp);
 
+    // Set up waveform tracing:
+    // https://veripool.org/guide/latest/faq.html#how-do-i-generate-waveforms-traces-in-c
     VerilatedVcdC *m_trace = new VerilatedVcdC();
-    m_trace->open("waveform.vcd");
-
     top->trace(m_trace, 5);
+    m_trace->open("waveform.vcd");
 
     while (contextp->time() < MAX_SIM_TIME && !contextp->gotFinish()) {
         contextp->timeInc(1);

@@ -25,5 +25,4 @@ clean:
 test: $(VBIN)/verilator
 	$(VBIN)/verilator --version
 
-
 include ../Makefile

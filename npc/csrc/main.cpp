@@ -5,7 +5,7 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#define MAX_SIM_TIME 30
+#define MAX_SIM_TIME 1000
 
 int main(int argc, char **argv) {
     VerilatedContext *contextp = new VerilatedContext;
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     // https://veripool.org/guide/latest/faq.html#how-do-i-generate-waveforms-traces-in-c
     VerilatedVcdC *m_trace = new VerilatedVcdC();
     top->trace(m_trace, 5);
-    m_trace->open("waveform.vcd");
+    m_trace->open("waveform.fsd");
 
     while (contextp->time() < MAX_SIM_TIME && !contextp->gotFinish()) {
         contextp->timeInc(1);
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         top->b = b;
         top->eval();
         m_trace->dump(contextp->time());
-        printf("a = %d, b = %d, f = %d\n", a, b, top->f);
+        // printf("a = %d, b = %d, f = %d\n", a, b, top->f);
         assert(top->f == (a ^ b));
     }
     printf("Verification complete.\n");

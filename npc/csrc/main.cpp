@@ -5,7 +5,7 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#define MAX_SIM_TIME 1000
+#define MAX_SIM_TIME 50
 
 int main(int argc, char **argv) {
     VerilatedContext *contextp = new VerilatedContext;

@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         top->b = b;
         top->eval();
         m_trace->dump(contextp->time());
-        // printf("a = %d, b = %d, f = %d\n", a, b, top->f);
+        printf("a = %d, b = %d, f = %d\n", a, b, top->f);
         assert(top->f == (a ^ b));
     }
     printf("Verification complete.\n");

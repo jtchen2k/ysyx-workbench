@@ -1,9 +1,9 @@
-VBIN:=$(VERILATOR_ROOT)/bin
-VCC:=$(VBIN)/verilator
-VERILOG_SRC:=$(wildcard vsrc/*.v)
-CSRC:=$(wildcard csrc/*.cpp csrc/*.c csrc/*.h csrc/*.hpp)
-TARGET:=$(patsubst vsrc/%.v,V%,$(VERILOG_SRC))
-BUILD_DIR:=build
+VBIN := $(VERILATOR_ROOT)/bin
+VCC := $(VBIN)/verilator
+VERILOG_SRC := $(wildcard vsrc/*.v)
+CSRC := $(wildcard csrc/*.cpp csrc/*.c csrc/*.h csrc/*.hpp)
+TARGET := $(patsubst vsrc/%.v,V%,$(VERILOG_SRC))
+BUILD_DIR := build
 
 .PHONY: all build sim clean
 

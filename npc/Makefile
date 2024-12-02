@@ -1,32 +1,62 @@
-VBIN := $(VERILATOR_ROOT)/bin
-VCC := $(VBIN)/verilator
-VERILOG_SRC := $(wildcard vsrc/*.v)
-CSRC := $(wildcard csrc/*.cpp csrc/*.c csrc/*.h csrc/*.hpp)
-TARGET := $(patsubst vsrc/%.v,V%,$(VERILOG_SRC))
-BUILD_DIR := build
+# Environment
+TOPNAME = light
+NXDC_FILES = constr/light.nxdc
+SHELL = /bin/sh
 
-.PHONY: all build sim clean
+VCC := verilator
+VFLAGS = --build -cc -O3 --x-assign fast --x-initial fast --noassert --trace
 
-all: build
+BUILD_DIR = ./build
+OBJ_DIR = $(BUILD_DIR)/obj_dir
+BIN = $(BUILD_DIR)/$(TOPNAME)
 
-build: $(TARGET)
+# Project Src
+VSRCS = $(abspath $(wildcard vsrc/*.v))
+CSRCS = $(abspath $(wildcard csrc/*.cpp csrc/*.c csrc/*.h csrc/*.hpp))
+CSRCS += $(SRC_AUTO_BIND)
 
-$(VCC):
-	@echo "Could not found verilator binary at $(VCC)."
-	@exit 1
+.PHONY: build sim clean
 
-$(TARGET): $(VERILOG_SRC) $(CSRC)
-	@mkdir -p $(BUILD_DIR)
-	$(VCC) --trace --cc --exe --build -j 0 -Wall --Mdir $(BUILD_DIR) $(CSRC) $(VERILOG_SRC)
+$(shell mkdir -p $(BUILD_DIR))
 
-sim: $(TARGET)
+default: build
+
+include $(NVBOARD_HOME)/scripts/nvboard.mk
+
+# Constraint file
+SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
+$(SRC_AUTO_BIND): $(NXDC_FILES)
+	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
+
+INC_PATH ?=
+INC_PATH += $(abspath $(BUILD_DIR))
+INC_PATH += $(abspath $(OBJ_DIR))
+
+INCFLAGS = $(addprefix -I, $(INC_PATH))
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+
+$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
+	@rm -rf $(OBJ_DIR)
+	$(VCC) $(VFLAGS) \
+		--top-module $(TOPNAME) $^ \
+		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
+		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
+
+build: $(BIN)
+
+# $(TARGET): $(VERILOG_SRC) $(CSRC)
+# 	@mkdir -p $(BUILD_DIR)
+# 	$(VCC) --trace --cc --exe --build -j 0 -Wall --Mdir $(BUILD_DIR) $(CSRC) $(VERILOG_SRC)
+
+sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	./build/$(TARGET)
+	$^
 
 clean:
-	rm -rf $(TARGET)
+	rm -rf $(BIN)
+	rm -rf $(BUILD_DIR)
 
-test: $(VCC)
-	$(VBIN)/verilator --version
+test:
+	$(VCC) --version
 
 include ../Makefile

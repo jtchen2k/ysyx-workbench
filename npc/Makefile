@@ -29,8 +29,6 @@ $(SRC_AUTO_BIND): $(NXDC_FILES)
 	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
 
 INC_PATH ?=
-INC_PATH += $(abspath $(BUILD_DIR))
-INC_PATH += $(abspath $(OBJ_DIR))
 
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""

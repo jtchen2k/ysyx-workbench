@@ -1,40 +1,59 @@
 
 
-
 #include "Vlight.h"
-#include <assert.h>
-#include <cstdio>
 #include <cassert>
+#include <cstdio>
+#include <nvboard.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-#include <nvboard.h>
 
 #ifndef TOP_NAME
 #define TOP_NAME Vlight
 #endif
 
-
-static TOP_NAME dut;
+static TOP_NAME      *dut = new TOP_NAME();
+static int            TRACE_DUMP_CYCLE = 1e3;
+static int            TRACE_FLUSH_CYCLE = 1e6;
+static VerilatedVcdC *g_trace = new VerilatedVcdC();
+static int            cur_cycle = 0;
 
 void nvboard_bind_all_pins(TOP_NAME *top);
 
+static void save_trace() { g_trace->flush(); }
+
 static void single_cycle() {
-    dut.clk = 0; dut.eval();
-    dut.clk = 1; dut.eval();
+    cur_cycle++;
+    dut->clk = 0;
+    dut->eval();
+    dut->clk = 1;
+    dut->eval();
+    if (cur_cycle % TRACE_DUMP_CYCLE == 0)
+        g_trace->dump(cur_cycle);
+    if (cur_cycle % TRACE_FLUSH_CYCLE == 0) {
+        save_trace();
+        printf("dumped trace. cycle = %d\n", cur_cycle);
+    }
 }
 
 static void reset(int n) {
-    dut.rst = 1;
-    while (n -- > 0) single_cycle();
-    dut.rst = 0;
+    dut->rst = 1;
+    while (n-- > 0)
+        single_cycle();
+    dut->rst = 0;
+}
+
+static void setup_trace() {
+    Verilated::traceEverOn(true);
+    dut->trace(g_trace, 99);
+    g_trace->open("waveform_light.fsd");
 }
 
 int main() {
-    nvboard_bind_all_pins(&dut);
+    setup_trace();
+    nvboard_bind_all_pins(dut);
     nvboard_init();
 
     reset(10);
-
     while (1) {
         nvboard_update();
         single_cycle();

@@ -19,7 +19,7 @@ static int            cur_cycle = 0;
 
 void nvboard_bind_all_pins(TOP_NAME *top);
 
-static void save_trace() { g_trace->flush(); }
+static void single_cycle_trace() { g_trace->flush(); }
 
 static void single_cycle() {
     cur_cycle++;
@@ -30,7 +30,7 @@ static void single_cycle() {
     if (cur_cycle % TRACE_DUMP_CYCLE == 0)
         g_trace->dump(cur_cycle);
     if (cur_cycle % TRACE_FLUSH_CYCLE == 0) {
-        save_trace();
+        single_cycle_trace();
         printf("dumped trace. cycle = %d\n", cur_cycle);
     }
 }

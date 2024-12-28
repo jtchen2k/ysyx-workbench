@@ -25,7 +25,9 @@ const char *regs[] = {
 
 void isa_reg_display() {
   for (int i = 0; i < 32; i++) {
-    printf("%-12s 0x%08x %16u\n", reg_name(i), gpr(i), gpr(i));
+      printf("%-12s " MUXDEF(CONFIG_RV64, "0x%08x ", "0x%016x ")
+                 MUXDEF(CONFIG_RV64, "%16lu\n", "%16u\n"),
+             reg_name(i), gpr(i), gpr(i));
   }
 }
 

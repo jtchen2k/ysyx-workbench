@@ -58,6 +58,9 @@ static int cmd_si(char *args) {
     printf("Invalid argument: %s\n.", args);
     return 0;
   }
+  if (strtok(args, " ") != NULL) {
+    printf("warning: subsequent arguments are ignored.\n");
+  }
   cpu_exec(n);
   return 0;
 }

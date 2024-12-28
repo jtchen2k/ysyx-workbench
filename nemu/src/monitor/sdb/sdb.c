@@ -101,7 +101,8 @@ static int cmd_x(char *args) {
     printf("x: missing EXPR.\n");
     return 0;
   }
-  word_t addr = atoi(arg2);
+
+  paddr_t addr = atoi(arg2);
   for (int i = 0; i < n; i++) {
     printf("0x%08x: 0x%08x\n", addr, paddr_read(addr, 4));
     addr += 4;

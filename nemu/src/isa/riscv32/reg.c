@@ -24,6 +24,10 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
+  for (int i = 0; i < 32; i++) {
+      printf(ANSI_FG_BLUE "%-12s " ANSI_NONE FMT_PADDR MUXDEF(CONFIG_ISA64, "%16llu\n", "%8u\n"),
+             reg_name(i), gpr(i), gpr(i));
+  }
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

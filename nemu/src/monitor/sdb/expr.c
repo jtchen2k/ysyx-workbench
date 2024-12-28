@@ -23,7 +23,6 @@
 enum {
   TK_NOTYPE = 256,
   TK_EQ,
-
   /* TODO: Add more token types */
   TK_DECIMAL,
 };
@@ -42,7 +41,7 @@ static struct rule {
     {"\\*", '*'},                          // mult
     {"\\/", '/'},                          // divide
     {"\\+", '+'},                          // plus
-    {"\\-", '-'},
+    {"\\-", '-'},                          // minus
     {"==", TK_EQ}, // equal
 };
 
@@ -89,6 +88,16 @@ static bool make_token(char *e) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
+        if (substr_len >= 32) {
+          Log("token length exceeds buffer size.");
+          return false;
+        }
+
+        if (nr_token >= 32) {
+            Log("too many tokens");
+            return false;
+        }
+
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
@@ -100,8 +109,14 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_DECIMAL:
+            tokens[nr_token].type = TK_DECIMAL;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            break;
+          default:
+            tokens[nr_token].type = rules[i].token_type;
         }
+        nr_token++;
 
         break;
       }

@@ -92,7 +92,7 @@ static int cmd_x(char *args) {
   char *arg1 = strtok(args, " ");
   char *arg2 = strtok(args, " ");
   int n = atoi(arg1);
-  if (!n || n < 0) {
+  if (arg1 == NULL || n < 0) {
     printf("Invalid argument: %s\n.", arg1);
     return 0;
   }

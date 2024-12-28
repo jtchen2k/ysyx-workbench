@@ -90,8 +90,8 @@ static int cmd_x(char *args) {
     printf("x: missing N and EXPR.\n");
     return 0;
   }
-  char *arg1 = strtok(NULL, " ");
-  char *arg2 = strtok(NULL, " ");
+  char *arg1 = strtok(args, " ");
+  char *arg2 = strtok(args, " ");
   int n = atoi(arg1);
   if (arg1 == NULL || n < 0) {
     printf("Invalid argument: %s\n.", arg1);
@@ -103,6 +103,7 @@ static int cmd_x(char *args) {
   }
 
   paddr_t addr = strtol(arg2, NULL, 0);
+
   for (int i = 0; i < n; i++) {
     printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ": " FMT_WORD "\n", addr, paddr_read(addr, 4));
     addr += 4;

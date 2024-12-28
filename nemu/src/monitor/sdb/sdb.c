@@ -84,6 +84,27 @@ static int cmd_info (char *args) {
 }
 
 static int cmd_x(char *args) {
+  if (args == NULL) {
+    printf("x: missing N and EXPR.\n");
+    return 0;
+  }
+  char *arg1 = strtok(args, " ");
+  char *arg2 = strtok(args, " ");
+  int n = atoi(arg1);
+  if (!n || n < 0) {
+    printf("Invalid argument: %s\n.", arg1);
+    return 0;
+  }
+  if (arg2 == NULL) {
+    printf("x: missing EXPR.\n");
+    return 0;
+  }
+  bool success = false;
+  // word_t addr = expr(arg2, &success);
+  if (!success) {
+    printf("Invalid expression: %s\n.", arg2);
+    return 0;
+  }
   return 0;
 }
 
@@ -99,7 +120,7 @@ static struct {
     {"q", "Exit NEMU", cmd_q},
     /* TODO: Add more commands */
     {"si", "Step one instruction exactly. Use si[N] to step N times.", cmd_si},
-    {"info", "Generic command for showing things about the program being debugged. Use info [SUBCMD]\n"
+    {"info", "Generic command for showing things about the program being debugged: info [SUBCMD]\n"
              "\tinfo r: Print register values.\n"
              "\tinfo w: Print information of watchpoints.\n", cmd_info},
     {"x", "Examine memory: x N EXPR", cmd_x},

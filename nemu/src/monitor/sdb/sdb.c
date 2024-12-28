@@ -83,6 +83,10 @@ static int cmd_info (char *args) {
   return 0;
 }
 
+static int cmd_x(char *args) {
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -98,6 +102,7 @@ static struct {
     {"info", "Generic command for showing things about the program being debugged. Use info [SUBCMD]\n"
              "\tinfo r: Print register values.\n"
              "\tinfo w: Print information of watchpoints.\n", cmd_info},
+    {"x", "Examine memory: x N EXPR", cmd_x},
     {"p", "Print value of expression EXP. ", cmd_p},
 };
 

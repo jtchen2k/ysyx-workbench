@@ -104,7 +104,7 @@ static int cmd_x(char *args) {
 
   paddr_t addr = strtol(arg2, NULL, 0);
   for (int i = 0; i < n; i++) {
-    printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ":      " FMT_WORD "\n", addr, paddr_read(addr, 4));
+    printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ": " FMT_WORD "\n", addr, paddr_read(addr, 4));
     addr += 4;
   }
   // bool success = false;

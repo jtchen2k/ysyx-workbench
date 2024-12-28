@@ -21,24 +21,29 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256,
+  TK_EQ,
 
   /* TODO: Add more token types */
-
+  TK_DECIMAL,
 };
 
 static struct rule {
-  const char *regex;
-  int token_type;
+    const char *regex;
+    int         token_type;
 } rules[] = {
 
-  /* TODO: Add more rules.
-   * Pay attention to the precedence level of different rules.
-   */
+    /* TODO: Add more rules.
+     * Pay attention to the precedence level of different rules.
+     */
 
-  {" +", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
-  {"==", TK_EQ},        // equal
+    {" +", TK_NOTYPE},                     // spaces
+    {"\\d+", TK_DECIMAL},
+    {"\\*", '*'},                          // mult
+    {"\\/", '/'},                          // divide
+    {"\\+", '+'},                          // plus
+    {"\\-", '-'},
+    {"==", TK_EQ}, // equal
 };
 
 #define NR_REGEX ARRLEN(rules)

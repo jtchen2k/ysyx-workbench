@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 
@@ -100,10 +101,12 @@ static int cmd_x(char *args) {
     return 0;
   }
   bool success = false;
-  // word_t addr = expr(arg2, &success);
+  word_t addr = expr(arg2, &success);
   if (!success) {
     printf("Invalid expression: %s\n.", arg2);
     return 0;
+  } else {
+    printf("0x%08x: 0x%08x\n", addr, paddr_read(addr, 4));
   }
   return 0;
 }

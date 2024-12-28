@@ -102,7 +102,7 @@ static int cmd_x(char *args) {
     return 0;
   }
 
-  paddr_t addr = atoi(arg2);
+  paddr_t addr = strtol(arg2, NULL, 0);
   for (int i = 0; i < n; i++) {
     printf("0x%08x: 0x%08x\n", addr, paddr_read(addr, 4));
     addr += 4;

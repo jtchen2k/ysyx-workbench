@@ -71,6 +71,10 @@ static int cmd_p(char *args) {
 }
 
 static int cmd_info (char *args) {
+  if (args == NULL) {
+    printf("info: missing [SUBCMD].\n");
+    return 0;
+  }
   if (strcmp(strtok(args, " "), "r") == 0) {
     isa_reg_display();
   } else if (strcmp(args, "w") == 0) {

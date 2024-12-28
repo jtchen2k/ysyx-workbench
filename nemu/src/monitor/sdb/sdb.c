@@ -65,18 +65,31 @@ static int cmd_si(char *args) {
   return 0;
 }
 
+static int cmd_p(char *args) {
+  return 0;
+
+}
+
+static int cmd_info (char *args) {
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
   const char *name;
   const char *description;
   int (*handler) (char *);
-} cmd_table [] = {
-  { "help", "Display information about all supported commands", cmd_help },
-  { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit NEMU", cmd_q },
-  /* TODO: Add more commands */
-  { "si", "Step N instructions. If N is not specified, step 1. Usage: si [N]", cmd_si }
+} cmd_table[] = {
+    {"help", "Display information about all supported commands", cmd_help},
+    {"c", "Continue the execution of the program", cmd_c},
+    {"q", "Exit NEMU", cmd_q},
+    /* TODO: Add more commands */
+    {"si", "Step one instruction exactly. Use si[N] to step N times.", cmd_si},
+    {"info", "Generic command for showing things about the program being debugged. Use info [SUBCMD]\n"
+             "\tinfo r: Print register values.\n"
+             "\tinfo w: Print information of watchpoints.\n", cmd_info},
+    {"p", "Print value of expression EXP. ", cmd_p},
 };
 
 #define NR_CMD ARRLEN(cmd_table)

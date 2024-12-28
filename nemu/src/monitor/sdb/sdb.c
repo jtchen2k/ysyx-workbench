@@ -101,14 +101,19 @@ static int cmd_x(char *args) {
     printf("x: missing EXPR.\n");
     return 0;
   }
-  bool success = false;
-  word_t addr = expr(arg2, &success);
-  if (!success) {
-    printf("Invalid expression: %s\n.", arg2);
-    return 0;
-  } else {
+  word_t addr = atoi(arg2);
+  for (int i = 0; i < n; i++) {
     printf("0x%08x: 0x%08x\n", addr, paddr_read(addr, 4));
+    addr += 4;
   }
+  // bool success = false;
+  // word_t addr = expr(arg2, &success);
+  // if (!success) {
+  //   printf("Invalid expression.\n.", arg2);
+  //   return 0;
+  // } else {
+  //   printf("0x%08x: 0x%08x\n", addr, paddr_read(addr, 4));
+  // }
   return 0;
 }
 

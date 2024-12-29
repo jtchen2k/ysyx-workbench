@@ -35,9 +35,10 @@ static struct rule {
     /* TODO: Add more rules.
      * Pay attention to the precedence level of different rules.
      */
-
     {" +", TK_NOTYPE},                     // spaces
     {"\\d+", TK_DECIMAL},
+    {"\\(", '('},
+    {"\\)", ')'},
     {"\\*", '*'},                          // mult
     {"\\/", '/'},                          // divide
     {"\\+", '+'},                          // plus
@@ -131,6 +132,67 @@ static bool make_token(char *e) {
   return true;
 }
 
+static bool check_parentheses(int p, int q) {
+  Assert(p < q, "bad check_parentheses call");
+  return (tokens[p].type == '(' && tokens[q].type == ')');
+}
+
+static int32_t eval(int p, int q, bool* success) {
+  if (p > q) {
+    /* Bad expression */
+    Assert(0, "bad expression.");
+  }
+  else if (p == q) {
+    /* Single token.
+     * For now this token should be a number.
+     * Return the value of the number.
+     */
+    return atoi(tokens[p].str);
+  }
+  else if (check_parentheses(p, q) == true) {
+    /* The expression is surrounded by a matched pair of parentheses.
+     * If that is the case, just throw away the parentheses.
+     */
+    return eval(p + 1, q - 1, success);
+  }
+  else {
+    int32_t op = 0;
+    int op_type = TK_NOTYPE;
+    uint8_t precedence[] = {
+      ['+'] = 100,
+      ['-'] = 100,
+      ['*'] = 50,
+      ['/'] = 50,
+      [TK_NOTYPE] = 0,
+    };
+
+    for (int i = p; i <= q; i++) {
+      Token t = tokens[i];
+      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/') {
+        if (precedence[t.type] > precedence[op_type]) {
+          op = i, op_type = t.type;
+        }
+      }
+    }
+    if (op_type == TK_NOTYPE) {
+      success = false;
+      return 0;
+    }
+
+    int32_t val1 = eval(p, op - 1, success);
+    int32_t val2 = eval(op + 1, q, success);
+
+    switch (op_type) {
+      case '+': return val1 + val2;
+      case '-': /* ... */
+      case '*': /* ... */
+      case '/': /* ... */
+      default: Assert(0, "unknown optype.");
+    }
+  }
+}
+
+
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -139,7 +201,6 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
+  int32_t res = eval(0, nr_token - 1, success);
+  return res;
 }

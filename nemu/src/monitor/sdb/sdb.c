@@ -71,8 +71,14 @@ static int cmd_p(char *args) {
     printf("p: missing EXPR.\n");
     return 0;
   }
+  bool success = true;
+  word_t res = expr(args, &success);
+  if (!success) {
+    printf("Invalid expression: %s\n", args);
+    return 0;
+  }
+  printf(FMT_WORD "\n", res);
   return 0;
-
 }
 
 static int cmd_info (char *args) {

@@ -257,6 +257,7 @@ static uint32_t eval(int p, int q, bool* success) {
           printf("warning: divided by zero. will ignore divide.\n");
           return val1; // return val1 to avoid the program crash
         }
+        return val1 / val2;
       default:
         *success = false;
         printf("unknown optype.\n\t");

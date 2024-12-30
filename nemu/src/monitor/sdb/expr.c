@@ -271,6 +271,7 @@ static word_t eval(int p, int q, bool* success) {
       case TK_HEX:
         return MUXDEF(CONFIG_ISA64, strtoll(tokens[p].str + 2, NULL, 16), strtol(tokens[p].str + 2, NULL, 16));
       case TK_REG:
+        printf("evaluating register %s\n", tokens[p].str);
         return isa_reg_str2val(tokens[p].str + 1, success);
       default:
         *success = false;

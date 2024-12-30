@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <memory/paddr.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -23,12 +24,17 @@
 #define EXPR_TOKEN_SIZE 4096
 #define EXPR_TOKEN_LENGTH 32
 
-enum {
+typedef enum {
   TK_NOTYPE = 256,
+  TK_NEGATIVE,
   TK_EQ,
-  /* TODO: Add more token types */
+  TK_NEQ,
+  TK_AND,
   TK_DECIMAL,
-};
+  TK_HEX,
+  TK_REG,
+  TK_DEREF,
+} TokenType;
 
 static struct rule {
     const char *regex;
@@ -37,14 +43,18 @@ static struct rule {
     /* TODO: Add more rules.
      * Pay attention to the precedence level of different rules.
      */
-    {" +", TK_NOTYPE},                     // spaces
+    {" +", TK_NOTYPE}, // spaces
+    {"0x[0-9]+", TK_HEX},
+    {"\\$[a-zA-Z0-7\\$]+", TK_REG},
     {"[0-9]+u?", TK_DECIMAL},
     {"\\(", '('},
     {"\\)", ')'},
-    {"\\*", '*'},                          // mult
-    {"/", '/'},                          // divide
-    {"\\+", '+'},                          // plus
-    {"-", '-'},                          // minus
+    {"\\*", '*'}, // mult
+    {"/", '/'},   // divide
+    {"\\+", '+'}, // plus
+    {"-", '-'},   // minus
+    {"&&", TK_AND},
+    {"!=", TK_NEQ},
     {"==", TK_EQ}, // equal
 };
 
@@ -113,15 +123,22 @@ static bool make_token(char *e) {
 
         switch (rules[i].token_type) {
           case TK_DECIMAL:
-            tokens[nr_token].type = TK_DECIMAL;
+          case TK_HEX:
+            tokens[nr_token].type = rules[i].token_type;
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token].str[substr_len] = '\0';
+            break;
+          case TK_REG:
+            tokens[nr_token].type = rules[i].token_type;
+            // skip $
+            strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
+            tokens[nr_token].str[substr_len - 1] = '\0';
             break;
           default:
             tokens[nr_token].type = rules[i].token_type;
         }
-        nr_token++;
 
+        nr_token++;
         break;
       }
     }
@@ -130,6 +147,40 @@ static bool make_token(char *e) {
       printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
       return false;
     }
+  }
+
+  /* distinguish minus vs neg, mult vs deref */
+  TokenType last_type = TK_NOTYPE;
+  TokenType unary_prevs[] = {
+    '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF, TK_NEGATIVE,
+  };
+  TokenType unary_ops_map[][2] = {
+    {'-', TK_NEGATIVE},
+    {'*', TK_DEREF},
+  };
+  for (int i = 0; i < nr_token; i++) {
+    Token *t = &tokens[i];
+    for (int o = 0; o < ARRLEN(unary_ops_map); o++) {
+      int op_type = unary_ops_map[o][0];
+      int unary_type = unary_ops_map[o][1];
+      if (t->type == op_type) {
+        if (i == 0) {
+          t->type = unary_type;
+        }
+        else {
+          for (int j = 0; j < ARRLEN(unary_prevs); j++) {
+            if (last_type == unary_prevs[j]) {
+              t->type = unary_type;
+              break;
+            }
+          }
+        }
+      }
+      if (t->type == unary_type)
+          Log("detected unary operator %c at position %d, after %c", op_type, i, last_type);
+    }
+
+    if (t->type != TK_NOTYPE) last_type = t->type;
   }
 
   return true;
@@ -183,7 +234,7 @@ static bool check_parentheses(int p, int q) {
   return ret;
 }
 
-static uint32_t eval(int p, int q, bool* success) {
+static word_t eval(int p, int q, bool* success) {
   /**
    * Remove leading and trailing spaces;
    */
@@ -192,19 +243,46 @@ static uint32_t eval(int p, int q, bool* success) {
 
   if (p > q) {
     /* Bad expression */
-    Assert(0, "bad expression (%d - %d).", p, q);
+    *success = false;
+    printf("unexpected eval state (%d - %d).\n", p, q);
+    return 0;
+  }
+  else if (tokens[p].type == TK_NEGATIVE) {
+    /**
+     * Handle negative unary operator.
+     */
+    word_t val = eval(p + 1, q, success);
+    return -val;
+  }
+  else if (tokens[p].type == TK_DEREF) {
+    /**
+     * Handle dereference unary operator.
+     */
+    word_t addr = eval(p + 1, q, success);
+    if (!in_pmem(addr)) {
+      *success = false;
+      printf("illegal memory access: " FMT_WORD "\n", addr);
+      return 0;
+    }
+    return paddr_read(addr, 4);
   }
   else if (p == q) {
     /* Single token.
-     * For now this token should be a number.
+     * For now this token should be a decimal / hex / register.
      * Return the value of the number.
      */
-    if (tokens[p].type != TK_DECIMAL) {
-      *success = false;
-      printf("invalid expression: missing decimal number.\n\ttoken type: %d\n", tokens[p].type);
-      return 0;
+    switch (tokens[p].type) {
+      case TK_DECIMAL:
+        return MUXDEF(CONFIG_ISA64, atoll(tokens[p].str), atoi(tokens[p].str));
+      case TK_HEX:
+        return MUXDEF(CONFIG_ISA64, strtoll(tokens[p].str + 2, NULL, 16), strtol(tokens[p].str + 2, NULL, 16));
+      case TK_REG:
+        return isa_reg_str2val(tokens[p].str, success);
+      default:
+        *success = false;
+        printf("invalid expression: unexpected token. type: %d\n", tokens[p].type);
+        return 0;
     }
-    return atoi(tokens[p].str);
   }
   else if (check_parentheses(p, q)) {
     /* The expression is surrounded by a matched pair of parentheses.
@@ -216,6 +294,9 @@ static uint32_t eval(int p, int q, bool* success) {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
     uint8_t precedence[] = {
+      [TK_EQ] = 150,
+      [TK_NEQ] = 150,
+      [TK_AND] = 150,
       ['+'] = 100,
       ['-'] = 100,
       ['/'] = 50,
@@ -228,7 +309,8 @@ static uint32_t eval(int p, int q, bool* success) {
       Token t = tokens[i];
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
-      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/') {
+      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/' ||
+          t.type == TK_EQ || t.type == TK_NEQ || t.type == TK_AND) {
         if (stk != 0) continue;
         if (precedence[t.type] >= precedence[op_type]) {
           op = i, op_type = t.type;
@@ -243,8 +325,8 @@ static uint32_t eval(int p, int q, bool* success) {
       return 0;
     }
 
-    uint32_t val1 = eval(p, op - 1, success);
-    uint32_t val2 = eval(op + 1, q, success);
+    word_t val1 = eval(p, op - 1, success);
+    word_t val2 = eval(op + 1, q, success);
 
     switch (op_type) {
       case '+': return val1 + val2;
@@ -257,6 +339,9 @@ static uint32_t eval(int p, int q, bool* success) {
           return UINT32_MAX; // return val1 to avoid the program crash
         }
         return val1 / val2;
+      case TK_EQ: return val1 == val2;
+      case TK_NEQ: return val1 != val2;
+      case TK_AND: return val1 && val2;
       default:
         *success = false;
         printf("unknown optype.\n\t");
@@ -274,7 +359,7 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
-  /* TODO: Insert codes to evaluate the expression. */
+  *success = true; // set to false if any error occurs
   int32_t res = eval(0, nr_token - 1, success);
   return res;
 }

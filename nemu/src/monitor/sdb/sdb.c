@@ -67,8 +67,18 @@ static int cmd_si(char *args) {
 }
 
 static int cmd_p(char *args) {
+  if (args == NULL) {
+    printf("p: missing EXPR.\n");
+    return 0;
+  }
+  bool success = true;
+  word_t res = expr(args, &success);
+  if (!success) {
+    printf("Failed to evaluate expression: %s\n", args);
+    return 0;
+  }
+  printf(FMT_WORD "\n", res);
   return 0;
-
 }
 
 static int cmd_info (char *args) {
@@ -80,7 +90,7 @@ static int cmd_info (char *args) {
   if (strcmp(arg1, "r") == 0) {
     isa_reg_display();
   } else if (strcmp(arg1, "w") == 0) {
-
+    TODO();
   }
   return 0;
 }
@@ -91,10 +101,10 @@ static int cmd_x(char *args) {
     return 0;
   }
   char *arg1 = strtok(args, " ");
-  char *arg2 = strtok(NULL, " ");
+  char *arg2 = strtok(NULL, "\n"); // expr
   int n = atoi(arg1);
   if (arg1 == NULL || n < 0) {
-    printf("Invalid argument: %s\n.", arg1);
+    printf("invalid argument: %s\n.", arg1);
     return 0;
   }
   if (arg2 == NULL) {
@@ -102,12 +112,30 @@ static int cmd_x(char *args) {
     return 0;
   }
 
-  paddr_t addr = strtol(arg2, NULL, 0);
+  bool success;
+  paddr_t addr = expr(arg2, &success);
+
+  if (!success) {
+    printf("Failed to evaluate expression: %s\n", arg2);
+    return 0;
+  }
 
   for (int i = 0; i < n; i++) {
-    printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ": " FMT_WORD "\n", addr, paddr_read(addr, 4));
+    if (!in_pmem(addr)) {
+      printf(ANSI_FG_RED FMT_PADDR ": illegal access\n" ANSI_NONE, addr);
+    } else {
+      printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ": " FMT_WORD "\n", addr, paddr_read(addr, 4));
+    }
     addr += 4;
   }
+  return 0;
+}
+
+static int cmd_w(char *args) {
+  return 0;
+}
+
+static int cmd_d(char *args) {
   return 0;
 }
 
@@ -125,9 +153,11 @@ static struct {
     {"si", "Step one instruction exactly. Use si[N] to step N times.", cmd_si},
     {"info", "Generic command for showing things about the program being debugged: info [SUBCMD]\n"
              "\tinfo r: Print register values.\n"
-             "\tinfo w: Print information of watchpoints.\n", cmd_info},
+             "\tinfo w: Print information of watchpoints.", cmd_info},
     {"x", "Examine memory: x N EXPR", cmd_x},
-    {"p", "Print value of expression EXP. ", cmd_p},
+    {"p", "Print value of expression EXPR: p EXPR. ", cmd_p},
+    {"w", "Set a watchpoint for an expression: w EXPR", cmd_w},
+    {"d", "Delete the watchpoint N: d N", cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)

@@ -67,6 +67,10 @@ static int cmd_si(char *args) {
 }
 
 static int cmd_p(char *args) {
+  if (args == NULL) {
+    printf("p: missing EXPR.\n");
+    return 0;
+  }
   return 0;
 
 }
@@ -133,7 +137,7 @@ static struct {
     {"si", "Step one instruction exactly. Use si[N] to step N times.", cmd_si},
     {"info", "Generic command for showing things about the program being debugged: info [SUBCMD]\n"
              "\tinfo r: Print register values.\n"
-             "\tinfo w: Print information of watchpoints.\n", cmd_info},
+             "\tinfo w: Print information of watchpoints.", cmd_info},
     {"x", "Examine memory: x N EXPR", cmd_x},
     {"p", "Print value of expression EXPR: p EXPR. ", cmd_p},
     {"w", "Set a watchpoint for an expression: w EXPR", cmd_w},

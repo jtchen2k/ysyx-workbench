@@ -312,7 +312,7 @@ int test_expr() {
       return -100;
     }
     if (result != expected_val) {
-      printf("failed to eval expression #%d: %s.\n\texpected: %u, but got: %u\n. stopping test.",
+      printf("incorrect result for expression #%d: %s.\n\texpected: %u, but got: %u\n. stopping test.",
         case_id, expression, expected_val, result);
       return -101;
     }

@@ -77,7 +77,7 @@ static char gen_rand_op() {
 }
 
 static void gen_rand_expr(int depth) {
-  if (depth >= 30) {
+  if (depth >= 20) {
     // avoid buffer overflow
     gen_num();
     return;

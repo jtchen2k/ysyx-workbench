@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <memory/paddr.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -240,6 +241,20 @@ static word_t eval(int p, int q, bool* success) {
     printf("unexpected eval state (%d - %d).\n", p, q);
     return 0;
   }
+  else if (tokens[p].type == TK_NEGATIVE) {
+    /**
+     * Handle negative unary operator.
+     */
+    word_t val = eval(p + 1, q, success);
+    return -val;
+  }
+  else if (tokens[p].type == TK_DEREF) {
+    /**
+     * Handle dereference unary operator.
+     */
+    word_t addr = eval(p + 1, q, success);
+    return paddr_read(addr, 4);
+  }
   else if (p == q) {
     /* Single token.
      * For now this token should be a decimal / hex / register.
@@ -298,8 +313,8 @@ static word_t eval(int p, int q, bool* success) {
       return 0;
     }
 
-    uint32_t val1 = eval(p, op - 1, success);
-    uint32_t val2 = eval(op + 1, q, success);
+    word_t val1 = eval(p, op - 1, success);
+    word_t val2 = eval(op + 1, q, success);
 
     switch (op_type) {
       case '+': return val1 + val2;
@@ -312,6 +327,9 @@ static word_t eval(int p, int q, bool* success) {
           return UINT32_MAX; // return val1 to avoid the program crash
         }
         return val1 / val2;
+      case TK_EQ: return val1 == val2;
+      case TK_NEQ: return val1 != val2;
+      case TK_AND: return val1 && val2;
       default:
         *success = false;
         printf("unknown optype.\n\t");

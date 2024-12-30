@@ -101,7 +101,7 @@ static int cmd_x(char *args) {
     return 0;
   }
   char *arg1 = strtok(args, " ");
-  char *arg2 = strtok(NULL, " ");
+  char *arg2 = strtok(NULL, " "); // expr
   int n = atoi(arg1);
   if (arg1 == NULL || n < 0) {
     printf("Invalid argument: %s\n.", arg1);
@@ -112,7 +112,8 @@ static int cmd_x(char *args) {
     return 0;
   }
 
-  paddr_t addr = strtol(arg2, NULL, 0);
+  bool success;
+  paddr_t addr = expr(arg2, &success);
 
   for (int i = 0; i < n; i++) {
     printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ": " FMT_WORD "\n", addr, paddr_read(addr, 4));

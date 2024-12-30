@@ -230,7 +230,7 @@ static uint32_t eval(int p, int q, bool* success) {
       else if (t.type == ')') stk--;
       if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/') {
         if (stk != 0) continue;
-        if (precedence[t.type] > precedence[op_type]) {
+        if (precedence[t.type] >= precedence[op_type]) {
           op = i, op_type = t.type;
         }
       }

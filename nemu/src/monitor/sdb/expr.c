@@ -36,11 +36,11 @@ static struct rule {
      * Pay attention to the precedence level of different rules.
      */
     {" +", TK_NOTYPE},                     // spaces
-    {"\\d+u", TK_DECIMAL},
+    {"[:digit:]+u?", TK_DECIMAL},
     {"\\(", '('},
     {"\\)", ')'},
     {"\\*", '*'},                          // mult
-    {"\\/", '/'},                          // divide
+    {"/", '/'},                          // divide
     {"\\+", '+'},                          // plus
     {"\\-", '-'},                          // minus
     {"==", TK_EQ}, // equal

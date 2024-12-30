@@ -20,14 +20,19 @@
  */
 #include <regex.h>
 
-#define EXPR_TOKEN_SIZE 2000000
+#define EXPR_TOKEN_SIZE 4096
 #define EXPR_TOKEN_LENGTH 32
 
 enum {
   TK_NOTYPE = 256,
+  TK_NEGATIVE,
   TK_EQ,
-  /* TODO: Add more token types */
+  TK_NEQ,
+  TK_AND,
   TK_DECIMAL,
+  TK_HEX,
+  TK_REG,
+  TK_DEREF,
 };
 
 static struct rule {
@@ -37,14 +42,18 @@ static struct rule {
     /* TODO: Add more rules.
      * Pay attention to the precedence level of different rules.
      */
-    {" +", TK_NOTYPE},                     // spaces
+    {" +", TK_NOTYPE}, // spaces
     {"[0-9]+u?", TK_DECIMAL},
+    {"0x[0-9]+", TK_HEX},
+    {"$[a-zA-Z]+", TK_REG},
     {"\\(", '('},
     {"\\)", ')'},
-    {"\\*", '*'},                          // mult
-    {"/", '/'},                          // divide
-    {"\\+", '+'},                          // plus
-    {"-", '-'},                          // minus
+    {"\\*", '*'}, // mult
+    {"/", '/'},   // divide
+    {"\\+", '+'}, // plus
+    {"-", '-'},   // minus
+    {"&&", TK_AND},
+    {"!=", TK_NEQ},
     {"==", TK_EQ}, // equal
 };
 

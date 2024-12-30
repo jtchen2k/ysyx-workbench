@@ -111,6 +111,14 @@ static int cmd_x(char *args) {
   return 0;
 }
 
+static int cmd_w(char *args) {
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -127,7 +135,9 @@ static struct {
              "\tinfo r: Print register values.\n"
              "\tinfo w: Print information of watchpoints.\n", cmd_info},
     {"x", "Examine memory: x N EXPR", cmd_x},
-    {"p", "Print value of expression EXP. ", cmd_p},
+    {"p", "Print value of expression EXPR: p EXPR. ", cmd_p},
+    {"w", "Set a watchpoint for an expression: w EXPR", cmd_w},
+    {"d", "Delete the watchpoint N: d N", cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)

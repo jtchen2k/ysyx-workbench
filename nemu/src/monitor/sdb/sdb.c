@@ -90,7 +90,7 @@ static int cmd_x(char *args) {
     printf("x: missing N and EXPR.\n");
     return 0;
   }
-  char *arg1 = strtok(NULL, " ");
+  char *arg1 = strtok(args, " ");
   char *arg2 = strtok(NULL, " ");
   int n = atoi(arg1);
   if (arg1 == NULL || n < 0) {

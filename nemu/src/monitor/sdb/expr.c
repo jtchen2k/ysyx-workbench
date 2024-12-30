@@ -72,7 +72,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[128] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {
@@ -89,7 +89,7 @@ static bool make_token(char *e) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
-        if (substr_len >= 32) {
+        if (substr_len >= 31) {
           Log("token length exceeds buffer size.");
           return false;
         }
@@ -113,6 +113,7 @@ static bool make_token(char *e) {
           case TK_DECIMAL:
             tokens[nr_token].type = TK_DECIMAL;
             strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token].str[substr_len] = '\0';
             break;
           default:
             tokens[nr_token].type = rules[i].token_type;
@@ -137,7 +138,7 @@ static bool check_parentheses(int p, int q) {
   return (tokens[p].type == '(' && tokens[q].type == ')');
 }
 
-static int32_t eval(int p, int q, bool* success) {
+static uint32_t eval(int p, int q, bool* success) {
   if (p > q) {
     /* Bad expression */
     Assert(0, "bad expression.");
@@ -147,6 +148,11 @@ static int32_t eval(int p, int q, bool* success) {
      * For now this token should be a number.
      * Return the value of the number.
      */
+    if (tokens[p].type != TK_DECIMAL) {
+      *success = false;
+      printf("invalid expression: missing decimal number.\n");
+      return 0;
+    }
     return atoi(tokens[p].str);
   }
   else if (check_parentheses(p, q) == true) {
@@ -156,7 +162,7 @@ static int32_t eval(int p, int q, bool* success) {
     return eval(p + 1, q - 1, success);
   }
   else {
-    int32_t op = 0;
+    uint32_t op = 0;
     int op_type = TK_NOTYPE;
     uint8_t precedence[] = {
       ['+'] = 100,
@@ -175,19 +181,28 @@ static int32_t eval(int p, int q, bool* success) {
       }
     }
     if (op_type == TK_NOTYPE) {
-      success = false;
+      *success = false;
+      printf("invalid expression: cannot find operator.\n");
       return 0;
     }
 
-    int32_t val1 = eval(p, op - 1, success);
-    int32_t val2 = eval(op + 1, q, success);
+    uint32_t val1 = eval(p, op - 1, success);
+    uint32_t val2 = eval(op + 1, q, success);
 
     switch (op_type) {
       case '+': return val1 + val2;
-      case '-': /* ... */
-      case '*': /* ... */
-      case '/': /* ... */
-      default: Assert(0, "unknown optype.");
+      case '-': return val1 - val2;
+      case '*': return val1 * val2;
+      case '/':
+        if (val2 == 0) {
+          *success = false;
+          printf("divided by zero.\n");
+          return val1; // return val1 to avoid the program crash
+        }
+      default:
+        *success = false;
+        printf("invalid expression.\n");
+        return 0;
     }
   }
 }
@@ -203,4 +218,48 @@ word_t expr(char *e, bool *success) {
   /* TODO: Insert codes to evaluate the expression. */
   int32_t res = eval(0, nr_token - 1, success);
   return res;
+}
+
+void test_expr(bool *success) {
+  char buf[65536] = {};
+  const char *nemu_home = getenv("NEMU_HOME");
+  if (nemu_home == NULL) {
+    printf("NEMU_HOME environment variable is not set.\n");
+    *success = false;
+    return;
+  }
+  snprintf(buf, sizeof(buf), "%s/tools/gen-expr/input", nemu_home);
+  FILE *input = fopen(buf, "r");
+  if (input == NULL) {
+    printf("failed to open input file %s.\n", buf);
+    *success = false;
+    return;
+  }
+
+  // get test line by line
+  while (fgets(buf, sizeof(buf), input) != NULL) {
+    bool expr_success = true;
+    if (buf[0] == '\n' || buf[0] == '\0') {
+      continue;
+    }
+    char *expected;
+    char *expression;
+    expected = strtok(buf, " ");
+    expression = strtok(NULL, "\n");
+    uint32_t expected_val = atoi(expected);
+    uint32_t result = expr(expression, &expr_success);
+    if (expr_success == false) {
+      printf("failed to evaluate expression: %s\n", expression);
+      *success = false;
+      return;
+    }
+    if (result != expected_val) {
+      printf("failed to eval expression: %s.\n\texpected: %u, but got: %u\n. stopping test.", expression, expected_val, result);
+      success = false;
+      return;
+    }
+  }
+  *success = true;
+  return;
+
 }

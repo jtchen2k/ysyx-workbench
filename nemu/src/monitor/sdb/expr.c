@@ -169,6 +169,7 @@ static bool check_parentheses(int p, int q) {
       if (i != q && top == 0) ret = false;
     }
   }
+  printf("check_parentheses(%d, %d) = %d\n", p, q, ret);
   return ret;
 }
 

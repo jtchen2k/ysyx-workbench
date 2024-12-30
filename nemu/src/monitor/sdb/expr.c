@@ -192,7 +192,7 @@ static uint32_t eval(int p, int q, bool* success) {
       *success = false;
       printf("invalid expression (%d - %d): cannot find operator.\n\t", p, q);
       for (int i = p; i <= q; i++) {
-        printf("%s ", tokens[i].str);
+        printf("%s(%d) ", tokens[i].str, tokens[i].type);
       }
       putchar('\n');
       return 0;

@@ -36,7 +36,7 @@ static struct rule {
      * Pay attention to the precedence level of different rules.
      */
     {" +", TK_NOTYPE},                     // spaces
-    {"\\d+u?", TK_DECIMAL},
+    {"\\d+[u]?", TK_DECIMAL},
     {"\\(", '('},
     {"\\)", ')'},
     {"\\*", '*'},                          // mult

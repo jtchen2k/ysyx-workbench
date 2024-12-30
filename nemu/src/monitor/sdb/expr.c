@@ -20,7 +20,7 @@
  */
 #include <regex.h>
 
-#define EXPR_TOKEN_SIZE 256
+#define EXPR_TOKEN_SIZE 512
 #define EXPR_TOKEN_LENGTH 32
 
 enum {

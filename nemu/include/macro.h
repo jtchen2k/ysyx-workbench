@@ -28,18 +28,6 @@
 // calculate the length of an array
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
-// if an element is in array
-#define INARRAY(arr, elem) {\
-  int __inarray_flag = 0;\
-  for (int __inarray_i = 0; __inarray_i < ARRLEN(arr); __inarray_i++) {\
-    if ((arr)[__inarray_i] == (elem)) {\
-      __inarray_flag = 1;\
-      break;\
-    }\
-  }\
-  return __inarray_flag;\
-}\
-
 // macro concatenation
 #define concat_temp(x, y) x ## y
 #define concat(x, y) concat_temp(x, y)

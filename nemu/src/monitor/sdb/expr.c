@@ -23,7 +23,7 @@
 #define EXPR_TOKEN_SIZE 4096
 #define EXPR_TOKEN_LENGTH 32
 
-enum {
+typedef enum {
   TK_NOTYPE = 256,
   TK_NEGATIVE,
   TK_EQ,
@@ -33,7 +33,7 @@ enum {
   TK_HEX,
   TK_REG,
   TK_DEREF,
-};
+} TokenType;
 
 static struct rule {
     const char *regex;
@@ -94,6 +94,7 @@ static bool make_token(char *e) {
   nr_token = 0;
 
   while (e[position] != '\0') {
+
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i ++) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
@@ -130,8 +131,8 @@ static bool make_token(char *e) {
           default:
             tokens[nr_token].type = rules[i].token_type;
         }
-        nr_token++;
 
+        nr_token++;
         break;
       }
     }
@@ -140,6 +141,42 @@ static bool make_token(char *e) {
       printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
       return false;
     }
+  }
+
+  /* distinguish minus vs neg, mult vs deref */
+  TokenType last_type = TK_NOTYPE;
+  for (int i = 0; i < nr_token; i++) {
+    TokenType neg_prev[] = {
+      '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_NEGATIVE, TK_DEREF
+    };
+    if (tokens[i].type == '-') {
+      if (i == 0) {
+        tokens[i].type = TK_NEGATIVE;
+        continue;
+      }
+      for (int j = 0; j < ARRLEN(neg_prev); j++) {
+        if (last_type == neg_prev[j]) {
+          tokens[i].type = TK_NEGATIVE;
+          break;
+        }
+      }
+    }
+    TokenType deref_prev[] = {
+      '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_NEGATIVE, TK_DEREF
+    };
+    if (tokens[i].type == '*') {
+      if (i == 0) {
+        tokens[i].type = TK_DEREF;
+        continue;
+      }
+      for (int j = 0; j < ARRLEN(deref_prev); j++) {
+        if (last_type == deref_prev[j]) {
+          tokens[i].type = TK_DEREF;
+          break;
+        }
+      }
+    }
+    if (tokens[i].type != TK_NOTYPE) last_type = tokens[i].type;
   }
 
   return true;
@@ -219,14 +256,10 @@ static word_t eval(int p, int q, bool* success) {
       case TK_REG:
         return isa_reg_str2val(tokens[p].str + 1, success);
       default:
-          *success = false;
-          printf("invalid expression: unexpected token. type: %d\n", tokens[p].type);
-          return 0;
+        *success = false;
+        printf("invalid expression: unexpected token. type: %d\n", tokens[p].type);
+        return 0;
     }
-    if (tokens[p].type != TK_DECIMAL) {
-
-    }
-    return atoi(tokens[p].str);
   }
   else if (check_parentheses(p, q)) {
     /* The expression is surrounded by a matched pair of parentheses.
@@ -238,6 +271,9 @@ static word_t eval(int p, int q, bool* success) {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
     uint8_t precedence[] = {
+      [TK_EQ] = 150,
+      [TK_NEQ] = 150,
+      [TK_AND] = 150,
       ['+'] = 100,
       ['-'] = 100,
       ['/'] = 50,

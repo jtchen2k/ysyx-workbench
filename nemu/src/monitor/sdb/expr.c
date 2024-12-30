@@ -146,7 +146,7 @@ static bool make_token(char *e) {
   /* distinguish minus vs neg, mult vs deref */
   TokenType last_type = TK_NOTYPE;
   TokenType unary_prevs[] = {
-    '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF
+    '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF, TK_NEGATIVE,
   };
   TokenType unary_ops_map[][2] = {
     {'-', TK_NEGATIVE},
@@ -171,7 +171,7 @@ static bool make_token(char *e) {
         }
       }
       if (t->type == unary_type)
-        Log("detected unary operator %c at position %d", op_type, i);
+        Log("detected unary operator %c at position %d, after %c", op_type, i, last_type);
 
       if (t->type != TK_NOTYPE) last_type = t->type;
     }

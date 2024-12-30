@@ -234,7 +234,7 @@ int test_expr() {
     return -2;
   }
 
-  // get test line by line
+  int case_id = 0;
   while (fgets(buf, sizeof(buf), input) != NULL) {
     bool expr_success = true;
     if (buf[0] == '\n' || buf[0] == '\0') {
@@ -247,13 +247,15 @@ int test_expr() {
     uint32_t expected_val = atoi(expected);
     uint32_t result = expr(expression, &expr_success);
     if (expr_success == false) {
-      printf("failed to evaluate expression: %s\n", expression);
+      printf("failed to evaluate expression #%d: %s\n", case_id, expression);
       return -100;
     }
     if (result != expected_val) {
-      printf("failed to eval expression: %s.\n\texpected: %u, but got: %u\n. stopping test.", expression, expected_val, result);
+      printf("failed to eval expression #%d: %s.\n\texpected: %u, but got: %u\n. stopping test.",
+        case_id, expression, expected_val, result);
       return -101;
     }
+    case_id++;
   }
   Log("test_expr() passed.");
   return 0;

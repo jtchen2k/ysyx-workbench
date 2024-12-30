@@ -123,7 +123,7 @@ static bool make_token(char *e) {
         switch (rules[i].token_type) {
           case TK_DECIMAL:
           case TK_HEX:
-            tokens[nr_token].type = TK_DECIMAL;
+            tokens[nr_token].type = rules[i].token_type;
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token].str[substr_len] = '\0';
             break;

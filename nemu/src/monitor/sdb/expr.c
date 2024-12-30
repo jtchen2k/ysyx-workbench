@@ -218,7 +218,7 @@ static uint32_t eval(int p, int q, bool* success) {
     uint8_t precedence[] = {
       ['+'] = 100,
       ['-'] = 100,
-      ['/'] = 55,
+      ['/'] = 50,
       ['*'] = 50,
       [TK_NOTYPE] = 0,
     };

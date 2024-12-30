@@ -165,8 +165,11 @@ static bool check_parentheses(int p, int q) {
       if (stk == 0 && i != q) ret = false;
     }
     if (stk < 0) {
-      Assert(0, "bad expression: unmatched parentheses.");
+      printf("bad expression: unmatched parentheses.");
     }
+  }
+  if (stk != 0) {
+    printf("bad expression: unmatched parentheses.");
   }
   return ret;
 }

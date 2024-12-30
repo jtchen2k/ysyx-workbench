@@ -203,7 +203,8 @@ static word_t eval(int p, int q, bool* success) {
   if (p > q) {
     /* Bad expression */
     *success = false;
-    printf("bad expression (%d - %d).", p, q);
+    printf("unexpected eval state (%d - %d).\n\t", p, q);
+    print_tokens(p, q);
     return 0;
   }
   else if (p == q) {

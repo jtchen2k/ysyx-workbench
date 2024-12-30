@@ -188,7 +188,7 @@ static uint32_t eval(int p, int q, bool* success) {
     }
     if (op_type == TK_NOTYPE) {
       *success = false;
-      printf("invalid expression: cannot find operator.\n");
+      printf("invalid expression (%d - %d): cannot find operator.\n", p, q);
       return 0;
     }
 

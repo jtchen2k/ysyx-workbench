@@ -220,20 +220,18 @@ word_t expr(char *e, bool *success) {
   return res;
 }
 
-void test_expr(bool *success) {
+int test_expr() {
   char buf[65536] = {};
   const char *nemu_home = getenv("NEMU_HOME");
   if (nemu_home == NULL) {
     printf("NEMU_HOME environment variable is not set.\n");
-    *success = false;
-    return;
+    return -1;
   }
   snprintf(buf, sizeof(buf), "%s/tools/gen-expr/input", nemu_home);
   FILE *input = fopen(buf, "r");
   if (input == NULL) {
     printf("failed to open input file %s.\n", buf);
-    *success = false;
-    return;
+    return -2;
   }
 
   // get test line by line
@@ -250,17 +248,14 @@ void test_expr(bool *success) {
     uint32_t result = expr(expression, &expr_success);
     if (expr_success == false) {
       printf("failed to evaluate expression: %s\n", expression);
-      *success = false;
-      return;
+      return -100;
     }
     if (result != expected_val) {
       printf("failed to eval expression: %s.\n\texpected: %u, but got: %u\n. stopping test.", expression, expected_val, result);
-      success = false;
-      return;
+      return -101;
     }
   }
   Log("test_expr() passed.");
-  *success = true;
-  return;
+  return 0;
 
 }

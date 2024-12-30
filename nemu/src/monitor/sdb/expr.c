@@ -218,8 +218,8 @@ static uint32_t eval(int p, int q, bool* success) {
     uint8_t precedence[] = {
       ['+'] = 100,
       ['-'] = 100,
-      ['*'] = 50,
       ['/'] = 50,
+      ['*'] = 50,
       [TK_NOTYPE] = 0,
     };
 
@@ -253,8 +253,8 @@ static uint32_t eval(int p, int q, bool* success) {
       case '*': return val1 * val2;
       case '/':
         if (val2 == 0) {
-          *success = false;
-          printf("divided by zero.\n");
+          // *success = false;
+          printf("warning: divided by zero. will ignore divide.\n");
           return val1; // return val1 to avoid the program crash
         }
       default:

@@ -247,11 +247,11 @@ int test_expr() {
     uint32_t expected_val = atoi(expected);
     uint32_t result = expr(expression, &expr_success);
     if (expr_success == false) {
-      Log("failed to evaluate expression #%d: %s\n", case_id, expression);
+      printf("failed to evaluate expression #%d: %s\n", case_id, expression);
       return -100;
     }
     if (result != expected_val) {
-      Log("failed to eval expression #%d: %s.\n\texpected: %u, but got: %u\n. stopping test.",
+      printf("failed to eval expression #%d: %s.\n\texpected: %u, but got: %u\n. stopping test.",
         case_id, expression, expected_val, result);
       return -101;
     }

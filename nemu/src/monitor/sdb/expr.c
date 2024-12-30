@@ -223,9 +223,14 @@ static uint32_t eval(int p, int q, bool* success) {
       [TK_NOTYPE] = 0,
     };
 
+    char stk[32] = {};
+    int top = 0;
     for (int i = p; i <= q; i++) {
       Token t = tokens[i];
+      if (t.type == '(') stk[top++] = '(';
+      else if (t.type == ')' && stk[--top] == '(') ;
       if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/') {
+        if (top != 0) continue;
         if (precedence[t.type] > precedence[op_type]) {
           op = i, op_type = t.type;
         }

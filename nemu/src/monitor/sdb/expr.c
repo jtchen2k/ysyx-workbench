@@ -153,7 +153,22 @@ static void format_token(Token* t, char *buf) {
 
 static bool check_parentheses(int p, int q) {
   Assert(p < q, "bad check_parentheses call");
-  return (tokens[p].type == '(' && tokens[q].type == ')');
+  int stk = 0;
+  bool ret = false;
+  for (int i = p; i <= q; i++) {
+    if (tokens[i].type == '(') {
+      if (i == p) ret = true;
+      stk++;
+    }
+    else if (tokens[i].type == ')') {
+      stk--;
+      if (stk == 0 && i != q) ret = false;
+    }
+    if (stk < 0) {
+      Assert(0, "bad expression: unmatched parentheses.");
+    }
+  }
+  return ret;
 }
 
 static uint32_t eval(int p, int q, bool* success) {
@@ -204,6 +219,7 @@ static uint32_t eval(int p, int q, bool* success) {
         }
       }
     }
+
     if (op_type == TK_NOTYPE) {
       *success = false;
       printf("invalid expression (%d - %d): cannot find operator.\n\t", p, q);

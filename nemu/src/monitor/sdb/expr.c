@@ -259,6 +259,7 @@ void test_expr(bool *success) {
       return;
     }
   }
+  Log("test_expr() passed.");
   *success = true;
   return;
 

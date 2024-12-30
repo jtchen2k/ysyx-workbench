@@ -155,7 +155,7 @@ static void print_tokens(int p, int q) {
   for (int i = p; i <= q; i++) {
     char buf[32];
     format_token(&tokens[i], buf);
-    printf("%s ", buf);
+    printf("%s", buf);
   }
   putchar('\n');
 }

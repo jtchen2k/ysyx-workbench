@@ -24,8 +24,20 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
+  for (int i = 0; i < ARRLEN(regs); i++) {
+      printf(ANSI_FG_BLUE "%-12s " ANSI_NONE FMT_PADDR MUXDEF(CONFIG_ISA64, "%24llu\n", "%16u\n"),
+             reg_name(i), gpr(i), gpr(i));
+  }
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
+  for (int i = 0; i < ARRLEN(regs); i++) {
+    if (!strncmp(regs[i], s, strlen(regs[i])) && (strlen(regs[i]) == strlen(s))) {
+      *success = true;
+      return gpr(i);
+    }
+  }
+  *success = false;
+  printf("no register named %s\n", s);
   return 0;
 }

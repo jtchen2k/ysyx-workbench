@@ -90,7 +90,7 @@ static int cmd_info (char *args) {
   if (strcmp(arg1, "r") == 0) {
     isa_reg_display();
   } else if (strcmp(arg1, "w") == 0) {
-
+    TODO();
   }
   return 0;
 }

@@ -202,7 +202,9 @@ static word_t eval(int p, int q, bool* success) {
 
   if (p > q) {
     /* Bad expression */
-    Assert(0, "bad expression (%d - %d).", p, q);
+    *success = false;
+    printf("bad expression (%d - %d).", p, q);
+    return 0;
   }
   else if (p == q) {
     /* Single token.

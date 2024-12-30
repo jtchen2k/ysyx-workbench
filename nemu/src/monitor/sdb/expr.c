@@ -315,6 +315,7 @@ int test_expr() {
         case_id, expression, expected_val, result);
       return -101;
     }
+    printf("passed expression #%d: %s\n\texpected: %u, got: %u\n", case_id, expression, expected_val, result);
     case_id++;
   }
   Log("test_expr() passed.");

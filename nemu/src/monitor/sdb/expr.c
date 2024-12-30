@@ -151,6 +151,15 @@ static void format_token(Token* t, char *buf) {
   }
 }
 
+static void print_tokens(int p, int q) {
+  for (int i = p; i <= q; i++) {
+    char buf[32];
+    format_token(&tokens[i], buf);
+    printf("%s ", buf);
+  }
+  putchar('\n');
+}
+
 static bool check_parentheses(int p, int q) {
   Assert(p < q, "bad check_parentheses call");
   char stk[EXPR_TOKEN_SIZE / 2] = {};
@@ -169,7 +178,8 @@ static bool check_parentheses(int p, int q) {
       if (i != q && top == 0) ret = false;
     }
   }
-  printf("check_parentheses(%d, %d) = %d\n", p, q, ret);
+  printf("check_parentheses(%d, %d) = %d\n\t", p, q, ret);
+  print_tokens(p, q);
   return ret;
 }
 
@@ -225,12 +235,7 @@ static uint32_t eval(int p, int q, bool* success) {
     if (op_type == TK_NOTYPE) {
       *success = false;
       printf("invalid expression (%d - %d): cannot find operator.\n\t", p, q);
-      for (int i = p; i <= q; i++) {
-        char buf[32];
-        format_token(&tokens[i], buf);
-        printf("%s ", buf);
-      }
-      putchar('\n');
+      print_tokens(p, q);
       return 0;
     }
 

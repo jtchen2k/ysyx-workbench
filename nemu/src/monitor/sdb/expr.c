@@ -45,7 +45,7 @@ static struct rule {
     {" +", TK_NOTYPE}, // spaces
     {"[0-9]+u?", TK_DECIMAL},
     {"0x[0-9]+", TK_HEX},
-    {"\\$[a-zA-Z\\$]+", TK_REG},
+    {"\\$[a-zA-Z0-7\\$]+", TK_REG},
     {"\\(", '('},
     {"\\)", ')'},
     {"\\*", '*'}, // mult

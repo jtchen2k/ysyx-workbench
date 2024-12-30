@@ -252,9 +252,9 @@ static uint32_t eval(int p, int q, bool* success) {
       case '*': return val1 * val2;
       case '/':
         if (val2 == 0) {
-          *success = false;
-          printf("divided by zero.\n");
-          return val1; // return val1 to avoid the program crash
+          // *success = false;
+          printf("warning: divided by zero.\n");
+          return 0; // return val1 to avoid the program crash
         }
         return val1 / val2;
       default:

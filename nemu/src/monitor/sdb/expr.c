@@ -211,9 +211,9 @@ static word_t eval(int p, int q, bool* success) {
      */
     switch (tokens[p].type) {
       case TK_DECIMAL:
-        return MUXDEF(CONFIG_ISA64, atoi(tokens[p].str), atoll(tokens[p].str));
+        return MUXDEF(CONFIG_ISA64, atoll(tokens[p].str), atoi(tokens[p].str));
       case TK_HEX:
-        return MUXDEF(CONFIG_ISA64, strtol(tokens[p].str, NULL, 16), strtoll(tokens[p].str, NULL, 16));
+        return MUXDEF(CONFIG_ISA64, strtoll(tokens[p].str, NULL, 16), strtol(tokens[p].str, NULL, 16));
       case TK_REG:
         return isa_reg_str2val(tokens[p].str + 1, success);
       default:

@@ -122,7 +122,7 @@ static int cmd_x(char *args) {
 
   for (int i = 0; i < n; i++) {
     if (!in_pmem(addr)) {
-      printf(ANSI_FG_RED FMT_PADDR ANSI_NONE ": illegal access\n", addr);
+      printf(ANSI_FG_RED FMT_PADDR ": illegal access\n" ANSI_NONE, addr);
     } else {
       printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ": " FMT_WORD "\n", addr, paddr_read(addr, 4));
     }

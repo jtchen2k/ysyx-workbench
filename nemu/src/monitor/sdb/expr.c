@@ -140,6 +140,9 @@ static void format_token(Token* t, char *buf) {
     case TK_DECIMAL:
       sprintf(buf, "< %s >", t->str);
       break;
+    case TK_NOTYPE:
+      sprintf(buf, "< >");
+      break;
     case TK_EQ:
       sprintf(buf, "< == >");
       break;

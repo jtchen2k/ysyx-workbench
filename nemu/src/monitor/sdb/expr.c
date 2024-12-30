@@ -178,8 +178,8 @@ static bool check_parentheses(int p, int q) {
       if (i != q && top == 0) ret = false;
     }
   }
-  printf("check_parentheses(%d, %d) = %d\n\t", p, q, ret);
-  print_tokens(p, q);
+  // printf("check_parentheses(%d, %d) = %d\n\t", p, q, ret);
+  // print_tokens(p, q);
   return ret;
 }
 

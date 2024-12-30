@@ -135,6 +135,19 @@ static bool make_token(char *e) {
   return true;
 }
 
+static void format_token(Token* t, char *buf) {
+  switch (t->type) {
+    case TK_DECIMAL:
+      sprintf(buf, "decimal(%s)", t->str);
+      break;
+    case TK_EQ:
+      sprintf(buf, "==");
+      break;
+    default:
+      sprintf(buf, "%c", t->type);
+  }
+}
+
 static bool check_parentheses(int p, int q) {
   Assert(p < q, "bad check_parentheses call");
   return (tokens[p].type == '(' && tokens[q].type == ')');
@@ -192,7 +205,9 @@ static uint32_t eval(int p, int q, bool* success) {
       *success = false;
       printf("invalid expression (%d - %d): cannot find operator.\n\t", p, q);
       for (int i = p; i <= q; i++) {
-        printf("%s(%d) ", tokens[i].str, tokens[i].type);
+        char buf[32];
+        format_token(&tokens[i], buf);
+        printf("%s ", buf);
       }
       putchar('\n');
       return 0;

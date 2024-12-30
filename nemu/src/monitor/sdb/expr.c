@@ -255,7 +255,7 @@ static word_t eval(int p, int q, bool* success) {
     word_t addr = eval(p + 1, q, success);
     if (!in_pmem(addr)) {
       *success = false;
-      printf("invalid memory access: " FMT_WORD, addr);
+      printf("illegal memory access: " FMT_WORD "\n", addr);
       return 0;
     }
     return paddr_read(addr, 4);

@@ -74,7 +74,7 @@ static int cmd_p(char *args) {
   bool success = true;
   word_t res = expr(args, &success);
   if (!success) {
-    printf("Invalid expression: %s\n", args);
+    printf("Failed to evaluate expression: %s\n", args);
     return 0;
   }
   printf(FMT_WORD "\n", res);
@@ -114,6 +114,11 @@ static int cmd_x(char *args) {
 
   bool success;
   paddr_t addr = expr(arg2, &success);
+
+  if (!success) {
+    printf("Failed to evaluate expression: %s\n", arg2);
+    return 0;
+  }
 
   for (int i = 0; i < n; i++) {
     printf(ANSI_FG_BLUE FMT_PADDR ANSI_NONE ": " FMT_WORD "\n", addr, paddr_read(addr, 4));

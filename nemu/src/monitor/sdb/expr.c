@@ -138,13 +138,13 @@ static bool make_token(char *e) {
 static void format_token(Token* t, char *buf) {
   switch (t->type) {
     case TK_DECIMAL:
-      sprintf(buf, "decimal(%s)", t->str);
+      sprintf(buf, "< %s (decimal)>", t->str);
       break;
     case TK_EQ:
-      sprintf(buf, "==");
+      sprintf(buf, "< == >");
       break;
     default:
-      sprintf(buf, "%c", t->type);
+      sprintf(buf, "< %c >", t->type);
   }
 }
 
@@ -176,7 +176,7 @@ static uint32_t eval(int p, int q, bool* success) {
     }
     return atoi(tokens[p].str);
   }
-  else if (check_parentheses(p, q) == true) {
+  else if (check_parentheses(p, q)) {
     /* The expression is surrounded by a matched pair of parentheses.
      * If that is the case, just throw away the parentheses.
      */

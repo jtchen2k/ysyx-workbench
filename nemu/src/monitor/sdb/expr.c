@@ -128,6 +128,12 @@ static bool make_token(char *e) {
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token].str[substr_len] = '\0';
             break;
+          case TK_REG:
+            tokens[nr_token].type = rules[i].token_type;
+            // skip $
+            strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
+            tokens[nr_token].str[substr_len - 1] = '\0';
+            break;
           default:
             tokens[nr_token].type = rules[i].token_type;
         }
@@ -272,7 +278,7 @@ static word_t eval(int p, int q, bool* success) {
         return MUXDEF(CONFIG_ISA64, strtoll(tokens[p].str + 2, NULL, 16), strtol(tokens[p].str + 2, NULL, 16));
       case TK_REG:
         printf("evaluating register %s\n", tokens[p].str);
-        return isa_reg_str2val(tokens[p].str + 1, success);
+        return isa_reg_str2val(tokens[p].str, success);
       default:
         *success = false;
         printf("invalid expression: unexpected token. type: %d\n", tokens[p].type);

@@ -254,7 +254,7 @@ static uint32_t eval(int p, int q, bool* success) {
         if (val2 == 0) {
           // *success = false;
           printf("warning: divided by zero.\n");
-          return val1; // return val1 to avoid the program crash
+          return UINT32_MAX; // return val1 to avoid the program crash
         }
         return val1 / val2;
       default:

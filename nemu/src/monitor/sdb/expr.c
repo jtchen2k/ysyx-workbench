@@ -259,7 +259,8 @@ static uint32_t eval(int p, int q, bool* success) {
         }
       default:
         *success = false;
-        printf("invalid expression.\n");
+        printf("unknown optype.\n\t");
+        print_tokens(op, op);
         return 0;
     }
   }

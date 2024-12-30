@@ -60,7 +60,7 @@ static void gen_space(int n) {
 }
 
 static void gen_num() {
-  int n = choose(5) + 1;
+  int n = choose(9) + 1;
   for (int i = 0; i < n; i++) {
     gen(i == 0 && n > 1 ? choose(9) + '1' : choose(10) + '0');
   }
@@ -96,7 +96,7 @@ static void gen_rand_expr(int depth) {
       if (op == '/') {
         gen('(');
         gen_rand_expr(depth + 1);
-        gens("*2u+1u)");
+        gens("/2u+1u)");
       } else {
         gen_rand_expr(depth + 1);
       }

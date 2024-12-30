@@ -112,7 +112,7 @@ static int cmd_x(char *args) {
     return 0;
   }
 
-  bool success = true;
+  bool success;
   paddr_t addr = expr(arg2, &success);
 
   if (!success) {

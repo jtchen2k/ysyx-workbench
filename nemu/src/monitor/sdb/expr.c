@@ -359,7 +359,7 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
-  /* TODO: Insert codes to evaluate the expression. */
+  *success = true; // set to false if any error occurs
   int32_t res = eval(0, nr_token - 1, success);
   return res;
 }

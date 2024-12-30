@@ -138,7 +138,7 @@ static bool make_token(char *e) {
 static void format_token(Token* t, char *buf) {
   switch (t->type) {
     case TK_DECIMAL:
-      sprintf(buf, "< %s (decimal)>", t->str);
+      sprintf(buf, "< %s >", t->str);
       break;
     case TK_EQ:
       sprintf(buf, "< == >");

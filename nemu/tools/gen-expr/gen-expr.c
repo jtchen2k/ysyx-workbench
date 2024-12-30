@@ -96,7 +96,7 @@ static void gen_rand_expr(int depth) {
       if (op == '/') {
         gen('(');
         gen_rand_expr(depth + 1);
-        gens("+1u)");
+        gens("*2u+1u)");
       } else {
         gen_rand_expr(depth + 1);
       }

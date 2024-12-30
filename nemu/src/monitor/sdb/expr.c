@@ -180,7 +180,7 @@ static uint32_t eval(int p, int q, bool* success) {
 
   if (p > q) {
     /* Bad expression */
-    Assert(0, "bad expression.");
+    Assert(0, "bad expression (%d - %d).", p, q);
   }
   else if (p == q) {
     /* Single token.

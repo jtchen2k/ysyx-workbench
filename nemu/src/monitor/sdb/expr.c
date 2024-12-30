@@ -94,7 +94,6 @@ static bool make_token(char *e) {
   nr_token = 0;
 
   while (e[position] != '\0') {
-
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i ++) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
@@ -171,11 +170,10 @@ static bool make_token(char *e) {
         }
       }
       if (t->type == unary_type)
-        Log("detected unary operator %c at position %d, after %c", op_type, i, last_type);
-
-      if (t->type != TK_NOTYPE) last_type = t->type;
+          Log("detected unary operator %c at position %d, after %c", op_type, i, last_type);
     }
 
+    if (t->type != TK_NOTYPE) last_type = t->type;
   }
 
   return true;

@@ -145,38 +145,37 @@ static bool make_token(char *e) {
 
   /* distinguish minus vs neg, mult vs deref */
   TokenType last_type = TK_NOTYPE;
+  TokenType unary_prevs[] = {
+    '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF
+  };
+  TokenType unary_ops_map[][2] = {
+    {'-', TK_NEGATIVE},
+    {'*', TK_DEREF},
+  };
   for (int i = 0; i < nr_token; i++) {
-    TokenType neg_prev[] = {
-      '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_NEGATIVE, TK_DEREF
-    };
-    if (tokens[i].type == '-') {
-      if (i == 0) {
-        tokens[i].type = TK_NEGATIVE;
-        continue;
-      }
-      for (int j = 0; j < ARRLEN(neg_prev); j++) {
-        if (last_type == neg_prev[j]) {
-          tokens[i].type = TK_NEGATIVE;
-          break;
+    Token *t = &tokens[i];
+    for (int o = 0; o < ARRLEN(unary_ops_map); o++) {
+      int op_type = unary_ops_map[o][0];
+      int unary_type = unary_ops_map[o][1];
+      if (t->type == op_type) {
+        if (i == 0) {
+          t->type = unary_type;
+        }
+        else {
+          for (int j = 0; j < ARRLEN(unary_prevs); j++) {
+            if (last_type == unary_prevs[j]) {
+              t->type = unary_type;
+              break;
+            }
+          }
         }
       }
+      if (t->type == unary_type)
+        Log("detected unary operator %c at position %d", op_type, i);
+
+      if (t->type != TK_NOTYPE) last_type = t->type;
     }
-    TokenType deref_prev[] = {
-      '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_NEGATIVE, TK_DEREF
-    };
-    if (tokens[i].type == '*') {
-      if (i == 0) {
-        tokens[i].type = TK_DEREF;
-        continue;
-      }
-      for (int j = 0; j < ARRLEN(deref_prev); j++) {
-        if (last_type == deref_prev[j]) {
-          tokens[i].type = TK_DEREF;
-          break;
-        }
-      }
-    }
-    if (tokens[i].type != TK_NOTYPE) last_type = tokens[i].type;
+
   }
 
   return true;

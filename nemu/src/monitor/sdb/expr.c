@@ -223,14 +223,13 @@ static uint32_t eval(int p, int q, bool* success) {
       [TK_NOTYPE] = 0,
     };
 
-    char stk[32] = {};
-    int top = 0;
+    int stk = 0;
     for (int i = p; i <= q; i++) {
       Token t = tokens[i];
-      if (t.type == '(') stk[top++] = '(';
-      else if (t.type == ')' && stk[--top] == '(') ;
+      if (t.type == '(') stk++;
+      else if (t.type == ')') stk--;
       if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/') {
-        if (top != 0) continue;
+        if (stk != 0) continue;
         if (precedence[t.type] > precedence[op_type]) {
           op = i, op_type = t.type;
         }
@@ -254,7 +253,7 @@ static uint32_t eval(int p, int q, bool* success) {
       case '/':
         if (val2 == 0) {
           *success = false;
-          printf("warning: divided by zero.\n");
+          printf("divided by zero.\n");
           return val1; // return val1 to avoid the program crash
         }
         return val1 / val2;

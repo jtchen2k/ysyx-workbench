@@ -122,6 +122,7 @@ static bool make_token(char *e) {
 
         switch (rules[i].token_type) {
           case TK_DECIMAL:
+          case TK_HEX:
             tokens[nr_token].type = TK_DECIMAL;
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token].str[substr_len] = '\0';
@@ -192,7 +193,7 @@ static bool check_parentheses(int p, int q) {
   return ret;
 }
 
-static uint32_t eval(int p, int q, bool* success) {
+static word_t eval(int p, int q, bool* success) {
   /**
    * Remove leading and trailing spaces;
    */
@@ -205,13 +206,23 @@ static uint32_t eval(int p, int q, bool* success) {
   }
   else if (p == q) {
     /* Single token.
-     * For now this token should be a number.
+     * For now this token should be a decimal / hex / register.
      * Return the value of the number.
      */
+    switch (tokens[p].type) {
+      case TK_DECIMAL:
+        return MUXDEF(CONFIG_ISA64, atoi(tokens[p].str), atoll(tokens[p].str));
+      case TK_HEX:
+        return MUXDEF(CONFIG_ISA64, strtol(tokens[p].str, NULL, 16), strtoll(tokens[p].str, NULL, 16));
+      case TK_REG:
+        return isa_reg_str2val(tokens[p].str + 1, success);
+      default:
+          *success = false;
+          printf("invalid expression: unexpected token. type: %d\n", tokens[p].type);
+          return 0;
+    }
     if (tokens[p].type != TK_DECIMAL) {
-      *success = false;
-      printf("invalid expression: missing decimal number.\n\ttoken type: %d\n", tokens[p].type);
-      return 0;
+
     }
     return atoi(tokens[p].str);
   }

@@ -138,16 +138,16 @@ static bool make_token(char *e) {
 static void format_token(Token* t, char *buf) {
   switch (t->type) {
     case TK_DECIMAL:
-      sprintf(buf, "< %s >", t->str);
+      sprintf(buf, "%s ", t->str);
       break;
     case TK_NOTYPE:
-      sprintf(buf, "< >");
+      sprintf(buf, " ");
       break;
     case TK_EQ:
-      sprintf(buf, "< == >");
+      sprintf(buf, "== ");
       break;
     default:
-      sprintf(buf, "< %c >", t->type);
+      sprintf(buf, "%c ", t->type);
   }
 }
 

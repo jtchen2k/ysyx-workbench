@@ -298,7 +298,8 @@ static word_t eval(int p, int q, bool* success) {
       Token t = tokens[i];
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
-      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/') {
+      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/' ||
+          t.type == TK_EQ || t.type == TK_NEQ || t.type == TK_AND) {
         if (stk != 0) continue;
         if (precedence[t.type] >= precedence[op_type]) {
           op = i, op_type = t.type;

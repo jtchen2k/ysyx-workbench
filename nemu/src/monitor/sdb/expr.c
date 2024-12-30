@@ -158,7 +158,7 @@ static uint32_t eval(int p, int q, bool* success) {
      */
     if (tokens[p].type != TK_DECIMAL) {
       *success = false;
-      printf("invalid expression: missing decimal number.\n");
+      printf("invalid expression: missing decimal number.\n\ttoken type: %d\n", tokens[p].type);
       return 0;
     }
     return atoi(tokens[p].str);
@@ -190,7 +190,10 @@ static uint32_t eval(int p, int q, bool* success) {
     }
     if (op_type == TK_NOTYPE) {
       *success = false;
-      printf("invalid expression (%d - %d): cannot find operator.\n", p, q);
+      printf("invalid expression (%d - %d): cannot find operator.\n\t", p, q);
+      for (int i = p; i <= q; i++) {
+        printf("%s ", tokens[i].str);
+      }
       return 0;
     }
 

@@ -141,7 +141,9 @@ static bool check_parentheses(int p, int q) {
 }
 
 static uint32_t eval(int p, int q, bool* success) {
-
+  /**
+   * Remove leading and trailing spaces;
+   */
   while(tokens[p].type == TK_NOTYPE) p++;
   while(tokens[q].type == TK_NOTYPE) q--;
 
@@ -241,7 +243,7 @@ int test_expr() {
   }
 
   Log("test_expr() started. using input file: %s", buf);
-  int case_id = 0;
+  int case_id = 1;
   while (fgets(buf, sizeof(buf), input) != NULL) {
     bool expr_success = true;
     if (buf[0] == '\n' || buf[0] == '\0') {

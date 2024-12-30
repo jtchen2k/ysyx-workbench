@@ -153,23 +153,21 @@ static void format_token(Token* t, char *buf) {
 
 static bool check_parentheses(int p, int q) {
   Assert(p < q, "bad check_parentheses call");
-  int stk = 0;
+  char stk[EXPR_TOKEN_SIZE / 2] = {};
+  int top = 0;
   bool ret = false;
   for (int i = p; i <= q; i++) {
     if (tokens[i].type == '(') {
       if (i == p) ret = true;
-      stk++;
+      stk[top++] = '(';
     }
     else if (tokens[i].type == ')') {
-      stk--;
-      if (stk == 0 && i != q) ret = false;
+      if (top == 0 || stk[--top] != '(') {
+        printf("bad expression: unmatched parentheses.\n");
+        return false;
+      }
+      if (i != q && top == 0) ret = false;
     }
-    if (stk < 0) {
-      printf("bad expression: unmatched parentheses.\n");
-    }
-  }
-  if (stk != 0) {
-    printf("bad expression: unmatched parentheses.\n");
   }
   return ret;
 }

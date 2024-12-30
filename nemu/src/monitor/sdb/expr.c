@@ -20,6 +20,9 @@
  */
 #include <regex.h>
 
+#define EXPR_TOKEN_SIZE 256
+#define EXPR_TOKEN_LENGTH 32
+
 enum {
   TK_NOTYPE = 256,
   TK_EQ,
@@ -68,10 +71,10 @@ void init_regex() {
 
 typedef struct token {
   int type;
-  char str[32];
+  char str[EXPR_TOKEN_LENGTH];
 } Token;
 
-static Token tokens[128] __attribute__((used)) = {};
+static Token tokens[EXPR_TOKEN_SIZE] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {
@@ -93,7 +96,7 @@ static bool make_token(char *e) {
           return false;
         }
 
-        if (nr_token >= 32) {
+        if (nr_token >= EXPR_TOKEN_SIZE) {
             Log("too many tokens");
             return false;
         }

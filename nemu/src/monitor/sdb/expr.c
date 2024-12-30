@@ -233,6 +233,7 @@ int test_expr() {
     return -2;
   }
 
+  Log("test_expr() started. using input file: %s", buf);
   int case_id = 0;
   while (fgets(buf, sizeof(buf), input) != NULL) {
     bool expr_success = true;

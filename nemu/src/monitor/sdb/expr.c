@@ -138,6 +138,10 @@ static bool check_parentheses(int p, int q) {
 }
 
 static uint32_t eval(int p, int q, bool* success) {
+
+  while(tokens[p].type == TK_NOTYPE) p++;
+  while(tokens[q].type == TK_NOTYPE) q--;
+
   if (p > q) {
     /* Bad expression */
     Assert(0, "bad expression.");
@@ -215,7 +219,6 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  printf("nr_token = %d\n", nr_token);
   int32_t res = eval(0, nr_token - 1, success);
   return res;
 }

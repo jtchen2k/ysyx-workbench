@@ -28,10 +28,11 @@
 typedef struct watchpoint {
     int                NO;
     struct watchpoint *next;
-    word_t             value;
-    bool               enable;
+    bool               enable;  // if enabled
+    bool               valid;   // if the watchpoint is added by user
     int                hit;
     char               expr[WP_EXPR_SIZE];
+    word_t             value;
 } WP;
 
 /** expr.c **/

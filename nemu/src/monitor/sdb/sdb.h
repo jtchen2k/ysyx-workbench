@@ -30,6 +30,7 @@ typedef struct watchpoint {
     struct watchpoint *next;
     word_t             value;
     bool               enable;
+    int                hit;
     char               expr[WP_EXPR_SIZE];
 } WP;
 

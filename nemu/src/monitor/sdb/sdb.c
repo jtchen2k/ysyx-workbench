@@ -143,6 +143,16 @@ static int cmd_w(char *args) {
 }
 
 static int cmd_d(char *args) {
+  if (args == NULL) {
+    printf("d: missing N.\n");
+    return 0;
+  }
+  int n = atoi(args);
+  if (n < 0) {
+    printf("invalid argument: %s\n.", args);
+    return 0;
+  }
+  free_wp(n);
   return 0;
 }
 

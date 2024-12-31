@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "common.h"
 #include "sdb.h"
 
 static WP wp_pool[NR_WP] = {};
@@ -97,12 +98,12 @@ void wp_display() {
     return;
   }
 
-  printf("%-4s %-4s %-4s %s\n", "No", "Enb", "Hit", "What");
+  printf("%-4s %-4s %-4s %-10s %s\n", "No", "Enb", "Hit", "Value", "What");
   for (int i = 0; i < NR_WP; i++) {
     if (!wp_pool[i].valid)
       continue;
     WP *cur = &wp_pool[i];
-    printf("%-4d %-4s %-4d %s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->expr);
+    printf("%-4d %-4s %-4d 0x%8x %s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->value, cur->expr);
     cur = cur->next;
   }
 }

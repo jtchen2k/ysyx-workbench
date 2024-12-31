@@ -81,6 +81,9 @@ void free_wp(int NO) {
         prev->next = cur->next;
       }
       cur->enable = false;
+      cur->valid = false;
+
+      // move to free list.
       cur->next = free_;
       free_ = cur;
       return;

@@ -32,10 +32,17 @@ void init_wp_pool() {
 }
 
 // Create a new watchpoint and return it. If failed, return NULL.
-WP *new_wp(char *expr) {
+WP *new_wp(char *wp_expr) {
   if (free_ == NULL) {
-      printf("No enough watchpoints.\n");
-      return NULL;
+    printf("No enough watchpoints.\n");
+    return NULL;
+  }
+
+  bool expr_suc = true;
+  word_t val = expr(wp_expr, &expr_suc);
+  if (!expr_suc) {
+    printf("Invalid watchpoint expression: %s\n", wp_expr);
+    return NULL;
   }
 
   // get free watchpoint, remove first from free_
@@ -50,7 +57,9 @@ WP *new_wp(char *expr) {
   wp->enable = true;
   wp->valid = true;
   wp->hit = 0;
-  strncpy(wp->expr, expr, WP_EXPR_SIZE);
+  strncpy(wp->expr, wp_expr, WP_EXPR_SIZE);
+  wp->value = val;
+
   return wp;
 }
 
@@ -82,7 +91,6 @@ void free_wp(int NO) {
   printf("No watchpoint %d.\n", NO);
 }
 
-
 void wp_display() {
   if (head == NULL) {
     printf("No watchpoints.\n");
@@ -91,7 +99,8 @@ void wp_display() {
 
   printf("%-4s %-4s %-4s %s\n", "No", "Enb", "Hit", "What");
   for (int i = 0; i < NR_WP; i++) {
-    if (!wp_pool[i].valid) continue;
+    if (!wp_pool[i].valid)
+      continue;
     WP *cur = &wp_pool[i];
     printf("%-4d %-4s %-4d %s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->expr);
     cur = cur->next;

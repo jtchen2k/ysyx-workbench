@@ -22,9 +22,6 @@
 
 static int is_batch_mode = false;
 
-void init_regex();
-void init_wp_pool();
-
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -132,6 +129,16 @@ static int cmd_x(char *args) {
 }
 
 static int cmd_w(char *args) {
+  if (args == NULL) {
+    printf("w: missing EXPR.\n");
+    return 0;
+  }
+  WP *wp = new_wp(args);
+  if (wp == NULL) {
+    printf("Failed to create watchpoint for expression: %s\n", args);
+  } else {
+    printf("Watchpoint %d: %s\n", wp->NO, wp->expr);
+  }
   return 0;
 }
 

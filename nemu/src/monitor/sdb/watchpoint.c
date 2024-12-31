@@ -15,16 +15,6 @@
 
 #include "sdb.h"
 
-#define NR_WP 32
-
-typedef struct watchpoint {
-  int NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
-} WP;
-
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
 
@@ -39,5 +29,15 @@ void init_wp_pool() {
   free_ = wp_pool;
 }
 
-/* TODO: Implement the functionality of watchpoint */
-
+// Create a new watchpoint and return it. If failed, return NULL.
+WP *new_wp(char *expr) {
+    if (free_ == NULL) {
+        printf("No enough watchpoints.\n");
+        return NULL;
+    }
+    WP *wp = free_;
+    free_ = free_->next;
+    wp->enable = true;
+    strncpy(wp->expr, expr, WP_EXPR_SIZE);
+    return wp;
+}

@@ -103,7 +103,7 @@ void wp_display() {
     if (!wp_pool[i].valid)
       continue;
     WP *cur = &wp_pool[i];
-    printf("%-4d %-4s %-4d 0x%8x %s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->value, cur->expr);
+    printf("%-4d %-4s %-4d " FMT_WORD " %s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->value, cur->expr);
     cur = cur->next;
   }
 }

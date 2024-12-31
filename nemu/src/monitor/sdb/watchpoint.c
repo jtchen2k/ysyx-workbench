@@ -66,9 +66,9 @@ void free_wp(int NO) {
         head = cur->next;
       } else {
         prev->next = cur->next;
-        cur->next = free_;
       }
       cur->enable = false;
+      cur->next = free_;
       free_ = cur;
       return;
     } else {
@@ -87,9 +87,9 @@ void wp_display() {
   }
 
   WP *cur = head;
-  printf("%-4s %-3s %-3s %-24s\n", "No", "Enb", "Hit", "What");
+  printf("%-4s %-4s %-4s %s\n", "No", "Enb", "Hit", "What");
   while (cur != NULL) {
-    printf("%-4d %-3s %-3d %-24s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->expr);
+    printf("%-4d %-4s %-4d %s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->expr);
     cur = cur->next;
   }
 }

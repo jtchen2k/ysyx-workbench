@@ -22,9 +22,6 @@
 
 static int is_batch_mode = false;
 
-void init_regex();
-void init_wp_pool();
-
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -90,7 +87,7 @@ static int cmd_info (char *args) {
   if (strcmp(arg1, "r") == 0) {
     isa_reg_display();
   } else if (strcmp(arg1, "w") == 0) {
-    TODO();
+    wp_display();
   }
   return 0;
 }
@@ -132,10 +129,30 @@ static int cmd_x(char *args) {
 }
 
 static int cmd_w(char *args) {
+  if (args == NULL) {
+    printf("w: missing EXPR.\n");
+    return 0;
+  }
+  WP *wp = new_wp(args);
+  if (wp == NULL) {
+    printf("Failed to create watchpoint for expression: %s\n", args);
+  } else {
+    printf("Watchpoint %d: %s\n", wp->NO, wp->expr);
+  }
   return 0;
 }
 
 static int cmd_d(char *args) {
+  if (args == NULL) {
+    printf("d: missing N.\n");
+    return 0;
+  }
+  int n = atoi(args);
+  if (n < 0) {
+    printf("invalid argument: %s\n.", args);
+    return 0;
+  }
+  free_wp(n);
   return 0;
 }
 

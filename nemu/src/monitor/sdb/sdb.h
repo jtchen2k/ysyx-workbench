@@ -18,6 +18,30 @@
 
 #include <common.h>
 
+#define EXPR_TOKEN_SIZE 4096
+#define EXPR_TOKEN_LENGTH 32
+
+#define WP_EXPR_SIZE 512
+#define NR_WP 32
+
+typedef struct watchpoint {
+  int                NO;
+  struct watchpoint *next;
+  bool               enable; // if enabled
+  bool               valid;  // if the watchpoint is added by user
+  int                hit;
+  char               expr[WP_EXPR_SIZE];
+  word_t             value;
+} WP;
+
+/** expr.c **/
+void   init_regex();
 word_t expr(char *e, bool *success);
+
+/** watchpoint.c */
+void init_wp_pool();
+WP  *new_wp(char *expr);
+void free_wp(int NO);
+void wp_display();
 
 #endif

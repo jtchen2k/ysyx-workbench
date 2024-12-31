@@ -78,3 +78,18 @@ void free_wp(int NO) {
 
   printf("No watchpoint %d.\n", NO);
 }
+
+
+void wp_display() {
+  if (head == NULL) {
+    printf("No watchpoints.\n");
+    return;
+  }
+
+  WP *cur = head;
+  printf("%-4s %-3s %-3s %-24s\n", "No", "Enb", "Hit", "What");
+  while (cur != NULL) {
+    printf("%-4d %-3s %-3d %-24s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->expr);
+    cur = cur->next;
+  }
+}

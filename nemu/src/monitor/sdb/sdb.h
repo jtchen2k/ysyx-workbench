@@ -42,5 +42,6 @@ word_t expr(char *e, bool *success);
 void init_wp_pool();
 WP* new_wp(char *expr);
 void free_wp(int NO);
+void wp_display();
 
 #endif

@@ -28,9 +28,15 @@ void isa_reg_display() {
       printf(ANSI_FG_BLUE "%-12s " ANSI_NONE FMT_PADDR MUXDEF(CONFIG_ISA64, "%24llu\n", "%16u\n"),
              reg_name(i), gpr(i), gpr(i));
   }
+  printf(ANSI_FG_BLUE "%-12s " ANSI_NONE FMT_PADDR MUXDEF(CONFIG_ISA64, "%24llu\n", "%16u\n"),
+         "pc", cpu.pc, cpu.pc);
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
+  if (!strncmp(s, "pc", strlen(s))) {
+    *success = true;
+    return cpu.pc;
+  }
   for (int i = 0; i < ARRLEN(regs); i++) {
     if (!strncmp(regs[i], s, strlen(regs[i])) && (strlen(regs[i]) == strlen(s))) {
       *success = true;

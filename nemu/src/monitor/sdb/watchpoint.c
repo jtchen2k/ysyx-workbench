@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include "common.h"
+#include "debug.h"
 #include "sdb.h"
 
 static WP wp_pool[NR_WP] = {};
@@ -47,6 +48,11 @@ WP *new_wp(char *wp_expr) {
   }
 
   // get free watchpoint, remove first from free_
+  if (free_ == NULL) {
+    printf("Too many watchpoints.\n");
+    return NULL;
+  }
+
   WP *wp = free_;
   free_ = free_->next;
 
@@ -58,7 +64,8 @@ WP *new_wp(char *wp_expr) {
   wp->enable = true;
   wp->valid = true;
   wp->hit = 0;
-  strncpy(wp->expr, wp_expr, WP_EXPR_SIZE);
+  strncpy(wp->expr, wp_expr, WP_EXPR_SIZE - 1);
+  wp->expr[WP_EXPR_SIZE - 1] = '\0';
   wp->value = val;
 
   return wp;
@@ -67,7 +74,7 @@ WP *new_wp(char *wp_expr) {
 void free_wp(int NO) {
 
   if (head == NULL) {
-    printf("No watchpoints.\n");
+    printf("No watchpoint.\n");
     return;
   }
 
@@ -97,7 +104,7 @@ void free_wp(int NO) {
 
 void wp_display() {
   if (head == NULL) {
-    printf("No watchpoints.\n");
+    printf("No watchpoint.\n");
     return;
   }
 
@@ -107,6 +114,21 @@ void wp_display() {
       continue;
     WP *cur = &wp_pool[i];
     printf("%-4d %-4s %-4d " FMT_WORD " %s\n", cur->NO, cur->enable ? "y" : "n", cur->hit, cur->value, cur->expr);
+    cur = cur->next;
+  }
+}
+
+void wp_update(int *hit) {
+  WP* cur = head;
+  while (cur != NULL) {
+    bool s;
+    word_t newval = expr(cur->expr, &s);
+    Assert(s, "Failed to evaluate watchpoint during wp_update() %d: %s", cur->NO, cur->expr);
+    if (newval != cur->value) {
+      cur->hit ++;
+      *hit = cur->NO;
+      cur->value = newval;
+    }
     cur = cur->next;
   }
 }

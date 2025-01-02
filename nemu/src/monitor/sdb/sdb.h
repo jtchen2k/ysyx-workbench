@@ -27,11 +27,11 @@
 typedef struct watchpoint {
   int                NO;
   struct watchpoint *next;
-  bool               enable; // if enabled
-  bool               valid;  // if the watchpoint is added by user
   int                hit;
   char               expr[WP_EXPR_SIZE];
   word_t             value;
+  bool               enable; // if enabled
+  bool               valid;  // if the watchpoint is added by user
 } WP;
 
 /** expr.c **/
@@ -43,5 +43,6 @@ void init_wp_pool();
 WP  *new_wp(char *expr);
 void free_wp(int NO);
 void wp_display();
+void wp_update(int *hit);
 
 #endif

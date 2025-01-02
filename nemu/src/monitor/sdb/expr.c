@@ -15,14 +15,15 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
+#include "debug.h"
+#include "sdb.h"
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
 
-#define EXPR_TOKEN_SIZE 4096
-#define EXPR_TOKEN_LENGTH 32
+
 
 typedef enum {
   TK_NOTYPE = 256,
@@ -354,11 +355,11 @@ static word_t eval(int p, int q, bool* success) {
 
 
 word_t expr(char *e, bool *success) {
+  Assert(success != NULL, "success should not be NULL");
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-
   *success = true; // set to false if any error occurs
   int32_t res = eval(0, nr_token - 1, success);
   return res;

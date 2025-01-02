@@ -43,5 +43,6 @@ void init_wp_pool();
 WP  *new_wp(char *expr);
 void free_wp(int NO);
 void wp_display();
+void wp_update(int *hit);
 
 #endif

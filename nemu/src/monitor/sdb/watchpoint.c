@@ -48,6 +48,11 @@ WP *new_wp(char *wp_expr) {
   }
 
   // get free watchpoint, remove first from free_
+  if (free_ == NULL) {
+    printf("Too many watchpoints.\n");
+    return NULL;
+  }
+
   WP *wp = free_;
   free_ = free_->next;
 

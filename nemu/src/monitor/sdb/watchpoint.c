@@ -69,7 +69,7 @@ WP *new_wp(char *wp_expr) {
 void free_wp(int NO) {
 
   if (head == NULL) {
-    printf("No watchpoints.\n");
+    printf("No watchpoint.\n");
     return;
   }
 
@@ -99,7 +99,7 @@ void free_wp(int NO) {
 
 void wp_display() {
   if (head == NULL) {
-    printf("No watchpoints.\n");
+    printf("No watchpoint.\n");
     return;
   }
 

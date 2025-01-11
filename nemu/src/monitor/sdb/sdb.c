@@ -47,6 +47,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+  // set_nemu_state(int state, vaddr_t pc, int halt_ret)
   return -1;
 }
 

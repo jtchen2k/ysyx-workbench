@@ -333,13 +333,22 @@ static word_t eval(int p, int q, bool* success) {
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
       for (int b = 0; b < ARRLEN(binary_ops); b++) {
-        if (t.type == binary_ops[b]) {
+        if (t.type == binary_ops[b] && precedence[t.type] >= precedence[op_type]) {
           if (stk != 0) continue;
           if (precedence[t.type] >= precedence[op_type]) {
             op = i, op_type = t.type;
           }
         }
       }
+
+      //       if (t.type == '(') stk++;
+      // else if (t.type == ')') stk--;
+      // if (stk) continue;
+      // for (int b = 0; b < ARRLEN(binary_ops); b++) {
+      //   if (t.type == binary_ops[b] && precedence[t.type] > precedence[op_type]) {
+      //     op = i, op_type = t.type;
+      //   }
+      // }
       // if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/' ||
       //     t.type == TK_EQ || t.type == TK_NEQ || t.type == TK_AND) {
       //   if (stk != 0) continue;

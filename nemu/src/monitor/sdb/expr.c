@@ -164,6 +164,7 @@ static bool make_token(char *e) {
   TokenType last_type = TK_NOTYPE;
   TokenType unary_prevs[] = {
     '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF, TK_NEGATIVE,
+    TK_GT, TK_LE, '>', '<', '!'
   };
   TokenType unary_ops_map[][2] = {
     {'-', TK_NEGATIVE},
@@ -258,31 +259,6 @@ static word_t eval(int p, int q, bool* success) {
     printf("unexpected eval state (%d - %d).\n", p, q);
     return 0;
   }
-  // else if (tokens[p].type == TK_NEGATIVE) {
-  //   /**
-  //    * Handle negative unary operator.
-  //    */
-  //   word_t val = eval(p + 1, q, success);
-  //   return -val;
-  // }
-  // else if (tokens[p].type == TK_DEREF) {
-  //   /**
-  //    * Handle dereference unary operator.
-  //    */
-  //   word_t addr = eval(p + 1, q, success);
-  //   if (!in_pmem(addr)) {
-  //     *success = false;
-  //     printf("illegal memory access: " FMT_WORD "\n", addr);
-  //     return 0;
-  //   }
-  //   return paddr_read(addr, 4);
-  // } else if (tokens[p].type == '!') {
-  //   /**
-  //    * Handle logical not unary operator.
-  //    */
-  //    word_t val = eval(p + 1, q, success);
-  //    return !val;
-  // }
   else if (p == q) {
     /* Single token.
      * For now this token should be a decimal / hex / register.

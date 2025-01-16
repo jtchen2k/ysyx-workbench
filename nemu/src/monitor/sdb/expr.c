@@ -304,7 +304,7 @@ static word_t eval(int p, int q, bool* success) {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
     int binary_ops[] = {
-      '+', '-', '*', '/', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '<', '>', '!', TK_DEREF,
+      '+', '-', '*', '/', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '<', '>', '!',
     };
     uint8_t precedence[] = {
       [TK_EQ] = 150,

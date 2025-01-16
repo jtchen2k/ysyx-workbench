@@ -332,7 +332,7 @@ static word_t eval(int p, int q, bool* success) {
       Token t = tokens[i];
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
-      if (!stk) continue;
+      if (stk) continue;
       for (int b = 0; b < ARRLEN(binary_ops); b++) {
         if (t.type == binary_ops[b] && precedence[t.type] > precedence[op_type]) {
           op = i, op_type = t.type;

@@ -335,9 +335,7 @@ static word_t eval(int p, int q, bool* success) {
       for (int b = 0; b < ARRLEN(binary_ops); b++) {
         if (t.type == binary_ops[b] && precedence[t.type] >= precedence[op_type]) {
           if (stk != 0) continue;
-          if (precedence[t.type] >= precedence[op_type]) {
-            op = i, op_type = t.type;
-          }
+          op = i, op_type = t.type;
         }
       }
 

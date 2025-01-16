@@ -306,6 +306,11 @@ static word_t eval(int p, int q, bool* success) {
       [TK_EQ] = 150,
       [TK_NEQ] = 150,
       [TK_AND] = 150,
+      [TK_LE] = 130,
+      [TK_GE] = 130,
+      ['>'] = 130,
+      ['<'] = 130,
+      ['!'] = 110,
       ['+'] = 100,
       ['-'] = 100,
       ['/'] = 50,
@@ -348,6 +353,11 @@ static word_t eval(int p, int q, bool* success) {
           return UINT32_MAX; // return val1 to avoid the program crash
         }
         return val1 / val2;
+      case '<': return val1 < val2;
+      case '>': return val1 > val2;
+      case '!': return !val2;
+      case TK_LE: return val1 <= val2;
+      case TK_GE: return val1 >= val2;
       case TK_EQ: return val1 == val2;
       case TK_NEQ: return val1 != val2;
       case TK_AND: return val1 && val2;

@@ -16,6 +16,7 @@
 #include <isa.h>
 #include <memory/paddr.h>
 #include "debug.h"
+#include "macro.h"
 #include "sdb.h"
 
 /* We use the POSIX regex functions to process regular expressions.
@@ -302,6 +303,9 @@ static word_t eval(int p, int q, bool* success) {
   else {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
+    int binary_ops[] = {
+      '+', '-', '*', '/', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '<', '>', '!', TK_DEREF,
+    };
     uint8_t precedence[] = {
       [TK_EQ] = 150,
       [TK_NEQ] = 150,
@@ -318,15 +322,14 @@ static word_t eval(int p, int q, bool* success) {
       [TK_NOTYPE] = 0,
     };
 
+    // stack for parentheses matching
     int stk = 0;
     for (int i = p; i <= q; i++) {
       Token t = tokens[i];
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
-      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/' ||
-          t.type == TK_EQ || t.type == TK_NEQ || t.type == TK_AND) {
-        if (stk != 0) continue;
-        if (precedence[t.type] >= precedence[op_type]) {
+      for (int b = 0; b < ARRLEN(binary_ops); b++) {
+        if (t.type == binary_ops[b] && stk == 0 && precedence[t.type] > precedence[op_type]) {
           op = i, op_type = t.type;
         }
       }

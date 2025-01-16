@@ -309,9 +309,9 @@ static word_t eval(int p, int q, bool* success) {
   else {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
-    // int binary_ops[] = {
-    //   '+', '-', '*', '/', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '<', '>',
-    // };
+    int binary_ops[] = {
+      '+', '-', '*', '/', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '<', '>',
+    };
     uint8_t precedence[] = {
       [TK_EQ] = 150,
       [TK_NEQ] = 150,
@@ -332,13 +332,21 @@ static word_t eval(int p, int q, bool* success) {
       Token t = tokens[i];
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
-      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/' ||
-          t.type == TK_EQ || t.type == TK_NEQ || t.type == TK_AND) {
-        if (stk != 0) continue;
-        if (precedence[t.type] >= precedence[op_type]) {
-          op = i, op_type = t.type;
+      for (int b = 0; b < ARRLEN(binary_ops); b++) {
+        if (t.type == binary_ops[b]) {
+          if (stk != 0) continue;
+          if (precedence[t.type] >= precedence[op_type]) {
+            op = i, op_type = t.type;
+          }
         }
       }
+      // if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/' ||
+      //     t.type == TK_EQ || t.type == TK_NEQ || t.type == TK_AND) {
+      //   if (stk != 0) continue;
+      //   if (precedence[t.type] >= precedence[op_type]) {
+      //     op = i, op_type = t.type;
+      //   }
+      // }
     }
 
     if (op_type == TK_NOTYPE) {

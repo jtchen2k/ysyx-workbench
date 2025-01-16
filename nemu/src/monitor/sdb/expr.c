@@ -247,6 +247,13 @@ static bool check_parentheses(int p, int q) {
 }
 
 static word_t eval(int p, int q, bool* success) {
+
+  if (p > q || p < 0 || q < 0 || p >= nr_token || q >= nr_token) {
+    *success = false;
+    printf("unexpected eval state (%d - %d).\n", p, q);
+    return 0;
+  }
+
   /**
    * Remove leading and trailing spaces;
    */
@@ -254,7 +261,7 @@ static word_t eval(int p, int q, bool* success) {
   while(tokens[q].type == TK_NOTYPE) q--;
   printf("eval(%d, %d)\n", p, q);
 
-  if (p > q || p < 0 || p >= nr_token || q < 0 || q >= nr_token) {
+  if (p > q) {
     /* Bad expression */
     *success = false;
     printf("unexpected eval state (%d - %d).\n", p, q);

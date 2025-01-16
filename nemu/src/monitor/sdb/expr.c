@@ -15,7 +15,9 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
+#include "common.h"
 #include "debug.h"
+#include "macro.h"
 #include "sdb.h"
 
 /* We use the POSIX regex functions to process regular expressions.
@@ -35,6 +37,10 @@ typedef enum {
   TK_HEX,
   TK_REG,
   TK_DEREF,
+  TK_GE,
+  TK_LE,
+  TK_GT,
+  TK_LT,
 } TokenType;
 
 static struct rule {
@@ -57,6 +63,11 @@ static struct rule {
     {"&&", TK_AND},
     {"!=", TK_NEQ},
     {"==", TK_EQ}, // equal
+    {"<=", TK_LE},
+    {">=", TK_GE},
+    {"<", '<'},
+    {">", '>'},
+    {"!", '!'},
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -153,6 +164,7 @@ static bool make_token(char *e) {
   TokenType last_type = TK_NOTYPE;
   TokenType unary_prevs[] = {
     '+', '-', '*', '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF, TK_NEGATIVE,
+    TK_GT, TK_LE, '>', '<', '!'
   };
   TokenType unary_ops_map[][2] = {
     {'-', TK_NEGATIVE},
@@ -212,7 +224,7 @@ static void print_tokens(int p, int q) {
 }
 
 static bool check_parentheses(int p, int q) {
-  Assert(p < q, "bad check_parentheses call");
+  Assert(p < q && p >= 0 && q < nr_token, "bad check_parentheses call");
   char stk[EXPR_TOKEN_SIZE / 2] = {};
   int top = 0;
   bool ret = false;
@@ -235,6 +247,13 @@ static bool check_parentheses(int p, int q) {
 }
 
 static word_t eval(int p, int q, bool* success) {
+
+  if (p > q || p < 0 || q < 0 || p >= nr_token || q >= nr_token) {
+    *success = false;
+    printf("unexpected eval state (%d - %d).\n", p, q);
+    return 0;
+  }
+
   /**
    * Remove leading and trailing spaces;
    */
@@ -246,25 +265,6 @@ static word_t eval(int p, int q, bool* success) {
     *success = false;
     printf("unexpected eval state (%d - %d).\n", p, q);
     return 0;
-  }
-  else if (tokens[p].type == TK_NEGATIVE) {
-    /**
-     * Handle negative unary operator.
-     */
-    word_t val = eval(p + 1, q, success);
-    return -val;
-  }
-  else if (tokens[p].type == TK_DEREF) {
-    /**
-     * Handle dereference unary operator.
-     */
-    word_t addr = eval(p + 1, q, success);
-    if (!in_pmem(addr)) {
-      *success = false;
-      printf("illegal memory access: " FMT_WORD "\n", addr);
-      return 0;
-    }
-    return paddr_read(addr, 4);
   }
   else if (p == q) {
     /* Single token.
@@ -293,26 +293,41 @@ static word_t eval(int p, int q, bool* success) {
   else {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
+    int all_ops[] = {
+        '+', '-', '*', '/', '<', '>',
+        TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE,
+        TK_NEGATIVE, TK_DEREF, '!',
+    };
+    int unary_ops[] = {
+      TK_NEGATIVE, TK_DEREF, '!',
+    };
     uint8_t precedence[] = {
       [TK_EQ] = 150,
       [TK_NEQ] = 150,
       [TK_AND] = 150,
+      [TK_LE] = 130,
+      [TK_GE] = 130,
+      ['>'] = 130,
+      ['<'] = 130,
       ['+'] = 100,
       ['-'] = 100,
       ['/'] = 50,
       ['*'] = 50,
+      ['!'] = 20,
+      [TK_DEREF] = 20,
+      [TK_NEGATIVE] = 20,
       [TK_NOTYPE] = 0,
     };
 
+    // stack for parentheses matching
     int stk = 0;
     for (int i = p; i <= q; i++) {
       Token t = tokens[i];
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
-      if (t.type == '+' || t.type == '-' || t.type == '*' || t.type == '/' ||
-          t.type == TK_EQ || t.type == TK_NEQ || t.type == TK_AND) {
-        if (stk != 0) continue;
-        if (precedence[t.type] >= precedence[op_type]) {
+      if (stk) continue;
+      for (int b = 0; b < ARRLEN(all_ops); b++) {
+        if (t.type == all_ops[b] && precedence[t.type] >= precedence[op_type]) {
           op = i, op_type = t.type;
         }
       }
@@ -325,28 +340,61 @@ static word_t eval(int p, int q, bool* success) {
       return 0;
     }
 
-    word_t val1 = eval(p, op - 1, success);
-    word_t val2 = eval(op + 1, q, success);
+    // handle unary operators
+    bool is_unary = false;
+    for (int j = 0; j < ARRLEN(unary_ops); j++) {
+      if (op_type == unary_ops[j]) {
+        is_unary = true;
+        break;
+      }
+    }
 
-    switch (op_type) {
-      case '+': return val1 + val2;
-      case '-': return val1 - val2;
-      case '*': return val1 * val2;
-      case '/':
-        if (val2 == 0) {
-          // *success = false;
-          printf("warning: divided by zero.\n");
-          return UINT32_MAX; // return val1 to avoid the program crash
+    if (is_unary) {
+      word_t val = eval(op + 1, q, success);
+      switch (op_type) {
+        case '!' : return !val;
+        case TK_NEGATIVE: return -val;
+        case TK_DEREF:
+          if (!in_pmem(val)) {
+            *success = false;
+            printf("illegal memory access: " FMT_WORD "\n", val);
+            return 0;
+          }
+          return paddr_read(val, 4);
+        default:
+          *success = false;
+          printf("unknown unary operator.\n\t");
+          print_tokens(op, op);
+          return 0;
+      }
+    } else {
+        word_t val1 = eval(p, op - 1, success);
+        word_t val2 = eval(op + 1, q, success);
+
+        switch (op_type) {
+          case '+': return val1 + val2;
+          case '-': return val1 - val2;
+          case '*': return val1 * val2;
+          case '/':
+            if (val2 == 0) {
+              // *success = false;
+              printf("warning: divided by zero.\n");
+              return UINT32_MAX; // return val1 to avoid the program crash
+            }
+            return val1 / val2;
+          case '<': return val1 < val2;
+          case '>': return val1 > val2;
+          case TK_LE: return val1 <= val2;
+          case TK_GE: return val1 >= val2;
+          case TK_EQ: return val1 == val2;
+          case TK_NEQ: return val1 != val2;
+          case TK_AND: return val1 && val2;
+          default:
+            *success = false;
+            printf("unknown optype.\n\t");
+            print_tokens(op, op);
+            return 0;
         }
-        return val1 / val2;
-      case TK_EQ: return val1 == val2;
-      case TK_NEQ: return val1 != val2;
-      case TK_AND: return val1 && val2;
-      default:
-        *success = false;
-        printf("unknown optype.\n\t");
-        print_tokens(op, op);
-        return 0;
     }
   }
 }

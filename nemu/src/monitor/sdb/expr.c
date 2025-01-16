@@ -35,6 +35,10 @@ typedef enum {
   TK_HEX,
   TK_REG,
   TK_DEREF,
+  TK_GE,
+  TK_LE,
+  TK_GT,
+  TK_LT,
 } TokenType;
 
 static struct rule {
@@ -57,6 +61,11 @@ static struct rule {
     {"&&", TK_AND},
     {"!=", TK_NEQ},
     {"==", TK_EQ}, // equal
+    {"<=", TK_LE},
+    {">=", TK_GE},
+    {"<", '<'},
+    {">", '>'},
+    {"!", '!'},
 };
 
 #define NR_REGEX ARRLEN(rules)

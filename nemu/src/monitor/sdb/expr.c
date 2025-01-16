@@ -224,7 +224,7 @@ static void print_tokens(int p, int q) {
 }
 
 static bool check_parentheses(int p, int q) {
-  Assert(p < q, "bad check_parentheses call");
+  Assert(p < q && p >= 0 && q < nr_token, "bad check_parentheses call");
   char stk[EXPR_TOKEN_SIZE / 2] = {};
   int top = 0;
   bool ret = false;

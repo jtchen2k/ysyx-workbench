@@ -242,7 +242,7 @@ static bool check_parentheses(int p, int q) {
     }
   }
   // printf("check_parentheses(%d, %d) = %d\n\t", p, q, ret);
-  print_tokens(p, q);
+  // print_tokens(p, q);
   return ret;
 }
 

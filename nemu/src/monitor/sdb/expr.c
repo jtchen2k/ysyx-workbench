@@ -253,7 +253,7 @@ static word_t eval(int p, int q, bool* success) {
   while(tokens[p].type == TK_NOTYPE) p++;
   while(tokens[q].type == TK_NOTYPE) q--;
 
-  if (p > q) {
+  if (p > q || p < 0 || q >= nr_token) {
     /* Bad expression */
     *success = false;
     printf("unexpected eval state (%d - %d).\n", p, q);
@@ -286,7 +286,7 @@ static word_t eval(int p, int q, bool* success) {
   else {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
-    int      all_ops[] = {
+    int all_ops[] = {
         '+', '-', '*', '/', '<', '>',
         TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE,
         TK_NEGATIVE, TK_DEREF, '!',
@@ -311,6 +311,7 @@ static word_t eval(int p, int q, bool* success) {
       [TK_NEGATIVE] = 20,
       [TK_NOTYPE] = 0,
     };
+
     // stack for parentheses matching
     int stk = 0;
     for (int i = p; i <= q; i++) {

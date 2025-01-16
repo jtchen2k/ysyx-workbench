@@ -310,8 +310,10 @@ static word_t eval(int p, int q, bool* success) {
   else {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
-    int all_ops[] = {
-      '+', '-', '*', '/', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '<', '>',
+    int      all_ops[] = {
+        '+', '-', '*', '/', '<', '>',
+        TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE,
+        TK_NEGATIVE, TK_DEREF, '!',
     };
     int unary_ops[] = {
       TK_NEGATIVE, TK_DEREF, '!',

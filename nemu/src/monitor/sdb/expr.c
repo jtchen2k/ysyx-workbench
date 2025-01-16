@@ -259,7 +259,6 @@ static word_t eval(int p, int q, bool* success) {
    */
   while(tokens[p].type == TK_NOTYPE) p++;
   while(tokens[q].type == TK_NOTYPE) q--;
-  printf("eval(%d, %d)\n", p, q);
 
   if (p > q) {
     /* Bad expression */

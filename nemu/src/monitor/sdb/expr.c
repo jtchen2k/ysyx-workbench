@@ -51,7 +51,7 @@ static struct rule {
      * Pay attention to the precedence level of different rules.
      */
     {" +", TK_NOTYPE}, // spaces
-    {"0x[0-9]+", TK_HEX},
+    {"0x[0-9a-fA-F]+", TK_HEX},
     {"\\$[a-zA-Z0-9\\$]+", TK_REG},
     {"[0-9]+u?", TK_DECIMAL},
     {"\\(", '('},
@@ -293,10 +293,9 @@ static word_t eval(int p, int q, bool* success) {
   else {
     uint32_t op = 0;
     int op_type = TK_NOTYPE;
-    int all_ops[] = {
+    int binary_ops[] = {
         '+', '-', '*', '/', '<', '>',
         TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE,
-        TK_NEGATIVE, TK_DEREF, '!',
     };
     int unary_ops[] = {
       TK_NEGATIVE, TK_DEREF, '!',
@@ -326,8 +325,13 @@ static word_t eval(int p, int q, bool* success) {
       if (t.type == '(') stk++;
       else if (t.type == ')') stk--;
       if (stk) continue;
-      for (int b = 0; b < ARRLEN(all_ops); b++) {
-        if (t.type == all_ops[b] && precedence[t.type] >= precedence[op_type]) {
+      for (int b = 0; b < ARRLEN(binary_ops); b++) {
+        if (t.type == binary_ops[b] && precedence[t.type] >= precedence[op_type]) {
+          op = i, op_type = t.type;
+        }
+      }
+      for (int b = 0; b < ARRLEN(unary_ops); b++) {
+        if (t.type == unary_ops[b] && precedence[t.type] > precedence[op_type]) {
           op = i, op_type = t.type;
         }
       }

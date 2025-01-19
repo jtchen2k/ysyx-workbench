@@ -20,6 +20,7 @@
 #include "sdb.h"
 #include "utils.h"
 #include <memory/paddr.h>
+#include <stdlib.h>
 
 static int is_batch_mode = false;
 
@@ -58,6 +59,7 @@ static int cmd_si(char *args) {
     printf("Invalid argument: %s\n.", args);
     return 0;
   }
+  strtok(NULL, " ");
   if (strtok(NULL, " ") != NULL) {
     printf("warning: subsequent arguments are ignored.\n");
   }

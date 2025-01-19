@@ -126,7 +126,7 @@ static int decode_exec(Decode *s) {
   /// 13. RV32M Standard Extension
   /// h = high, s = signed, u = unsigned
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (sword_t)src1 * (sword_t)src2);
-  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (((uint64_t)src1 * (uint64_t)src2) >> 32)); // upper XLEN for signed x signed
+  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)(((uint64_t)src1 * (uint64_t)src2) >> 32)); // upper XLEN for signed x signed
   INSTPAT("0000001 ????? ????? 010 ????? 01100 11", mulhsu , R, R(rd) = (sword_t)(((int64_t)src1 * (uint64_t)src2) >> 32)); // upper XLEN for rs1 x unsigned rs2
   INSTPAT("0000001 ????? ????? 011 ????? 01100 11", mulhu  , R, R(rd) = (sword_t)(((uint64_t)src1 * (uint64_t)src2) >> 32)); // upper XLEN for unsigned x unsigned
   INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2);

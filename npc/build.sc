@@ -8,7 +8,7 @@ import mill.scalalib._
 // support BSP
 import mill.bsp._
 
-object playground extends ScalaModule with ScalafmtModule { m =>
+object core extends ScalaModule with ScalafmtModule { m =>
   override def scalaVersion = "2.13.15"
 
   override def scalacOptions = Seq(

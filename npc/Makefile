@@ -7,10 +7,10 @@ OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
 VSRCS = $(abspath $(wildcard build/*.sv build/*.v))
-CSRCS = $(abspath $(wildcard csrc/*.cc csrc/*.c csrc/*.h csrc/*.hpp csrc/*.cpp))
+CSRCS = $(abspath $(shell find csrc -name "*.cpp" -o -name "*.cc"))
 CSRCS += $(SRC_AUTO_BIND)
 
-TOPNAME = Light
+TOPNAME = Top
 NXDC_FILES = constr/$(TOPNAME).nxdc
 
 ifneq ($(shell which bear),)
@@ -23,10 +23,9 @@ VFLAGS = --build -cc -O3 --x-assign fast --x-initial fast --noassert --trace
 
 include $(NVBOARD_HOME)/scripts/nvboard.mk
 
-INC_PATH ?=
+INC_PATH += $(abspath csrc/include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
-
 
 # NVBoard Constraint file
 SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
@@ -35,11 +34,12 @@ $(SRC_AUTO_BIND): $(NXDC_FILES)
 	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
 
 # Binary Target
-$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE) verilog
+$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
+	@make verilog
 	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
 	$(VCC) $(VFLAGS) \
-		--top-module $(TOPNAME) $(filter-out verilog, $^) \
+		--top-module $(TOPNAME) $^ \
 		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
@@ -50,7 +50,7 @@ sim: $(BIN)
 build: $(BIN)
 
 # chisel
-PRJ = playground
+PRJ = core
 MILL = ./mill
 test:
 	$(MILL) -i $(PRJ).test
@@ -79,5 +79,5 @@ clean:
 	-rm -rf $(BUILD_DIR)
 	-rm -f compile_commands.json
 
-.PHONY: test verilog help reformat checkformat clean default build
+.PHONY: test verilog help reformat checkformat clean default build $(BIN)
 -include ../Makefile

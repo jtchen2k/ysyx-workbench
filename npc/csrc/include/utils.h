@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-02-01 21:23:52
+ * @modified: 2025-02-07 22:44:23
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -17,6 +17,9 @@
 
 
 // ----------- log -----------
+
+#define FMT_ADDR "0x%08x"
+
 
 #define ANSI_FG_BLACK   "\33[1;30m"
 #define ANSI_FG_RED     "\33[1;31m"
@@ -36,13 +39,13 @@
 #define ANSI_BG_WHITE   "\33[1;47m"
 #define ANSI_NONE       "\33[0m"
 
-#define ANSI_FMT(str, fmt) fmt str ANSI_NONE
+#define ANSI_FMT(str, fmt) fmt str ANSI_NONE "\n"
 
 #define _Log(fmt, ...) \
     printf("[%s:%d:%s] " fmt "\n", __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define _LogColor(color, fmt, ...) \
-    printf(ANSI_FMT("<%s:%d:%s> " fmt "\n", color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
+    printf(ANSI_FMT("<%s:%d:%s> " fmt, color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define Log(fmt, ...) _LogColor(ANSI_FG_BLACK, fmt, ##__VA_ARGS__)
 #define LogDebug(fmt, ...) _LogColor(ANSI_FG_CYAN, "[debug] " fmt, ##__VA_ARGS__)
@@ -60,7 +63,7 @@
 #define Assert(cond, fmt, ...) \
     do { \
         if (!(cond)) { \
-            _LogColor(ANSI_BG_YELLOW, "[assert] " fmt, ##__VA_ARGS__); \
+            _LogColor(ANSI_BG_RED, "Assertion failed: " fmt, ##__VA_ARGS__); \
             exit(1); \
         } \
     } while (0)

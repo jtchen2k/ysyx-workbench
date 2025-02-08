@@ -51,7 +51,8 @@ build: $(BIN)
 
 # chisel
 PRJ = core
-MILL = ./mill
+MILL = mill
+
 test:
 	$(MILL) -i $(PRJ).test
 

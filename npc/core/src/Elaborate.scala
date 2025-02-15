@@ -8,5 +8,10 @@ object Elaborate extends App {
       "locationInfoStyle=wrapInAtSquareBracket"
     ).reduce(_ + "," + _)
   )
-  circt.stage.ChiselStage.emitSystemVerilogFile(new top.Top(), args, firtoolOptions)
+  val arg = Array(
+    // to make DPI work
+    // see https://github.com/chipsalliance/chisel/issues/3933#issuecomment-2000035088
+    "--split-verilog",
+  )
+  circt.stage.ChiselStage.emitSystemVerilogFile(new top.Top(), args ++ arg, firtoolOptions)
 }

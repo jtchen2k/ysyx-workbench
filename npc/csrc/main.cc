@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 17:14:02
- * @modified: 2025-02-07 22:46:59
+ * @modified: 2025-02-15 03:53:40
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -13,42 +13,31 @@
 #include <cassert>
 #include <cstdio>
 #include <nvboard.h>
-#include <verilated.h>
-#include <verilated_vcd_c.h>
 
 #include "common.h"
+#include "config.h"
 #include "mem.h"
 #include "utils.h"
-
-#ifndef TOP_NAME
-#define TOP_NAME VTop
-#endif
-
-static TOP_NAME      *core = new TOP_NAME();
-static bool           TRACE_ENABLE = false;
-static int            TRACE_DUMP_CYCLE = 1e4;
-static int            TRACE_FLUSH_CYCLE = 1e6;
-static VerilatedVcdC *g_trace = new VerilatedVcdC();
-static int            cur_cycle = 0;
+#include "core.h"
 
 void nvboard_bind_all_pins(TOP_NAME *top);
 
 static void single_cycle_trace() { g_trace->flush(); }
 
 word_t* regs[] = {
-    &core->io_regs_0, &core->io_regs_1,  &core->io_regs_2,  &core->io_regs_3,
-    &core->io_regs_4, &core->io_regs_5,  &core->io_regs_6,  &core->io_regs_7,
-    &core->io_regs_8, &core->io_regs_9,  &core->io_regs_10, &core->io_regs_11,
-    &core->io_regs_12, &core->io_regs_13, &core->io_regs_14, &core->io_regs_15,
-    &core->io_regs_16, &core->io_regs_17, &core->io_regs_18, &core->io_regs_19,
-    &core->io_regs_20, &core->io_regs_21, &core->io_regs_22, &core->io_regs_23,
-    &core->io_regs_24, &core->io_regs_25, &core->io_regs_26, &core->io_regs_27,
-    &core->io_regs_28, &core->io_regs_29, &core->io_regs_30, &core->io_regs_31,
+    &g_core->io_regs_0, &g_core->io_regs_1,  &g_core->io_regs_2,  &g_core->io_regs_3,
+    &g_core->io_regs_4, &g_core->io_regs_5,  &g_core->io_regs_6,  &g_core->io_regs_7,
+    &g_core->io_regs_8, &g_core->io_regs_9,  &g_core->io_regs_10, &g_core->io_regs_11,
+    &g_core->io_regs_12, &g_core->io_regs_13, &g_core->io_regs_14, &g_core->io_regs_15,
+    &g_core->io_regs_16, &g_core->io_regs_17, &g_core->io_regs_18, &g_core->io_regs_19,
+    &g_core->io_regs_20, &g_core->io_regs_21, &g_core->io_regs_22, &g_core->io_regs_23,
+    &g_core->io_regs_24, &g_core->io_regs_25, &g_core->io_regs_26, &g_core->io_regs_27,
+    &g_core->io_regs_28, &g_core->io_regs_29, &g_core->io_regs_30, &g_core->io_regs_31,
 };
 #define R(i) (*regs[i])
 
 static void print_register() {
-    printf("[cycle %6d pc = 0x%08x inst = 0x%08x]: \n", cur_cycle, core->io_pc, core->io_inst);
+    printf("[cycle %6d pc = 0x%08x inst = 0x%08x]: \n", cur_cycle, g_core->io_pc, g_core->io_inst);
     for (int i = 0; i < 32; i++) {
         printf("x%-2d = 0x%08x ", i, *regs[i]);
         if (i % 8 == 7)
@@ -58,46 +47,51 @@ static void print_register() {
 }
 
 static void clock_step() {
-    cur_cycle++;
-    core->clock = 0;
-    core->eval();
-    core->clock = 1;
-    core->eval();
+    g_core->clock = 0;
+    g_core->eval();
+    g_context->timeInc(1);
+    g_core->clock = 1;
+    g_core->eval();
+    g_context->timeInc(1);
     if (TRACE_ENABLE) {
-        if (cur_cycle % TRACE_DUMP_CYCLE == 0)
-            g_trace->dump(cur_cycle);
-        if (cur_cycle % TRACE_FLUSH_CYCLE == 0) {
+        g_trace->dump(g_context->time());
+        if (g_context->time() % TRACE_FLUSH_CYCLE == 0) {
             single_cycle_trace();
-            printf("dumped trace. cycle = %d\n", cur_cycle);
         }
     }
 }
 
 static void reset(int n) {
-    core->reset = 1;
+    g_core->reset = 1;
     while (n-- > 0)
         clock_step();
-    core->reset = 0;
+    g_core->reset = 0;
 }
 
 static void setup_trace() {
     if (!TRACE_ENABLE)
         return;
-    Verilated::traceEverOn(true);
-    core->trace(g_trace, 99);
-    g_trace->open("waveform_light.vcd");
+    g_context->traceEverOn(true);
+    g_core->trace(g_trace, 99);
+    g_trace->open(TRACE_FILENAME);
+    LogDebug("trace enabled: %s", TRACE_FILENAME);
 }
 
 static void exec() {
-    word_t pc = core->io_pc;
+    word_t pc = g_core->io_pc;
     word_t inst = pmem_read(pc, 4);
-    core->io_inst = inst;
-    print_register();
+    g_core->io_inst = inst;
+    // print_register();
     clock_step();
+}
+
+static void ebreak() {
+    LogWarn("EBREAK!");
 }
 
 int main() {
     pmem_init();
+    setup_trace();
     reset(10);
     int n = 6; // total cycles
     while (n--) {

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-02-07 22:44:23
+ * @modified: 2025-02-15 04:36:53
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -14,7 +14,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-
+#include <ctime>
 
 // ----------- log -----------
 
@@ -42,12 +42,13 @@
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE "\n"
 
 #define _Log(fmt, ...) \
-    printf("[%s:%d:%s] " fmt "\n", __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
+    printf("< %6s:%-4d:%s> " fmt "\n", __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define _LogColor(color, fmt, ...) \
-    printf(ANSI_FMT("<%s:%d:%s> " fmt, color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
+    printf(ANSI_FMT("[%s:%d.%s] " fmt, color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define Log(fmt, ...) _LogColor(ANSI_FG_BLACK, fmt, ##__VA_ARGS__)
+#define LogTrace(fmt, ...) _LogColor(ANSI_FG_CYAN, "[trace] " fmt, ##__VA_ARGS__)
 #define LogDebug(fmt, ...) _LogColor(ANSI_FG_CYAN, "[debug] " fmt, ##__VA_ARGS__)
 #define LogInfo(fmt, ...) _LogColor(ANSI_FG_BLUE, "[info] " fmt, ##__VA_ARGS__)
 #define LogWarn(fmt, ...) _LogColor(ANSI_FG_YELLOW, "[warn] " fmt, ##__VA_ARGS__)

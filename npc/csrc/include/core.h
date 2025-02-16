@@ -4,44 +4,40 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-02-15 03:49:06
+ * @modified: 2025-02-15 16:48:40
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
 
-#ifndef __INCLUDE_CORE__
-#define __INCLUDE_CORE__
+#ifndef __INCLUDE_CORE_H__
+#define __INCLUDE_CORE_H__
 
-#include "svdpi.h"
 #include "VTop.h"
 #include "VTop__Dpi.h"
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-static int               cur_cycle = 0;
-static VerilatedVcdC    *g_trace = new VerilatedVcdC();
-static VerilatedContext *g_context = new VerilatedContext();
-static TOP_NAME         *g_core = new TOP_NAME(g_context);
-
-
-#ifndef TOP_NAME
-#define TOP_NAME VTop
-#endif
-
-enum { CORE_RUNNING, CORE_STOP, CORE_QUIT };
-
-typedef struct {
+enum { CORE_STATE_RUNNING, CORE_STATE_STOP, CORE_STATE_QUIT };
+struct CoreState {
   int state;
-} g_core_state;
+};
+
+extern VerilatedVcdC    *g_trace;
+extern VerilatedContext *g_context;
+extern TOP_NAME         *g_core;
+extern CoreState        *g_core_state;
 
 void core_init();
 
 /// main loop of the core.
 void exec(int n);
 
-// /// reset the core for n cycles.
-// void reset(int n);
+/// reset the core for n cycles.
+void reset(int n);
+
+/// step one single cycle
+void single_cycle();
 
 void core_shutdown();
 
-#endif /* __INCLUDE_CORE__ */
+#endif // __INCLUDE_CORE_H__

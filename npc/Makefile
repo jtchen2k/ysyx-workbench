@@ -19,13 +19,19 @@ else
 VCC = verilator
 endif
 
-VFLAGS = --build -cc -O3 --x-assign fast --x-initial fast --noassert --trace
+VFLAGS = --build -cc -O3 --x-assign fast --x-initial fast --noassert --trace -j $(shell nproc)
 
 include $(NVBOARD_HOME)/scripts/nvboard.mk
 
 INC_PATH += $(abspath csrc/include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+CXXFLAGS += -fsanitize=address -g
+LDFLAGS += -fsanitize=address -g
+endif
 
 # NVBoard Constraint file
 SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)

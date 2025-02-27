@@ -1,6 +1,3 @@
-JOBS ?= $(shell nproc)
-MAKEFLAGS += -j $(JOBS)
-
 .DEFAULT_GOAL = app
 
 # Add necessary options if the target is a shared library

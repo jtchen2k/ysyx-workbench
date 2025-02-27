@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-02-15 16:43:12
+ * @modified: 2025-02-15 16:54:14
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -14,6 +14,8 @@
 #include "core.h"
 #include "utils.h"
 #include <cstring>
+
+static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 
 word_t pmem_read(paddr_t addr, int len) {
     if (!in_pmem(addr)) {

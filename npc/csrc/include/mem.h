@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:04:22
- * @modified: 2025-02-15 16:31:02
+ * @modified: 2025-02-15 16:55:07
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -15,8 +15,6 @@
 #include "common.h"
 #include "core.h"
 #include "macro.h"
-
-static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 
 static inline bool in_pmem(paddr_t addr) { return (addr - CONFIG_MBASE) < CONFIG_MSIZE; }
 

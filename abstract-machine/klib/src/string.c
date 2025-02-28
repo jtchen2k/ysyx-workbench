@@ -12,11 +12,20 @@ size_t strlen(const char *s) {
   return len;
 }
 
+// copy src to dst, return dst.
 char *strcpy(char *dst, const char *src) {
   size_t len = strlen(src);
   memcpy(dst, src, len);
   dst[len] = '\0';
   return dst;
+}
+
+// copy src to dst, return the terminating null byte
+char *stpcpy(char *dst, const char *src) {
+  size_t len = strlen(src);
+  memcpy(dst, src, len);
+  dst[len] = '\0';
+  return dst + len;
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {

@@ -9,7 +9,7 @@
 int printf(const char *fmt, ...) {
   // conversion specification:
   //  %[$][flags][width][.precision][length modifier]conversion
-  panic("Not implemented");
+  panic("not implemented");
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {

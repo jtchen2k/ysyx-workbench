@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
+#include "trace.h"
 
 void init_rand();
 void init_log(const char *log_file);
@@ -127,6 +128,11 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Initialize the simple debugger. */
   init_sdb();
+
+  /* Initialize tracer */
+#ifdef CONFIG_ITRACE
+  init_itrace();
+#endif
 
   IFDEF(CONFIG_ITRACE, init_disasm());
 

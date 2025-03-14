@@ -18,9 +18,12 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include "macro.h"
 #include "utils.h"
+#include "trace.h"
 #include <memory/paddr.h>
 #include <stdlib.h>
+
 
 static int is_batch_mode = false;
 
@@ -160,6 +163,11 @@ static int cmd_d(char *args) {
   return 0;
 }
 
+static int cmd_ib(char *args) {
+  irb_display();
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -179,6 +187,9 @@ static struct {
     {"p", "Print value of expression EXPR: p EXPR. ", cmd_p},
     {"w", "Set a watchpoint for an expression: w EXPR", cmd_w},
     {"d", "Delete the watchpoint N: d N", cmd_d},
+#ifdef CONFIG_ITRACE
+    {"ib", "Print the iringbuf (instruction ringbuffer)", cmd_ib}
+#endif
 };
 
 #define NR_CMD ARRLEN(cmd_table)

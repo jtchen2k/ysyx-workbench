@@ -163,10 +163,21 @@ static int cmd_d(char *args) {
   return 0;
 }
 
+/// instruction ring buffer
+#ifdef CONFIG_ITRACE
 static int cmd_ib(char *args) {
   irb_display();
   return 0;
 }
+#endif
+
+/// ftrace
+#ifdef CONFIG_FTRACE
+static int cmd_fs(char *args) {
+  fsym_display();
+  return 0;
+}
+#endif
 
 static int cmd_help(char *args);
 
@@ -188,7 +199,10 @@ static struct {
     {"w", "Set a watchpoint for an expression: w EXPR", cmd_w},
     {"d", "Delete the watchpoint N: d N", cmd_d},
 #ifdef CONFIG_ITRACE
-    {"ib", "Print the iringbuf (instruction ringbuffer)", cmd_ib}
+    {"ib", "Print the iringbuf (instruction ringbuffer)", cmd_ib},
+#endif
+#ifdef CONFIG_FTRACE
+    {"fs", "List function symbols", cmd_fs},
 #endif
 };
 

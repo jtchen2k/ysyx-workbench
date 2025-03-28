@@ -71,8 +71,8 @@ void *memmove(void *dst, const void *src, size_t n) {
   uint8_t *pt = (uint8_t *)dst;
   uint8_t *ps = (uint8_t *)src;
   if (pt > ps) {
-    for (size_t i = n - 1; i >= 0; i--) {
-      pt[i] = ps[i];
+    for (size_t i = n; i > 0; i--) {
+      pt[i - 1] = ps[i - 1];
     }
   } else {
     for (size_t i = 0; i < n; i++) {

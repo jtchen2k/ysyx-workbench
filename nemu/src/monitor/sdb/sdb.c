@@ -174,6 +174,7 @@ static int cmd_ib(char *args) {
 /// ftrace
 #ifdef CONFIG_FTRACE
 static int cmd_fs(char *args) {
+  printf("list of function symbols:\n");
   fsym_display();
   return 0;
 }
@@ -240,6 +241,7 @@ void sdb_mainloop() {
     cmd_c(NULL);
     return;
   }
+
 
   for (char *str; (str = rl_gets()) != NULL; ) {
     char *str_end = str + strlen(str);

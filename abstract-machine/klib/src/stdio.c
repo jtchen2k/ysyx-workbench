@@ -7,8 +7,9 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-#define SIGN 1
-#define SMALL 2
+#define SIGN 1 // signed / unsigend
+#define PLUS 2 // show plus
+#define SMALL 4
 
 enum format_state {
   FORMAT_STATE_NONE,
@@ -37,7 +38,8 @@ struct printf_spec {
  * Each call decode a token from the format and return the
  * number of characters read.
  */
-static __attribute__((noinline)) struct fmt format_decode(struct fmt fmt, struct printf_spec *spec) {
+static __attribute__((noinline)) struct fmt
+format_decode(struct fmt fmt, struct printf_spec *spec) {
   const char *start = fmt.str;
   fmt.state = FORMAT_STATE_NONE;
 
@@ -99,22 +101,24 @@ static __attribute__((noinline)) struct fmt format_decode(struct fmt fmt, struct
   return fmt;
 }
 
-int printf(const char *fmt, ...) {
-  // conversion specification:
-  //  %[$][flags][width][.precision][length modifier]conversion
-  // comment the entire function to use printf in glibc.
-  va_list ap;
-  va_start(ap, fmt);
-  char print_buf[1024];
-  vsnprintf(print_buf, 1024, fmt, ap);
-  va_end(ap);
-  for (int i = 0; print_buf[i]; i++) {
-    putch(print_buf[i]);
-  }
-  return 0;
-}
+// int printf(const char *fmt, ...) {
+//   // conversion specification:
+//   //  %[$][flags][width][.precision][length modifier]conversion
+//   // comment the entire function to use printf in glibc.
+//   va_list ap;
+//   va_start(ap, fmt);
+//   char print_buf[1024];
+//   vsnprintf(print_buf, 1024, fmt, ap);
+//   va_end(ap);
+//   for (int i = 0; print_buf[i]; i++) {
+//     putch(print_buf[i]);
+//   }
+//   return 0;
+// }
 
-int vsprintf(char *out, const char *fmt, va_list ap) { return vsnprintf(out, 0xffffffff, fmt, ap); }
+int vsprintf(char *out, const char *fmt, va_list ap) {
+  return vsnprintf(out, 0xffffffff, fmt, ap);
+}
 
 int sprintf(char *out, const char *fmt, ...) {
   va_list ap;
@@ -136,15 +140,24 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
  * @param num
  * @return char* return the terminating null byte.
  */
-static char *number(char *str, char *end, int64_t num, struct printf_spec spec) {
+static char *number(char *str, char *end, uint64_t num,
+                    struct printf_spec spec) {
   char sign = '+';
   char tmp[3 * sizeof(num)];
   int  i = 0;
-  char digits[] = "0123456789abcdef";
+  char digits[] = "0123456789ABCDEF";
 
-  if (num < 0) {
-    sign = '-';
-    num = -num;
+  if (spec.base == 16 && spec.flags & SMALL) {
+    for (int j = 10; j < sizeof(digits); j++) {
+      digits[j] = digits[j] + 32;
+    }
+  }
+
+  if (spec.flags & SIGN) {
+    if ((int64_t)num < 0) {
+      num = -(int64_t)num;
+      sign = '-';
+    }
   }
 
   do {
@@ -152,8 +165,9 @@ static char *number(char *str, char *end, int64_t num, struct printf_spec spec) 
     num /= spec.base;
   } while (num);
 
-  if (sign == '-')
-    tmp[i++] = '-';
+  if (sign == '-' || spec.flags & PLUS) {
+    tmp[i++] = sign;
+  }
   while (i > 0) {
     if (str < end) {
       *str++ = tmp[--i];
@@ -189,7 +203,8 @@ int vsnprintf(char *buf, size_t size, const char *fmt_str, va_list ap) {
     const char *old_fmt = fmt.str;
 
     fmt = format_decode(fmt, &spec);
-    // printf("state = %d, str = %s, buf = %s, buf + 4 = %s\n", fmt.state, fmt.str, buf, buf + 4);
+    // printf("state = %d, str = %s, buf = %s, buf + 4 = %s\n", fmt.state,
+    // fmt.str, buf, buf + 4);
     switch (fmt.state) {
     case FORMAT_STATE_NONE: {
       int read = fmt.str - old_fmt;
@@ -205,7 +220,11 @@ int vsnprintf(char *buf, size_t size, const char *fmt_str, va_list ap) {
     }
 
     case FORMAT_STATE_NUM: {
-      int64_t num = va_arg(ap, int64_t);
+      uint64_t num;
+      if (fmt.size <= sizeof(int32_t))
+        num = va_arg(ap, int32_t);
+      else
+        num = va_arg(ap, int64_t);
       str = number(str, end, num, spec);
       continue;
     }
@@ -223,7 +242,6 @@ int vsnprintf(char *buf, size_t size, const char *fmt_str, va_list ap) {
       str += read;
       continue;
     }
-
     }
 
     // if (*fmt != '%') {

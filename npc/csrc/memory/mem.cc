@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-07 15:46:16
+ * @modified: 2025-04-07 19:05:38
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -66,7 +66,7 @@ void print_register() {
     printf("[cycle %6lu pc = 0x%08x inst = 0x%08x]: \n", g_context->time(),
            g_core->io_pc, g_core->io_inst);
     for (int i = 0; i < 32; i++) {
-        printf("x%-2d = 0x%08x ", i, *regs[i]);
+        printf("x%-2d = 0x%08x ", i, R(i));
         if (i % 8 == 7)
             printf("\n");
     }

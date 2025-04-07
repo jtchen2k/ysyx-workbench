@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-07 15:07:02
+ * @modified: 2025-04-07 19:05:59
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -12,6 +12,7 @@
 #ifndef __INCLUDE_CORE_H__
 #define __INCLUDE_CORE_H__
 
+#include "utils.h"
 #include "VTop.h"
 #include "VTop__Dpi.h"
 #include <verilated.h>
@@ -39,5 +40,7 @@ void reset(int n);
 void single_cycle();
 
 void core_shutdown();
+
+int core_isgoodtrap();
 
 #endif // __INCLUDE_CORE_H__

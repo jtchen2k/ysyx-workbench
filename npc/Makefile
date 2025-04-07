@@ -96,5 +96,8 @@ NPCFLAGS += $(ARGS)
 run: $(BIN)
 	$(BIN) $(NPCFLAGS)
 
+gdb: $(BIN)
+	gdb -s $(BIN) --args $(BIN) $(NPCFLAGS)
+
 .PHONY: test verilog help reformat checkformat clean default build run
 -include ../Makefile

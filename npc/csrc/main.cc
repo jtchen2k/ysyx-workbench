@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 17:14:02
- * @modified: 2025-04-07 17:29:49
+ * @modified: 2025-04-07 18:54:56
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -23,8 +23,9 @@
 void nvboard_bind_all_pins(TOP_NAME *top);
 
 int main(int argc, char **argv) {
-    init_monitor(argc, argv);
     core_init();
+    init_monitor(argc, argv);
+
     Assert(g_core != nullptr, "core not initialized.");
     Assert(g_core_state != nullptr, "core state not initialized.");
     while (g_context->time() < CONFIG_MAX_INST) {
@@ -42,10 +43,10 @@ int main(int argc, char **argv) {
 
 end:
     print_register();
-    Assert(R(1) == 12, "x1 = %d", R(1));
-    Assert(R(2) == 16, "x2 = %d", R(2));
-    Assert(R(3) == 36, "x3 = %d", R(3));
-    Assert(R(4) == 16, "x4 = %d", R(4));
-    LogInfo("test passed.");
-    return 0;
+    // Assert(R(1) == 12, "x1 = %d", R(1));
+    // Assert(R(2) == 16, "x2 = %d", R(2));
+    // Assert(R(3) == 36, "x3 = %d", R(3));
+    // Assert(R(4) == 16, "x4 = %d", R(4));
+    // LogInfo("test passed.");
+    return core_isgoodtrap();
 }

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-07 17:20:19
+ * @modified: 2025-04-07 19:07:29
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -51,6 +51,7 @@
 #define LogTrace(fmt, ...) _LogColor(ANSI_FG_MAGENTA, "[trace] " fmt, ##__VA_ARGS__)
 #define LogDebug(fmt, ...) _LogColor(ANSI_FG_CYAN, "[debug] " fmt, ##__VA_ARGS__)
 #define LogInfo(fmt, ...) _LogColor(ANSI_FG_BLUE, "[info] " fmt, ##__VA_ARGS__)
+#define LogSuccess(fmt, ...) _LogColor(ANSI_FG_GREEN, "[success] " fmt, ##__VA_ARGS__)
 #define LogWarn(fmt, ...) _LogColor(ANSI_FG_YELLOW, "[warn] " fmt, ##__VA_ARGS__)
 #define LogError(fmt, ...) _LogColor(ANSI_FG_RED, "[error] " fmt, ##__VA_ARGS__)
 

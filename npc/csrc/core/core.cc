@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-07 17:17:35
+ * @modified: 2025-04-07 19:08:13
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -75,4 +75,14 @@ void core_shutdown() {
         g_trace->flush();
         g_trace->close();
     }
+}
+
+NOINLINE int core_isgoodtrap() {
+    int code = R(10);
+    if (code == 0) {
+        LogSuccess("hit good trap.");
+    } else {
+        LogError("hit bad trap: %d", code);
+    }
+    return code;
 }

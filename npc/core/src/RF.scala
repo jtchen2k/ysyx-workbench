@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:31:05
- * @modified: 2025-02-07 22:56:24
+ * @modified: 2025-04-07 01:17:42
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -31,7 +31,7 @@ class RF(val aw: Int = 5, val dw: Int = 32) extends Module {
     val rdata1 = Output(UInt(dw.W))
     val rdata2 = Output(UInt(dw.W))
 
-    // wired to the top for debugging
+    // wired to the top for debugging purposes
     val _regs = Output(Vec(1 << aw, UInt(dw.W)))
   })
 

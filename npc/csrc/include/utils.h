@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-02-15 04:36:53
+ * @modified: 2025-04-07 17:20:19
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -48,7 +48,7 @@
     printf(ANSI_FMT("[%s:%d.%s] " fmt, color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define Log(fmt, ...) _LogColor(ANSI_FG_BLACK, fmt, ##__VA_ARGS__)
-#define LogTrace(fmt, ...) _LogColor(ANSI_FG_CYAN, "[trace] " fmt, ##__VA_ARGS__)
+#define LogTrace(fmt, ...) _LogColor(ANSI_FG_MAGENTA, "[trace] " fmt, ##__VA_ARGS__)
 #define LogDebug(fmt, ...) _LogColor(ANSI_FG_CYAN, "[debug] " fmt, ##__VA_ARGS__)
 #define LogInfo(fmt, ...) _LogColor(ANSI_FG_BLUE, "[info] " fmt, ##__VA_ARGS__)
 #define LogWarn(fmt, ...) _LogColor(ANSI_FG_YELLOW, "[warn] " fmt, ##__VA_ARGS__)

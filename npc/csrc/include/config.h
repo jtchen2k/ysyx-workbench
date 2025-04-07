@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:55:48
- * @modified: 2025-02-14 17:44:21
+ * @modified: 2025-04-07 17:30:06
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -14,6 +14,8 @@
 
 #define CONFIG_MBASE 0x80000000
 #define CONFIG_MSIZE 0x8000000
+#define CONFIG_PC_RESET_OFFSET 0x0
+#define CONFIG_MAX_INST 1000
 
 // runtime configurations
 #define TRACE_ENABLE true

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:36:17
- * @modified: 2025-02-15 16:25:04
+ * @modified: 2025-04-07 16:05:27
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -14,6 +14,7 @@
 
 #include "config.h"
 #include "macro.h"
+#include "utils.h"
 #include <cstdint>
 
 typedef uint32_t word_t;

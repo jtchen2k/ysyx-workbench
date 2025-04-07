@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-02-15 16:53:28
+ * @modified: 2025-04-07 17:17:35
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -12,6 +12,7 @@
 #include "config.h"
 #include "mem.h"
 #include "utils.h"
+#include "monitor.h"
 
 VerilatedVcdC    *g_trace = new VerilatedVcdC();
 VerilatedContext *g_context = new VerilatedContext();
@@ -38,6 +39,7 @@ void exec(int n) {
     while (n--) {
         word_t pc = g_core->io_pc;
         word_t inst = pmem_read(pc, 4);
+        LogTrace("pc: " FMT_ADDR ", inst: " FMT_ADDR, pc, inst);
         g_core->io_inst = inst;
         // print_register();
         single_cycle();

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 17:14:02
- * @modified: 2025-02-15 16:53:31
+ * @modified: 2025-04-07 17:29:49
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -18,16 +18,16 @@
 #include "core.h"
 #include "mem.h"
 #include "utils.h"
+#include "monitor.h"
 
 void nvboard_bind_all_pins(TOP_NAME *top);
 
-int main() {
-    pmem_init();
+int main(int argc, char **argv) {
+    init_monitor(argc, argv);
     core_init();
-
     Assert(g_core != nullptr, "core not initialized.");
     Assert(g_core_state != nullptr, "core state not initialized.");
-    while (1) {
+    while (g_context->time() < CONFIG_MAX_INST) {
         switch (g_core_state->state) {
         case CORE_STATE_RUNNING:
             exec(1);

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-08 17:47:25
+ * @modified: 2025-04-08 21:03:00
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -31,6 +31,11 @@ void Arguments::parse_args(int argc, char **argv) {
         .implicit_value(true)
         .action([this](const auto &) {++this->verbosity;})
         .append();
+    parser.add_argument("-b", "--batch")
+        .help("run in batch mode")
+        .default_value(false)
+        .implicit_value(true)
+        .store_into(batch);
     try {
         parser.parse_args(argc, argv);
     } catch (const std::exception &err) {

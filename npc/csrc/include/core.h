@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-08 19:44:09
+ * @modified: 2025-04-08 21:04:08
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -51,6 +51,9 @@ void single_cycle();
 /// stop the core
 void core_stop();
 
-int check_exit_status();
+/// statistics
+void statistics();
+
+int check_trap();
 
 #endif // __INCLUDE_CORE_H__

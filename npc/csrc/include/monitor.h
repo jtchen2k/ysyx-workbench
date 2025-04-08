@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:23:54
- * @modified: 2025-04-08 19:42:43
+ * @modified: 2025-04-08 21:00:14
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,7 +16,6 @@
 #include <map>
 #include <string>
 
-
 #define EXPR_TOKEN_SIZE 4096
 #define EXPR_TOKEN_LENGTH 32
 
@@ -25,6 +24,7 @@ class Arguments {
     std::string image = "";
     std::string elf = "";
     std::string log_dir = "";
+    bool        batch = false;
     int         verbosity = 0;
 
     argparse::ArgumentParser parser;

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:04:22
- * @modified: 2025-04-07 19:04:05
+ * @modified: 2025-04-08 21:14:34
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -25,27 +25,12 @@ static inline bool in_pmem(paddr_t addr) {
     return (addr >= PMEM_LEFT) && (addr < PMEM_RIGHT);
 }
 
-/// get the value of register i
-inline word_t R(int i) {
-    Assert(i >= 0 && i < 32, "invalid register index: %d", i);
-    Assert(g_core != nullptr, "core not initialized.");
-    word_t *regs[] = {
-        &g_core->io_regs_0,  &g_core->io_regs_1,  &g_core->io_regs_2,
-        &g_core->io_regs_3,  &g_core->io_regs_4,  &g_core->io_regs_5,
-        &g_core->io_regs_6,  &g_core->io_regs_7,  &g_core->io_regs_8,
-        &g_core->io_regs_9,  &g_core->io_regs_10, &g_core->io_regs_11,
-        &g_core->io_regs_12, &g_core->io_regs_13, &g_core->io_regs_14,
-        &g_core->io_regs_15, &g_core->io_regs_16, &g_core->io_regs_17,
-        &g_core->io_regs_18, &g_core->io_regs_19, &g_core->io_regs_20,
-        &g_core->io_regs_21, &g_core->io_regs_22, &g_core->io_regs_23,
-        &g_core->io_regs_24, &g_core->io_regs_25, &g_core->io_regs_26,
-        &g_core->io_regs_27, &g_core->io_regs_28, &g_core->io_regs_29,
-        &g_core->io_regs_30, &g_core->io_regs_31,
-    };
-    return *regs[i];
-}
+void reginfo_init();
+void print_registers();
 
-void print_register();
+/// register read via index or name (x0, x1 / zero, ra)
+word_t R(int i);
+word_t R(char *name);
 
 word_t pmem_read(paddr_t addr, int len);
 

@@ -4,11 +4,12 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-08 19:43:34
+ * @modified: 2025-04-08 21:08:44
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
 #include "core.h"
+#include "common.h"
 #include "config.h"
 #include "mem.h"
 #include "monitor.h"
@@ -32,6 +33,7 @@ void core_init() {
     trace_init();
     g_core_state = new CoreState();
     g_core_state->state = CORE_STATE_RUNNING;
+    reginfo_init();
     reset(10);
 }
 
@@ -39,7 +41,7 @@ void core_start() {
     Assert(g_core != nullptr, "core not initialized.");
     Assert(g_core_state != nullptr, "core state not initialized.");
     Assert(g_context != nullptr, "context not initialized.");
-    LogTrace("core started.");
+    LogDebug("core started.");
     sdb_mainloop();
 }
 
@@ -58,7 +60,7 @@ void core_exec(uint64_t n) {
     bool debug = (n <= CONFIG_MAX_PRINT_INST);
     switch (g_core_state->state) {
     case CORE_STATE_TERM:
-        LogInfo("core terminated.");
+        printf("core has terminated. to continue, please restart.\n");
         return;
     default:
         g_core_state->state = CORE_STATE_RUNNING;
@@ -78,6 +80,7 @@ void core_exec(uint64_t n) {
     case CORE_STATE_STOP:
         break;
     case CORE_STATE_TERM:
+        check_trap();
         break;
     }
 }
@@ -113,7 +116,9 @@ void core_stop() {
     }
 }
 
-NOINLINE int check_exit_status() {
+void statistics() {}
+
+NOINLINE int check_trap() {
     int code = R(10);
     if (code == 0) {
         LogSuccess("hit good trap at pc: " FMT_ADDR, g_core->io_pc);

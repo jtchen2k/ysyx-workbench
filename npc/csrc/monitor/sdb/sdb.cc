@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-08 21:36:28
+ * @modified: 2025-04-08 22:42:56
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,6 +16,8 @@
 #include "monitor.h"
 #include "utils.h"
 
+#include <cstdio>
+#include <cstring>
 #include <readline/history.h>
 #include <readline/readline.h>
 
@@ -38,9 +40,9 @@ static char *rl_gets() {
 
 int cmd_h(char *args);
 
-int cmd_q(char *args) { return SDB_STOP; }
+int cmd_q([[maybe_unused]] char *args) { return SDB_STOP; }
 
-int cmd_c(char *args) {
+int cmd_c([[maybe_unused]] char *args) {
     core_exec(-1);
     return SDB_CONTINUE;
 }
@@ -61,18 +63,53 @@ int cmd_info(char *args) {
 }
 
 int cmd_x(char *args) {
-    printf("todo\n");
+    char *nstr = strtok(args, " ");
+    if (nstr == nullptr) {
+        printf("missing n. usage: x n EXPR\n");
+        return SDB_INVALID;
+    }
+    int  n = atoi(nstr);
+    bool reverse = n < 0;
+    bool success = false;
+    if (reverse) {
+        n = -n;
+    }
+    char *e = strtok(nullptr, "");
+    if (e == nullptr) {
+        printf("missing EXPR. usage: x n EXPR\n");
+        return SDB_INVALID;
+    }
+    word_t addr = expr(e, &success);
+    if (!success) {
+        printf("failed to evaluate expression: %s\n", e);
+        return SDB_INVALID;
+    }
+    for (int i = 0; i < n; i++) {
+        if (!in_pmem(addr)) {
+            printf("illegal memory access: " FMT_ADDR "\n", addr);
+            return SDB_INVALID;
+        }
+        word_t val = pmem_read(addr, 4);
+        printf(ANSI_BOLD FMT_ADDR ANSI_NONE ": " FMT_WORD "\n", addr, val);
+        addr += (reverse ? -4 : 4);
+    }
     return SDB_CONTINUE;
 }
 
 int cmd_p(char *args) {
-    printf("todo\n");
+    char  *e = args;
+    bool   success = false;
+    word_t res = expr(e, &success);
+    if (!success) {
+        printf("failed to evaluate expression: %s\n", e);
+        return SDB_INVALID;
+    }
+    printf(FMT_WORD "\n", res);
     return SDB_CONTINUE;
 }
 
 int cmd_si(char *args) {
-    char   *nstr = strtok(args, " ");
-    int64_t n = nstr ? atoll(nstr) : 1;
+    int64_t n = args != nullptr ? atoll(args) : 1;
     if (n < 0) {
         printf("invalid argument: %s\n", args);
         return SDB_INVALID;
@@ -105,7 +142,7 @@ static struct {
 };
 static int NR_CMD = ARRLEN(sdb_commands);
 
-int cmd_h(char *args) {
+int cmd_h([[maybe_unused]] char *args) {
     for (int i = 0; i < NR_CMD; i++) {
         printf(ANSI_BOLD "%10s" ANSI_NONE " (%s) %s\n", sdb_commands[i].name,
                sdb_commands[i].shortcut, sdb_commands[i].description);
@@ -122,11 +159,15 @@ void sdb_mainloop() {
 
     for (char *line; (line = rl_gets()) != nullptr;) {
         char *cmd = strtok(line, " ");
-        int   i, ret;
+        if (cmd == nullptr) {
+            continue;
+        }
+        char *args = strtok(nullptr, "");
+        int i, ret;
         for (i = 0; i < NR_CMD; i++) {
             if (strcmp(cmd, sdb_commands[i].name) == 0 ||
                 strcmp(cmd, sdb_commands[i].shortcut) == 0) {
-                ret = sdb_commands[i].handler(strtok(nullptr, " "));
+                ret = sdb_commands[i].handler(args);
                 if (ret == SDB_STOP) {
                     goto end;
                 }
@@ -157,6 +198,4 @@ end:
     return;
 }
 
-void sdb_init() {
-    // init_regex();
-}
+void sdb_init() { regex_init(); }

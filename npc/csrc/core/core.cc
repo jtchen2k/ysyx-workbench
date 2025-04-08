@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-08 21:08:44
+ * @modified: 2025-04-08 21:46:25
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -118,7 +118,7 @@ void core_stop() {
 
 void statistics() {}
 
-NOINLINE int check_trap() {
+int check_trap() {
     int code = R(10);
     if (code == 0) {
         LogSuccess("hit good trap at pc: " FMT_ADDR, g_core->io_pc);

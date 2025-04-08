@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 20:46:57
- * @modified: 2025-04-08 21:40:38
+ * @modified: 2025-04-08 22:12:11
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -72,17 +72,24 @@ word_t R(int i) {
     return *regs[i];
 }
 
-word_t R(char *name) {
+word_t R(char *name, bool *success) {
     // allow pc
     for (int i = 0; i < 33; i++) {
         for (const auto &n : reg_names[i]) {
             if (strcmp(name, n.c_str()) == 0) {
+                *success = true;
                 return *regs[i];
             }
         }
     }
-    LogWarn("invalid register name: %s", name);
+    *success = false;
+    LogError("invalid register name: %s", name);
     return -1;
+}
+
+word_t R(char *name) {
+    bool success = false;
+    return R(name, &success);
 }
 
 void print_registers() {

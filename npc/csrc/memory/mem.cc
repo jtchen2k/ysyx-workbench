@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-08 21:08:27
+ * @modified: 2025-04-08 21:47:10
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -42,6 +42,12 @@ static const uint32_t img_addi[] = {
     0x00010213, // addi x4, x2, 0 (expect: x1 = 12, x2 = 16, x3 = 36, x4 = 16 )
     0x00100073, // ebreak
 };
+
+// test for this basic addi image:
+// Assert(R(1) == 12, "x1 = %d", R(1));
+// Assert(R(2) == 16, "x2 = %d", R(2));
+// Assert(R(3) == 36, "x3 = %d", R(3));
+// Assert(R(4) == 16, "x4 = %d", R(4));
 
 void pmem_init() {
     memset(pmem, 0, sizeof(pmem));

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:04:22
- * @modified: 2025-04-08 21:14:34
+ * @modified: 2025-04-08 22:12:27
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -30,6 +30,7 @@ void print_registers();
 
 /// register read via index or name (x0, x1 / zero, ra)
 word_t R(int i);
+word_t R(char *name, bool *success);
 word_t R(char *name);
 
 word_t pmem_read(paddr_t addr, int len);

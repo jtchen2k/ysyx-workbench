@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:23:54
- * @modified: 2025-04-08 21:00:14
+ * @modified: 2025-04-08 21:56:04
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -18,6 +18,7 @@
 
 #define EXPR_TOKEN_SIZE 4096
 #define EXPR_TOKEN_LENGTH 32
+#define EXPR_MAX_LENGTH 1024
 
 class Arguments {
   public:
@@ -36,6 +37,7 @@ class Arguments {
             {"image", image},
             {"elf", elf},
             {"log_dir", log_dir},
+            {"batch", std::to_string(batch)},
             {"verbosity", std::to_string(verbosity)},
         };
         std::string fmt = "arguments: ";
@@ -57,5 +59,7 @@ void sdb_mainloop();
 void sdb_init();
 
 void regex_init();
+
+word_t expr(char *e, bool *success);
 
 #endif // __INCLUDE_MONITOR__

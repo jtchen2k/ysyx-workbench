@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-08 21:03:00
+ * @modified: 2025-04-08 23:44:34
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,26 +16,6 @@
 Arguments *g_args;
 
 void Arguments::parse_args(int argc, char **argv) {
-    parser.add_argument("-i", "--image")
-        .help("the binary image file to load")
-        .store_into(image);
-    parser.add_argument("-e", "--elf")
-        .help("the elf file to load")
-        .store_into(elf);
-    parser.add_argument("-l", "--log_dir")
-        .help("the directory to store log files")
-        .store_into(log_dir);
-    parser.add_argument("-V", "--verbosity")
-        .help("set the verbosity level")
-        .default_value(0)
-        .implicit_value(true)
-        .action([this](const auto &) {++this->verbosity;})
-        .append();
-    parser.add_argument("-b", "--batch")
-        .help("run in batch mode")
-        .default_value(false)
-        .implicit_value(true)
-        .store_into(batch);
     try {
         parser.parse_args(argc, argv);
     } catch (const std::exception &err) {

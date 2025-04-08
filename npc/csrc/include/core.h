@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-08 21:04:08
+ * @modified: 2025-04-08 23:03:07
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -13,7 +13,6 @@
 #define __INCLUDE_CORE_H__
 
 #include "VTop.h"
-#include "VTop__Dpi.h"
 #include "utils.h"
 #include <verilated.h>
 #include <verilated_vcd_c.h>
@@ -26,6 +25,9 @@ enum core_state_t {
 
 struct CoreState {
     core_state_t state;
+    time_t       startup_time;
+    time_t       running_time;
+    uint64_t     exec_cycles;
 };
 
 extern VerilatedVcdC    *g_trace;

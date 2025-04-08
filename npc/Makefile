@@ -104,5 +104,8 @@ run: $(BIN)
 gdb: $(BIN)
 	gdb -s $(BIN) --args $(BIN) $(NPCFLAGS)
 
-.PHONY: test verilog help reformat checkformat clean default build run
+count:
+	cloc --include-ext=c,cc,cpp,hpp,h,scala,v,sv,py --fullpath --not-match-d='csrc/thirdparty/*|./build/*' --by-file .
+
+.PHONY: test verilog help reformat checkformat clean default build run count
 -include ../Makefile

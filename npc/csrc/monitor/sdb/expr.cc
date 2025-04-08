@@ -156,9 +156,11 @@ static bool make_token(char *e) {
     int last_type = TK_NOTYPE;
 
     // if last_type is one of the unary_prevs, then the current token is a unary
-    int unary_prevs[] = {'+',   '-',    '*',    '/',      '(',
-                         TK_EQ, TK_NEQ, TK_AND, TK_DEREF, TK_NEGATIVE,
-                         TK_GT, TK_LE,  '>',    '<',      '!'};
+    int unary_prevs[] = {
+        '+',      '-',         '*',   '/',   '(', TK_EQ, TK_NEQ, TK_AND,
+        TK_DEREF, TK_NEGATIVE, TK_GT, TK_LE, '>', '<',   '!',
+        TK_NOTYPE // first token
+    };
     int unary_ops_map[][2] = {
         {'-', TK_NEGATIVE},
         {'*', TK_DEREF},
@@ -182,7 +184,7 @@ static bool make_token(char *e) {
             }
             if (t->type == unary_type)
                 LogTrace("detected unary operator %c at position %d, after %c",
-                    op_type, i, last_type);
+                         op_type, i, last_type);
         }
 
         if (t->type != TK_NOTYPE)
@@ -376,7 +378,8 @@ static word_t eval(int p, int q, bool *success) {
             case '/':
                 if (val2 == 0) {
                     // *success = false;
-                    printf("warning: divided by zero - returning uint32_max.\n");
+                    printf(
+                        "warning: divided by zero - returning uint32_max.\n");
                     return UINT32_MAX; // return val1 to avoid the program crash
                 }
                 return val1 / val2;

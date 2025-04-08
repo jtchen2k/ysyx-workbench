@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:04:22
- * @modified: 2025-04-08 22:12:27
+ * @modified: 2025-04-08 23:49:26
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -26,7 +26,7 @@ static inline bool in_pmem(paddr_t addr) {
 }
 
 void reginfo_init();
-void print_registers();
+void reg_display();
 
 /// register read via index or name (x0, x1 / zero, ra)
 word_t R(int i);

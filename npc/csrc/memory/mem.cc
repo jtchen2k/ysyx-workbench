@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-08 21:47:10
+ * @modified: 2025-04-09 01:29:04
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -20,7 +20,7 @@ static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 
 word_t pmem_read(paddr_t addr, int len) {
     if (!in_pmem(addr)) {
-        Panic("illegal memory access: " FMT_ADDR, addr);
+        Panic("attempted illegal memory access: " FMT_ADDR, addr);
     }
     uint8_t *base = pmem + addr - CONFIG_MBASE;
     switch (len) {
@@ -52,7 +52,7 @@ static const uint32_t img_addi[] = {
 void pmem_init() {
     memset(pmem, 0, sizeof(pmem));
     memcpy(pmem, img_addi, sizeof(img_addi));
-    LogInfo("physical memory initialized.");
+    LogDebug("physical memory initialized.");
 }
 
 void pmem_init(FILE *fp) {
@@ -60,11 +60,11 @@ void pmem_init(FILE *fp) {
     fseek(fp, 0, SEEK_END);
     auto size = ftell(fp);
 
-    LogInfo("image size: %lu", size);
+    LogInfo("image loaded. size: %lu", size);
     fseek(fp, 0, SEEK_SET);
     int ret = fread(pmem, size, 1, fp);
 
     Assert(ret == 1, "failed to read image file: %s", strerror(errno));
-    LogInfo("physical memory initialized.");
+    LogDebug("physical memory initialized.");
 }
 

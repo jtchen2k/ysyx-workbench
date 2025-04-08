@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-08 21:46:25
+ * @modified: 2025-04-08 22:50:51
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -60,7 +60,7 @@ void core_exec(uint64_t n) {
     bool debug = (n <= CONFIG_MAX_PRINT_INST);
     switch (g_core_state->state) {
     case CORE_STATE_TERM:
-        printf("core has terminated. to continue, please restart.\n");
+        printf("core has terminated. to continue, please reboot npc.\n");
         return;
     default:
         g_core_state->state = CORE_STATE_RUNNING;

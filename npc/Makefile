@@ -8,7 +8,7 @@ BIN = $(BUILD_DIR)/npc
 
 VSRCS = $(abspath $(wildcard build/*.sv build/*.v))
 CSRCS = $(abspath $(shell find csrc -name "*.cpp" -o -name "*.cc"))
-HEADERS = $(abspath $(shell find csrc -name "*.h" -o -name "*.hpp"))
+CHDRS = $(abspath $(shell find csrc -name "*.h" -o -name "*.hpp"))
 CSRCS += $(SRC_AUTO_BIND)
 SCALA_SRC = $(abspath $(shell find core/src -name "*.scala"))
 
@@ -21,16 +21,19 @@ else
 VCC = verilator
 endif
 
-VFLAGS = --build -cc -O3 --x-assign fast --x-initial fast --noassert --trace -j $(shell nproc)
+VFLAGS = --build -cc -O3 --x-assign fast --x-initial fast --noassert --trace --build-jobs $(shell nproc)
 
 include $(NVBOARD_HOME)/scripts/nvboard.mk
 
 INC_PATH += $(abspath csrc/include)
 INC_PATH += $(abspath csrc/thirdparty)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -Wall -Wextra
 # for aarch64
 CXXFLAGS += -std=c++17 -isystem /usr/include/aarch64-linux-gnu/c++/13/ -isystem /usr/include/c++/13/
+# for x86_64
+CXXFLAGS += -isystem /usr/include/x86_64-linux-gnu/c++/13/
+LDFLAGS += -lreadline -ldl
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
@@ -53,8 +56,6 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
-$(VSRCS): verilog
-
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN)
@@ -67,6 +68,10 @@ MILL = mill
 
 test:
 	$(MILL) -i $(PRJ).test
+
+$(VSRCS): $(SCALA_SRC)
+	@echo "Generating Verilog files..."
+	@make verilog
 
 verilog:
 	$(call git_commit, "generate verilog")

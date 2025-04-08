@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:23:54
- * @modified: 2025-04-07 16:06:33
+ * @modified: 2025-04-08 19:42:43
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,10 +16,15 @@
 #include <map>
 #include <string>
 
+
+#define EXPR_TOKEN_SIZE 4096
+#define EXPR_TOKEN_LENGTH 32
+
 class Arguments {
   public:
     std::string image = "";
     std::string elf = "";
+    std::string log_dir = "";
     int         verbosity = 0;
 
     argparse::ArgumentParser parser;
@@ -30,6 +35,7 @@ class Arguments {
         std::map<std::string, std::string> argvals{
             {"image", image},
             {"elf", elf},
+            {"log_dir", log_dir},
             {"verbosity", std::to_string(verbosity)},
         };
         std::string fmt = "arguments: ";
@@ -42,6 +48,14 @@ class Arguments {
     };
 };
 
-void init_monitor(int argc, char **argv);
+extern Arguments *g_args;
+
+void monitor_init(int argc, char **argv);
+
+void sdb_mainloop();
+
+void sdb_init();
+
+void regex_init();
 
 #endif // __INCLUDE_MONITOR__

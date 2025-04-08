@@ -4,15 +4,15 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-07 19:08:13
+ * @modified: 2025-04-08 19:43:34
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
 #include "core.h"
 #include "config.h"
 #include "mem.h"
-#include "utils.h"
 #include "monitor.h"
+#include "utils.h"
 
 VerilatedVcdC    *g_trace = new VerilatedVcdC();
 VerilatedContext *g_context = new VerilatedContext();
@@ -35,18 +35,54 @@ void core_init() {
     reset(10);
 }
 
-void exec(int n) {
+void core_start() {
+    Assert(g_core != nullptr, "core not initialized.");
+    Assert(g_core_state != nullptr, "core state not initialized.");
+    Assert(g_context != nullptr, "context not initialized.");
+    LogTrace("core started.");
+    sdb_mainloop();
+}
+
+/// execute a single instruction
+static void exec_once(bool debug) {
+    word_t pc = g_core->io_pc;
+    word_t inst = pmem_read(pc, 4);
+    if (debug) {
+        LogInfo("pc: " FMT_ADDR ", inst: " FMT_WORD, pc, inst);
+    }
+    g_core->io_inst = inst;
+    single_cycle();
+}
+
+void core_exec(uint64_t n) {
+    bool debug = (n <= CONFIG_MAX_PRINT_INST);
+    switch (g_core_state->state) {
+    case CORE_STATE_TERM:
+        LogInfo("core terminated.");
+        return;
+    default:
+        g_core_state->state = CORE_STATE_RUNNING;
+        break;
+    }
+
     while (n--) {
-        word_t pc = g_core->io_pc;
-        word_t inst = pmem_read(pc, 4);
-        LogTrace("pc: " FMT_ADDR ", inst: " FMT_ADDR, pc, inst);
-        g_core->io_inst = inst;
-        // print_register();
-        single_cycle();
+        exec_once(debug);
+        if (g_core_state->state != CORE_STATE_RUNNING)
+            break;
+    }
+
+    switch (g_core_state->state) {
+    case CORE_STATE_RUNNING:
+        g_core_state->state = CORE_STATE_STOP;
+        break;
+    case CORE_STATE_STOP:
+        break;
+    case CORE_STATE_TERM:
+        break;
     }
 }
 
-void reset(int n) {
+void reset(uint64_t n) {
     g_core->reset = 1;
     while (n--) {
         single_cycle();
@@ -69,18 +105,18 @@ void single_cycle() {
     }
 }
 
-void core_shutdown() {
-    LogTrace("core shutdown.");
+void core_stop() {
+    LogTrace("core stopped.");
     if (TRACE_ENABLE) {
         g_trace->flush();
         g_trace->close();
     }
 }
 
-NOINLINE int core_isgoodtrap() {
+NOINLINE int check_exit_status() {
     int code = R(10);
     if (code == 0) {
-        LogSuccess("hit good trap.");
+        LogSuccess("hit good trap at pc: " FMT_ADDR, g_core->io_pc);
     } else {
         LogError("hit bad trap: %d", code);
     }

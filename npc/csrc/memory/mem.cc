@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-07 19:05:38
+ * @modified: 2025-04-08 17:30:00
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -70,5 +70,4 @@ void print_register() {
         if (i % 8 == 7)
             printf("\n");
     }
-    printf("\n");
 }

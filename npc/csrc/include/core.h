@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-07 19:05:59
+ * @modified: 2025-04-08 19:44:09
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -12,15 +12,20 @@
 #ifndef __INCLUDE_CORE_H__
 #define __INCLUDE_CORE_H__
 
-#include "utils.h"
 #include "VTop.h"
 #include "VTop__Dpi.h"
+#include "utils.h"
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-enum { CORE_STATE_RUNNING, CORE_STATE_STOP, CORE_STATE_QUIT };
+enum core_state_t {
+    CORE_STATE_RUNNING, // running
+    CORE_STATE_STOP,    // stopped (but can continue)
+    CORE_STATE_TERM     // terminated (cannot continue)
+};
+
 struct CoreState {
-  int state;
+    core_state_t state;
 };
 
 extern VerilatedVcdC    *g_trace;
@@ -28,19 +33,24 @@ extern VerilatedContext *g_context;
 extern TOP_NAME         *g_core;
 extern CoreState        *g_core_state;
 
+// core and trace initialization
 void core_init();
 
-/// main loop of the core.
-void exec(int n);
+/// start the core
+void core_start();
+
+/// execute n cycles
+void core_exec(uint64_t n);
 
 /// reset the core for n cycles.
-void reset(int n);
+void reset(uint64_t n);
 
 /// step one single cycle
 void single_cycle();
 
-void core_shutdown();
+/// stop the core
+void core_stop();
 
-int core_isgoodtrap();
+int check_exit_status();
 
 #endif // __INCLUDE_CORE_H__

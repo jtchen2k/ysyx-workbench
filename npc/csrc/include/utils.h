@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-07 19:07:29
+ * @modified: 2025-04-08 19:23:05
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,9 +16,12 @@
 #include <cstdlib>
 #include <ctime>
 
-// ----------- log -----------
 
 #define FMT_ADDR "0x%08x"
+#define FMT_WORD "0x%08x"
+
+
+// ----------- log -----------
 
 
 #define ANSI_FG_BLACK   "\33[1;30m"
@@ -29,6 +32,14 @@
 #define ANSI_FG_MAGENTA "\33[1;35m"
 #define ANSI_FG_CYAN    "\33[1;36m"
 #define ANSI_FG_WHITE   "\33[1;37m"
+#define ANSI_LG_BLACK   "\33[30m"
+#define ANSI_LG_RED     "\33[31m"
+#define ANSI_LG_GREEN   "\33[32m"
+#define ANSI_LG_YELLOW  "\33[33m"
+#define ANSI_LG_BLUE    "\33[34m"
+#define ANSI_LG_MAGENTA "\33[35m"
+#define ANSI_LG_CYAN    "\33[36m"
+#define ANSI_LG_WHITE   "\33[37m"
 #define ANSI_BG_BLACK   "\33[1;40m"
 #define ANSI_BG_RED     "\33[1;41m"
 #define ANSI_BG_GREEN   "\33[1;42m"
@@ -38,6 +49,7 @@
 #define ANSI_BG_CYAN    "\33[1;46m"
 #define ANSI_BG_WHITE   "\33[1;47m"
 #define ANSI_NONE       "\33[0m"
+#define ANSI_BOLD       "\33[1m"
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE "\n"
 
@@ -48,7 +60,7 @@
     printf(ANSI_FMT("[%s:%d.%s] " fmt, color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define Log(fmt, ...) _LogColor(ANSI_FG_BLACK, fmt, ##__VA_ARGS__)
-#define LogTrace(fmt, ...) _LogColor(ANSI_FG_MAGENTA, "[trace] " fmt, ##__VA_ARGS__)
+#define LogTrace(fmt, ...) _LogColor(ANSI_LG_MAGENTA, "[trace] " fmt, ##__VA_ARGS__)
 #define LogDebug(fmt, ...) _LogColor(ANSI_FG_CYAN, "[debug] " fmt, ##__VA_ARGS__)
 #define LogInfo(fmt, ...) _LogColor(ANSI_FG_BLUE, "[info] " fmt, ##__VA_ARGS__)
 #define LogSuccess(fmt, ...) _LogColor(ANSI_FG_GREEN, "[success] " fmt, ##__VA_ARGS__)
@@ -69,5 +81,9 @@
             exit(1); \
         } \
     } while (0)
+
+inline void welcome() {
+    Log("npc build time: %s %s", __DATE__, __TIME__);
+}
 
 #endif /* __INCLUDE_UTILS__ */

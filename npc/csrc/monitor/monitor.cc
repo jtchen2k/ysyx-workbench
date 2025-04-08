@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-07 16:07:20
+ * @modified: 2025-04-08 17:47:25
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -13,7 +13,7 @@
 #include "utils.h"
 #include <string>
 
-static Arguments *args;
+Arguments *g_args;
 
 void Arguments::parse_args(int argc, char **argv) {
     parser.add_argument("-i", "--image")
@@ -22,6 +22,9 @@ void Arguments::parse_args(int argc, char **argv) {
     parser.add_argument("-e", "--elf")
         .help("the elf file to load")
         .store_into(elf);
+    parser.add_argument("-l", "--log_dir")
+        .help("the directory to store log files")
+        .store_into(log_dir);
     parser.add_argument("-V", "--verbosity")
         .help("set the verbosity level")
         .default_value(0)
@@ -38,28 +41,27 @@ void Arguments::parse_args(int argc, char **argv) {
         std::cout << parser;
         exit(0);
     }
-
 }
 
 void load_image() {
-    if (args->image.empty()) {
+    if (g_args->image.empty()) {
         LogInfo("no image file specified, using default image.");
         pmem_init();
         return;
     }
-    FILE *fp = fopen(args->image.c_str(), "rb");
+    FILE *fp = fopen(g_args->image.c_str(), "rb");
     if (fp == nullptr) {
-        LogError("failed to open image file: %s", args->image.c_str());
+        LogError("failed to open image file: %s", g_args->image.c_str());
         exit(-1);
     }
-    LogInfo("loading image file: %s", args->image.c_str());
+    LogInfo("loading image file: %s", g_args->image.c_str());
     pmem_init(fp);
     fclose(fp);
 }
 
-void init_monitor(int argc, char **argv) {
-    args = new Arguments();
-    args->parse_args(argc, argv);
-    args->print_argvals();
+void monitor_init(int argc, char **argv) {
+    g_args = new Arguments();
+    g_args->parse_args(argc, argv);
+    g_args->print_argvals();
     load_image();
 }

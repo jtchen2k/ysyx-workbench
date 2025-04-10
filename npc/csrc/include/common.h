@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:36:17
- * @modified: 2025-04-10 21:50:53
+ * @modified: 2025-04-11 00:25:37
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -15,6 +15,9 @@
 #include "config.h"
 #include "macro.h"
 #include "utils.h"
+
+#include <cstdio>
+#include <cstring>
 #include <assert.h>
 #include <cstdint>
 

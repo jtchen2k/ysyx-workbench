@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:23:54
- * @modified: 2025-04-10 22:02:11
+ * @modified: 2025-04-11 00:26:42
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -24,8 +24,9 @@ class Arguments {
   public:
     std::string image = "";
     std::string elf = "";
-    std::string log = "npc.log";
+    std::string log_file = "npc.log";
     bool        batch = false;
+    bool        itrace = false;
     int         verbosity = 0;
 
     argparse::ArgumentParser parser;
@@ -42,7 +43,7 @@ class Arguments {
         parser.add_argument("-l", "--log")
             .help("the log file to write")
             .default_value("npc.log")
-            .store_into(log);
+            .store_into(log_file);
         parser.add_argument("-V", "--verbosity")
             .help("set the verbosity level")
             .default_value(0)
@@ -54,15 +55,21 @@ class Arguments {
             .default_value(false)
             .implicit_value(true)
             .store_into(batch);
-        }
+        parser.add_argument("-it", "--itrace")
+            .help("enable instruction trace")
+            .default_value(false)
+            .implicit_value(true)
+            .store_into(itrace);
+    }
 
     void print_argvals() {
         std::map<std::string, std::string> argvals{
             {"image", image},
             {"elf", elf},
-            {"log", log},
+            {"log", log_file},
             {"batch", std::to_string(batch)},
             {"verbosity", std::to_string(verbosity)},
+            {"itrace", std::to_string(itrace)},
         };
         std::string fmt = "arguments: ";
         for (const auto &pair : argvals) {
@@ -77,14 +84,14 @@ class Arguments {
 extern Arguments *g_args;
 
 void monitor_init(int argc, char **argv);
-int monitor_exit();
+int  monitor_exit();
 
 /// sdb
 void sdb_mainloop();
 void sdb_init();
 
 // expr
-void regex_init();
+void   regex_init();
 word_t expr_eval(char *e, bool *success);
 
 /// wp
@@ -97,5 +104,8 @@ void wp_eval();
 /// trace & disasm
 void disasm_init();
 void disasm(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+void itrace_init();
+void itrace_trace(word_t pc, word_t inst, const char *inst_str);
+void itrace_display();
 
 #endif // __INCLUDE_MONITOR__

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-09 00:05:49
- * @modified: 2025-04-09 00:07:44
+ * @modified: 2025-04-10 23:03:50
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -64,6 +64,10 @@ void wp_remove(int id, bool *success) {
     *success = false;
     if (id < 1 || id > WP_MAX_NUM) {
         printf("invalid watchpoint id: %d\n", id);
+        return;
+    }
+    if (!wp_pool[id - 1].enabled) {
+        printf("cannot find watchpoint %d\n", id);
         return;
     }
     wp_t *wp = wp_pool + id - 1;

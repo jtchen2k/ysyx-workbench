@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-09 11:42:41
+ * @modified: 2025-04-11 00:45:22
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -19,7 +19,6 @@
 
 #define FMT_ADDR "0x%08x"
 #define FMT_WORD "0x%08x"
-
 
 // ----------- log -----------
 
@@ -53,13 +52,33 @@
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE "\n"
 
 extern FILE *g_log_file;
+extern int g_verbosity;
 
-#define Print(fmt, ...) \
-    printf("< %6s:%-4d:%s> " fmt "\n", __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
+/// print to log file only
+#define LogPrintf(fmt, ...) do { \
+    if (g_log_file) { \
+        fprintf(g_log_file, fmt, ##__VA_ARGS__); \
+        fflush(g_log_file); \
+    } \
+} while (0)
 
-#define _LogColor(color, fmt, ...) \
-    printf(ANSI_FMT("[%s:%d.%s] " fmt, color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
+/// print together with log file
+#define Printf(fmt, ...) do { \
+    LogPrintf(fmt, ##__VA_ARGS__); \
+    printf(fmt, ##__VA_ARGS__); \
+} while (0)
 
+
+#define _LogColor(color, fmt, ...) do { \
+    printf(ANSI_FMT("[%s:%d.%s] " fmt, color), __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__); \
+    if (g_log_file) { \
+        fprintf(g_log_file, "[%s:%d.%s] " fmt "\n", __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__); \
+        fflush(g_log_file); \
+    } \
+} while (0)
+
+
+/// log to console and file (with ansi color and prefix)
 #define Log(fmt, ...) _LogColor(ANSI_FG_BLACK, fmt, ##__VA_ARGS__)
 #define LogTrace(fmt, ...) _LogColor(ANSI_LG_MAGENTA, "[trace] " fmt, ##__VA_ARGS__)
 #define LogDebug(fmt, ...) _LogColor(ANSI_FG_CYAN, "[debug] " fmt, ##__VA_ARGS__)
@@ -67,6 +86,7 @@ extern FILE *g_log_file;
 #define LogSuccess(fmt, ...) _LogColor(ANSI_FG_GREEN, "[success] " fmt, ##__VA_ARGS__)
 #define LogWarn(fmt, ...) _LogColor(ANSI_FG_YELLOW, "[warn] " fmt, ##__VA_ARGS__)
 #define LogError(fmt, ...) _LogColor(ANSI_FG_RED, "[error] " fmt, ##__VA_ARGS__)
+#define LogPlain(fmt, ...) _LogColor(ANSI_NONE, fmt, ##__VA_ARGS__)
 
 #define Panic(fmt, ...) \
     do { \
@@ -80,7 +100,7 @@ extern FILE *g_log_file;
         if (!(cond)) { \
             _LogColor(ANSI_BG_RED, "Assertion failed: " fmt, ##__VA_ARGS__); \
             exit(1); \
-        } \
+            } \
     } while (0)
 
 inline void welcome() {

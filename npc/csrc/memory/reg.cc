@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 20:46:57
- * @modified: 2025-04-09 12:32:48
+ * @modified: 2025-04-11 00:36:24
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -93,17 +93,14 @@ word_t R(char *name) {
 }
 
 void reg_display() {
-    printf("┌─────┬────────┬────────────┬──────────────┬──────────────┐\n");
-    printf("│ reg │ abi    │ hex        │ uint         │ int          │\n");
-    printf("├─────┼────────┼────────────┼──────────────┼──────────────┤\n");
+    printf("reg   abi      hex          uint          int          \n");
     for (int i = 0; i < 33; i++) {
         word_t      val = *regs[i];
         std::string abi_name = (i < 32) ? reg_names[i][1] : "pc";
         if (reg_names[i].size() > 2) {
             abi_name += "/" + reg_names[i][2]; // Add fp alias for s0
         }
-        printf("│ x%-2d │ %-6s │ 0x%08x │ %-12u │ %-12d │\n", i,
+        printf("x%-2d   %-6s   0x%08x   %-12u   %-12d\n", i,
                abi_name.c_str(), (uint32_t)val, (uint32_t)val, (int32_t)val);
     }
-    printf("└─────┴────────┴────────────┴──────────────┴──────────────┘\n");
 }

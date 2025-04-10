@@ -1,10 +1,11 @@
 /*
  * disasm.cc
+ * // ported from core/
  *
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-10 21:18:46
- * @modified: 2025-04-10 22:12:45
+ * @modified: 2025-04-11 00:02:03
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -22,8 +23,13 @@ static csh handle;
 
 void disasm_init() {
     void *dl_handle;
-    dl_handle = dlopen("csrc/tools/capstone/repo/libcapstone.so.5", RTLD_LAZY);
-    Assert(dl_handle, "failed to open capstone library");
+#ifdef __LIBCAPSTONE_PATH__
+    char lib_path[] = __LIBCAPSTONE_PATH__;
+#else
+    char lib_path[] = "lib/libcapstone.so.5";
+#endif
+    dl_handle = dlopen(lib_path, RTLD_LAZY);
+    Assert(dl_handle, "can't locate capstone library: %s", lib_path);
 
     cs_err (*cs_open_dl)(cs_arch arch, cs_mode mode, csh *handle) = nullptr;
     cs_open_dl = (decltype(cs_open_dl))dlsym(dl_handle, "cs_open");
@@ -47,7 +53,7 @@ void disasm(char *str, int size, uint64_t pc, uint8_t *code, int nbyte) {
     cs_insn *insn;
     size_t   count = cs_disasm_dl(handle, code, nbyte, pc, 0, &insn);
     Assert(count > 0, "failed to disasm");
-    int ret = snprintf(str, size, "%s", insn->mnemonic);
+    int ret = snprintf(str, size, "%-5s", insn->mnemonic);
     if (insn->op_str[0] != '\0') {
         ret += snprintf(str + ret, size - ret, " %s", insn->op_str);
     }

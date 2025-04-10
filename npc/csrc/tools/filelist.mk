@@ -6,4 +6,5 @@ $(LIBCAPSTONE):
 	$(MAKE) -C csrc/tools/capstone
 
 INC_PATH += $(abspath csrc/tools)
+CXXFLAGS += -D__LIBCAPSTONE_PATH__=\\\"$(abspath $(LIBCAPSTONE))\\\"
 DIRS_BLACKLIST += $(abspath csrc/tools/capstone)

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-10 22:03:28
+ * @modified: 2025-04-11 00:30:39
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,8 +16,6 @@
 #include "monitor.h"
 #include "utils.h"
 
-#include <cstdio>
-#include <cstring>
 #include <readline/history.h>
 #include <readline/readline.h>
 #include <signal.h>
@@ -73,6 +71,14 @@ static int cmd_i(char *args) {
     }
     if (strcmp(subcmd, "w") == 0) {
         wp_display();
+        return SDB_CONTINUE;
+    }
+    if (strcmp(subcmd, "i") == 0) {
+        if (!g_args->itrace) {
+            printf("instruction trace is not enabled.\n");
+            return SDB_INVALID;
+        }
+        itrace_display();
         return SDB_CONTINUE;
     }
     printf("unknown subcommand: %s\n", subcmd);

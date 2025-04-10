@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-10 22:10:52
+ * @modified: 2025-04-11 00:27:19
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -46,15 +46,20 @@ void core_start() {
 }
 
 /// execute a single instruction
-static void exec_once(bool debug) {
+static void exec_once(bool print_stdio) {
     // evaluate watchpoints
     wp_eval();
     word_t pc = g_core->io_pc;
     word_t inst = pmem_read(pc, 4);
-    if (debug) {
+    if (print_stdio || g_args->itrace) {
         char inststr[64];
         disasm(inststr, sizeof(inststr), pc, (uint8_t *)&inst, 4);
-        LogInfo("pc: " FMT_ADDR ", inst: " FMT_WORD " %s", pc, inst, inststr);
+        if (print_stdio)
+            printf("[" FMT_ADDR "]: " FMT_WORD " %s\n", pc, inst, inststr);
+        if (g_args->itrace) {
+            LogPrintf("[" FMT_ADDR "]: " FMT_WORD " %s\n", pc, inst, inststr);
+            itrace_trace(pc, inst, inststr);
+        }
     }
     g_core->io_inst = inst;
     single_cycle();
@@ -62,10 +67,10 @@ static void exec_once(bool debug) {
 
 /// execute n instructions. early stop if term.
 void core_exec(uint64_t n) {
-    bool debug = (n <= CONFIG_MAX_PRINT_INST);
+    bool print_stdio = (n <= CONFIG_MAX_PRINT_INST);
     switch (g_core_state->state) {
     case CORE_STATE_TERM:
-        printf("core has terminated. to continue, please reboot npc.\n");
+        printf("core has terminated. to continue, please restart npc.\n");
         return;
     default:
         g_core_state->state = CORE_STATE_RUNNING;
@@ -73,7 +78,7 @@ void core_exec(uint64_t n) {
     }
 
     while (n--) {
-        exec_once(debug);
+        exec_once(print_stdio);
         if (g_core_state->state != CORE_STATE_RUNNING)
             break;
     }

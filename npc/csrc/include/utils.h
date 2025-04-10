@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-09 00:08:35
+ * @modified: 2025-04-09 11:42:41
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -22,7 +22,6 @@
 
 
 // ----------- log -----------
-
 
 #define ANSI_FG_BLACK   "\33[1;30m"
 #define ANSI_FG_RED     "\33[1;31m"
@@ -53,7 +52,9 @@
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE "\n"
 
-#define _Log(fmt, ...) \
+extern FILE *g_log_file;
+
+#define Print(fmt, ...) \
     printf("< %6s:%-4d:%s> " fmt "\n", __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define _LogColor(color, fmt, ...) \

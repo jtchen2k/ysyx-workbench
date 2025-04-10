@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 20:46:57
- * @modified: 2025-04-08 23:49:26
+ * @modified: 2025-04-09 12:32:48
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -20,9 +20,9 @@ static std::vector<std::vector<std::string>> reg_names = {
     {"x2", "sp"},       // stack pointer
     {"x3", "gp"},       // global pointer
     {"x4", "tp"},       // thread pointer
-    {"x5", "t0"},       // temporary
-    {"x6", "t1"},       // temporary
-    {"x7", "t2"},       // temporary
+    {"x5", "t0"},       // tmp register
+    {"x6", "t1"},       // tmp register
+    {"x7", "t2"},       // tmp register
     {"x8", "s0", "fp"}, // saved register, frame pointer
     {"x9", "s1"},       // saved register
     {"x10", "a0"},      // func param, return value
@@ -43,10 +43,10 @@ static std::vector<std::vector<std::string>> reg_names = {
     {"x25", "s9"},      // saved register
     {"x26", "s10"},     // saved register
     {"x27", "s11"},     // saved register
-    {"x28", "t3"},      // temporary
-    {"x29", "t4"},      // temporary
-    {"x30", "t5"},      // temporary
-    {"x31", "t6"},      // temporary
+    {"x28", "t3"},      // tmp register
+    {"x29", "t4"},      // tmp register
+    {"x30", "t5"},      // tmp register
+    {"x31", "t6"},      // tmp register
     {"pc"},             // program counter
 };
 static word_t **regs;

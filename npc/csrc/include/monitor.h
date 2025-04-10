@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:23:54
- * @modified: 2025-04-09 00:06:04
+ * @modified: 2025-04-10 22:02:11
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -24,7 +24,7 @@ class Arguments {
   public:
     std::string image = "";
     std::string elf = "";
-    std::string log_dir = "";
+    std::string log = "npc.log";
     bool        batch = false;
     int         verbosity = 0;
 
@@ -39,9 +39,10 @@ class Arguments {
         parser.add_argument("-e", "--elf")
             .help("the elf file to load")
             .store_into(elf);
-        parser.add_argument("-l", "--log_dir")
-            .help("the directory to store log files")
-            .store_into(log_dir);
+        parser.add_argument("-l", "--log")
+            .help("the log file to write")
+            .default_value("npc.log")
+            .store_into(log);
         parser.add_argument("-V", "--verbosity")
             .help("set the verbosity level")
             .default_value(0)
@@ -53,13 +54,13 @@ class Arguments {
             .default_value(false)
             .implicit_value(true)
             .store_into(batch);
-    }
+        }
 
     void print_argvals() {
         std::map<std::string, std::string> argvals{
             {"image", image},
             {"elf", elf},
-            {"log_dir", log_dir},
+            {"log", log},
             {"batch", std::to_string(batch)},
             {"verbosity", std::to_string(verbosity)},
         };
@@ -76,15 +77,25 @@ class Arguments {
 extern Arguments *g_args;
 
 void monitor_init(int argc, char **argv);
+int monitor_exit();
 
+/// sdb
 void sdb_mainloop();
-
 void sdb_init();
 
+// expr
 void regex_init();
+word_t expr_eval(char *e, bool *success);
 
+/// wp
 void wp_init();
+void wp_add(char *expr, bool *success);
+void wp_remove(int id, bool *success);
+void wp_display();
+void wp_eval();
 
-word_t expr(char *e, bool *success);
+/// trace & disasm
+void disasm_init();
+void disasm(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
 #endif // __INCLUDE_MONITOR__

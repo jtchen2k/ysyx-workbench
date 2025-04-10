@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-09 02:14:03
+ * @modified: 2025-04-10 22:03:28
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -28,6 +28,13 @@
 #define SDB_CONTINUE 0
 #define SDB_INVALID 0xee
 
+struct CommandInfo {
+    const char *name;
+    const char *shortcut;
+    const char *description;
+    int (*handler)(char *args);
+};
+
 static char *rl_gets() {
     static char *line_read = nullptr;
     if (line_read) {
@@ -41,34 +48,38 @@ static char *rl_gets() {
     return line_read;
 }
 
-int cmd_h(char *args);
+static int cmd_h(char *args);
 
-int cmd_q([[maybe_unused]] char *args) {
+static int cmd_q([[maybe_unused]] char *args) {
     printf("bye.\n");
     return SDB_STOP;
 }
 
-int cmd_c([[maybe_unused]] char *args) {
+static int cmd_c([[maybe_unused]] char *args) {
     core_exec(-1);
     return SDB_CONTINUE;
 }
 
-int cmd_info(char *args) {
-    printf("[cycle = %8lu, pc = 0x%08x, inst = 0x%08x] \n", g_context->time(),
-           g_core->io_pc, g_core->io_inst);
+static int cmd_i(char *args) {
     char *subcmd = strtok(args, " ");
     if (subcmd == nullptr) {
+        printf("[cycle = %8lu, pc = 0x%08x, inst = 0x%08x] \n",
+               g_context->time(), g_core->io_pc, g_core->io_inst);
         return SDB_CONTINUE;
     }
     if (strcmp(subcmd, "r") == 0) {
         reg_display();
         return SDB_CONTINUE;
     }
+    if (strcmp(subcmd, "w") == 0) {
+        wp_display();
+        return SDB_CONTINUE;
+    }
     printf("unknown subcommand: %s\n", subcmd);
     return SDB_INVALID;
 }
 
-int cmd_x(char *args) {
+static int cmd_x(char *args) {
     char *nstr = strtok(args, " ");
     if (nstr == nullptr) {
         printf("missing n. usage: x n EXPR\n");
@@ -85,7 +96,7 @@ int cmd_x(char *args) {
         printf("missing EXPR. usage: x n EXPR\n");
         return SDB_INVALID;
     }
-    word_t addr = expr(e, &success);
+    word_t addr = expr_eval(e, &success);
     if (!success) {
         printf("failed to evaluate expression: %s\n", e);
         return SDB_INVALID;
@@ -104,13 +115,17 @@ int cmd_x(char *args) {
     return SDB_CONTINUE;
 }
 
-int cmd_p(char *args) {
+static int cmd_p(char *args) {
+    if (args == nullptr) {
+        printf("missing EXPR\n");
+        return SDB_INVALID;
+    }
     char formats[] = "duxt";
     char fmt = 'x';
     if (strlen(args) > 0 && args[0] == '/') {
         args++;
         if (strchr(formats, args[0]) == nullptr) {
-            printf("invalid prinnt format: %c\n", args[0]);
+            printf("invalid print format: %c\n", args[0]);
             return SDB_INVALID;
         }
         fmt = args[0];
@@ -118,17 +133,17 @@ int cmd_p(char *args) {
     }
     char  *e = args;
     bool   success = false;
-    word_t res = expr(e, &success);
+    word_t res = expr_eval(e, &success);
     if (!success) {
         printf("failed to evaluate expression: %s\n", e);
         return SDB_INVALID;
     }
     switch (fmt) {
     case 'd':
-        printf( "%d\n", (int32_t)res);
+        printf("%d\n", (int32_t)res);
         break;
     case 'u':
-        printf( "%u\n", (uint32_t)res);
+        printf("%u\n", (uint32_t)res);
         break;
     case 't':
         for (int i = 31; i >= 0; i--) {
@@ -147,7 +162,7 @@ int cmd_p(char *args) {
     return SDB_CONTINUE;
 }
 
-int cmd_si(char *args) {
+static int cmd_si(char *args) {
     int64_t n = args != nullptr ? atoll(args) : 1;
     if (n < 0) {
         printf("invalid argument: %s\n", args);
@@ -157,14 +172,28 @@ int cmd_si(char *args) {
     return SDB_CONTINUE;
 }
 
-struct CommandInfo {
-    const char *name;
-    const char *shortcut;
-    const char *description;
-    int (*handler)(char *);
-};
+static int cmd_w(char *args) {
+    if (args == nullptr) {
+        printf("missing EXPR\n");
+        return SDB_INVALID;
+    }
+    bool success = false;
+    wp_add(args, &success);
+    return success ? SDB_CONTINUE : SDB_INVALID;
+}
 
-std::vector<CommandInfo> sdb_commands{
+static int cmd_d(char *args) {
+    if (args == nullptr) {
+        printf("missing ID\n");
+        return SDB_INVALID;
+    }
+    int  id = atoi(strtok(args, " "));
+    bool success = false;
+    wp_remove(id, &success);
+    return success ? SDB_CONTINUE : SDB_INVALID;
+}
+
+static std::vector<CommandInfo> sdb_commands{
     {"continue", "c", "continue the execution of the program", cmd_c},
     {"print", "p",
      "print expression. usage: p EXPR, p/<format> EXPR, where <format> is one "
@@ -175,23 +204,19 @@ std::vector<CommandInfo> sdb_commands{
     {"step", "si", "step instructions. usage: si <n>, where n defaults to 1",
      cmd_si},
     {"scan", "x", "scan memory. usage: x n EXPR", cmd_x},
-    {"watch", "w", "set watchpoint. usage: w EXPR", nullptr},
-    {"unwatch", "d", "remove watchpoint. usage: d ID", nullptr},
-    {
-        "info", "i",
-        "display runtime information. usage: info <SUBCMD>\n"
-        "\t\ti r: print register values.\n"
-        "\t\ti i: print instruction ring buffer\n"
-        "\t\ti w: print watchpoints.",
-        cmd_info
-        // "\tinfo w: Print information of watchpoints."
-        //
-    },
+    {"watch", "w", "set watchpoint. usage: w EXPR", cmd_w},
+    {"unwatch", "d", "remove watchpoint. usage: d ID", cmd_d},
+    {"info", "i",
+     "display runtime information. usage: info <SUBCMD>\n"
+     "\t\ti r: print register values.\n"
+     "\t\ti i: print instruction ring buffer\n"
+     "\t\ti w: print watchpoints.",
+     cmd_i},
     {"help", "h", "show this help message", cmd_h},
     {"quit", "q", "quit npc", cmd_q},
 };
 
-int cmd_h([[maybe_unused]] char *args) {
+static int cmd_h([[maybe_unused]] char *args) {
     printf("\nList of available commands:\n\n");
     for (uint32_t i = 0; i < sdb_commands.size(); i++) {
         printf(ANSI_BOLD "%10s" ANSI_NONE " (%s) %s\n", sdb_commands[i].name,
@@ -266,5 +291,6 @@ void sdb_init() {
     regex_init();
     wp_init();
     signal_init();
+    disasm_init();
     LogDebug("sdb fully initialized.");
 }

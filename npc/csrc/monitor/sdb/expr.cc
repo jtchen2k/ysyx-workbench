@@ -407,8 +407,12 @@ static word_t eval(int p, int q, bool *success) {
     }
 }
 
-word_t expr(char *e, bool *success) {
-    Assert(success != NULL, "success should not be NULL");
+word_t expr_eval(char *e, bool *success) {
+    // if success is nullptr, use a temporary variable to store the result (caller don't care)
+    bool success_tmp = false;
+    if (success == nullptr) {
+        success = &success_tmp;
+    }
     if (e == NULL) {
         *success = false;
         printf("expression is NULL\n");

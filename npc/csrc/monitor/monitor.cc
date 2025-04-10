@@ -4,16 +4,18 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-08 23:44:34
+ * @modified: 2025-04-09 11:39:32
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
 #include "monitor.h"
+#include "core.h"
 #include "mem.h"
 #include "utils.h"
 #include <string>
 
 Arguments *g_args;
+FILE      *g_log_file;
 
 void Arguments::parse_args(int argc, char **argv) {
     try {
@@ -49,4 +51,9 @@ void monitor_init(int argc, char **argv) {
     g_args->parse_args(argc, argv);
     g_args->print_argvals();
     load_image();
+}
+
+int monitor_exit() {
+    core_stop();
+    return R(10);
 }

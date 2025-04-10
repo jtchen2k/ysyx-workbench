@@ -4,7 +4,7 @@
  * @project: npc
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 17:14:02
- * @modified: 2025-04-08 23:00:42
+ * @modified: 2025-04-09 11:30:08
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -35,6 +35,5 @@ int main(int argc, char **argv) {
     // start the core and enter main loop
     core_start();
 
-    // use register a0 as return value
-    return R(10);
+    return monitor_exit();
 }

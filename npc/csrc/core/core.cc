@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-08 22:50:51
+ * @modified: 2025-04-10 22:10:52
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -47,15 +47,20 @@ void core_start() {
 
 /// execute a single instruction
 static void exec_once(bool debug) {
+    // evaluate watchpoints
+    wp_eval();
     word_t pc = g_core->io_pc;
     word_t inst = pmem_read(pc, 4);
     if (debug) {
-        LogInfo("pc: " FMT_ADDR ", inst: " FMT_WORD, pc, inst);
+        char inststr[64];
+        disasm(inststr, sizeof(inststr), pc, (uint8_t *)&inst, 4);
+        LogInfo("pc: " FMT_ADDR ", inst: " FMT_WORD " %s", pc, inst, inststr);
     }
     g_core->io_inst = inst;
     single_cycle();
 }
 
+/// execute n instructions. early stop if term.
 void core_exec(uint64_t n) {
     bool debug = (n <= CONFIG_MAX_PRINT_INST);
     switch (g_core_state->state) {
@@ -109,7 +114,6 @@ void single_cycle() {
 }
 
 void core_stop() {
-    LogTrace("core stopped.");
     if (TRACE_ENABLE) {
         g_trace->flush();
         g_trace->close();

@@ -21,4 +21,18 @@ config FTRACE
     depends on TRACE
     default y
 
+config WTRACE
+    bool "Enable waveform trace"
+    depends on TRACE
+    default y
+
+config WAVEFORM_FILE
+    string "Waveform file"
+    depends on WTRACE
+    default "waveform.vcd"
+
+config DIFFTEST
+    bool "Enable diff test"
+    default y
+
 endmenu

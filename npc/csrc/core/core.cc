@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-11 00:27:19
+ * @modified: 2025-04-11 15:11:33
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -15,6 +15,7 @@
 #include "monitor.h"
 #include "utils.h"
 
+#define PRINT_INST 0x01
 VerilatedVcdC    *g_trace = new VerilatedVcdC();
 VerilatedContext *g_context = new VerilatedContext();
 TOP_NAME         *g_core = new TOP_NAME(g_context);
@@ -45,22 +46,12 @@ void core_start() {
     sdb_mainloop();
 }
 
-/// execute a single instruction
-static void exec_once(bool print_stdio) {
+/// execute a single cycle
+static void exec_once(uint32_t flags) {
     // evaluate watchpoints
     wp_eval();
     word_t pc = g_core->io_pc;
     word_t inst = pmem_read(pc, 4);
-    if (print_stdio || g_args->itrace) {
-        char inststr[64];
-        disasm(inststr, sizeof(inststr), pc, (uint8_t *)&inst, 4);
-        if (print_stdio)
-            printf("[" FMT_ADDR "]: " FMT_WORD " %s\n", pc, inst, inststr);
-        if (g_args->itrace) {
-            LogPrintf("[" FMT_ADDR "]: " FMT_WORD " %s\n", pc, inst, inststr);
-            itrace_trace(pc, inst, inststr);
-        }
-    }
     g_core->io_inst = inst;
     single_cycle();
 }
@@ -78,7 +69,7 @@ void core_exec(uint64_t n) {
     }
 
     while (n--) {
-        exec_once(print_stdio);
+        exec_once(print_stdio ? PRINT_INST : 0);
         if (g_core_state->state != CORE_STATE_RUNNING)
             break;
     }

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-11 00:43:24
+ * @modified: 2025-04-11 14:27:49
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -55,12 +55,11 @@ void monitor_init(int argc, char **argv) {
 
     g_log_file = fopen(g_args->log_file.c_str(), "w");
     Assert(g_log_file, "failed to open log file: %s", g_args->log_file.c_str());
-
     load_image();
-
-    if (g_args->itrace) {
-        itrace_init();
-    }
+#ifdef CONFIG_ITRACE
+    itrace_init();
+    LogInfo("instruction trace enabled.");
+#endif
 }
 
 int monitor_exit() {

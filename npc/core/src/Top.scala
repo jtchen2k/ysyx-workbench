@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:15:33
- * @modified: 2025-04-07 17:07:17
+ * @modified: 2025-04-11 14:54:11
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -29,8 +29,12 @@ class Top extends Module {
   val idu = Module(new IDU)
   val rf  = Module(new RF)
   val exu = Module(new EXU)
+  val ifu = Module(new IFU)
 
-  idu.io.inst := io.inst
+  ifu.io.inst_in := io.inst
+  ifu.io.pc      := pc
+
+  idu.io.inst := ifu.io.inst
 
   exu.io.rs1    := idu.io.rs1
   exu.io.rs2    := idu.io.rs2

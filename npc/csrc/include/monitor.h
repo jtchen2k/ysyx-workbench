@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:23:54
- * @modified: 2025-04-11 00:26:42
+ * @modified: 2025-04-11 14:12:01
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -26,7 +26,6 @@ class Arguments {
     std::string elf = "";
     std::string log_file = "npc.log";
     bool        batch = false;
-    bool        itrace = false;
     int         verbosity = 0;
 
     argparse::ArgumentParser parser;
@@ -55,11 +54,6 @@ class Arguments {
             .default_value(false)
             .implicit_value(true)
             .store_into(batch);
-        parser.add_argument("-it", "--itrace")
-            .help("enable instruction trace")
-            .default_value(false)
-            .implicit_value(true)
-            .store_into(itrace);
     }
 
     void print_argvals() {
@@ -69,7 +63,6 @@ class Arguments {
             {"log", log_file},
             {"batch", std::to_string(batch)},
             {"verbosity", std::to_string(verbosity)},
-            {"itrace", std::to_string(itrace)},
         };
         std::string fmt = "arguments: ";
         for (const auto &pair : argvals) {

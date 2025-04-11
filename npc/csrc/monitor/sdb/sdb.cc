@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-11 00:30:39
+ * @modified: 2025-04-11 14:15:55
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -73,14 +73,12 @@ static int cmd_i(char *args) {
         wp_display();
         return SDB_CONTINUE;
     }
+#ifdef CONFIG_ITRACE
     if (strcmp(subcmd, "i") == 0) {
-        if (!g_args->itrace) {
-            printf("instruction trace is not enabled.\n");
-            return SDB_INVALID;
-        }
         itrace_display();
         return SDB_CONTINUE;
     }
+#endif
     printf("unknown subcommand: %s\n", subcmd);
     return SDB_INVALID;
 }
@@ -215,7 +213,9 @@ static std::vector<CommandInfo> sdb_commands{
     {"info", "i",
      "display runtime information. usage: info <SUBCMD>\n"
      "\t\ti r: print register values.\n"
+#ifdef CONFIG_ITRACE
      "\t\ti i: print instruction ring buffer\n"
+#endif
      "\t\ti w: print watchpoints.",
      cmd_i},
     {"help", "h", "show this help message", cmd_h},

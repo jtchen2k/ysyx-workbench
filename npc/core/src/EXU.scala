@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:10:34
- * @modified: 2025-04-07 17:26:48
+ * @modified: 2025-04-11 15:00:19
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -48,7 +48,7 @@ class EXU extends Module {
   val rs2r = io.rdata2
 
   val res = Wire(UInt(32.W))
-  val dpi = Module(new DPI)
+  val dpi = Module(new DPI_EXU)
 
   dpi.io.reset    := reset
   dpi.io.clock    := clock

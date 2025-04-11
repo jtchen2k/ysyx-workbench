@@ -14,6 +14,9 @@
 !build.sc
 !README.md
 build/
+csrc/include/config
+# kconfig
+csrc/include/generated
 
 # mill
 out/
@@ -26,3 +29,5 @@ test_run_dir/
 .metals/
 .bloop/
 .cache
+
+!Kconfig

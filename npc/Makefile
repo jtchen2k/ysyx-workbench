@@ -7,6 +7,7 @@ BIN = $(BUILD_DIR)/npc
 
 # load makefiles
 include $(NVBOARD_HOME)/scripts/nvboard.mk
+include $(NPC_HOME)/scripts/config.mk
 
 FILELIST_MK = $(shell find -L ./csrc -name "filelist.mk")
 include $(FILELIST_MK)
@@ -56,16 +57,16 @@ $(SRC_AUTO_BIND): $(NXDC_FILES)
 	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
 
 # Binary Target
-$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE) | $(CHDRS)
+$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE) $(CHDRS)
 	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
 	$(VCC) $(VFLAGS) \
-		--top-module $(TOPNAME) $^ \
+		--top-module $(TOPNAME) $(filter-out $(CHDRS), $^) \
 		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 sim: $(BIN)
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+	$(call git_commit, "sim npc") # DO NOT REMOVE THIS LINE!!!
 	$(BIN)
 
 build: $(BIN)
@@ -102,6 +103,10 @@ idea:
 	$(MILL) -i mill.idea.GenIdea/idea
 
 clean:
+	-rm -rf $(OBJ_DIR)
+	-rm -rf $(BIN)
+
+clean-all:
 	-rm -rf $(BUILD_DIR)
 	-rm -f compile_commands.json
 
@@ -116,4 +121,5 @@ count:
 	cloc --include-ext=c,cc,cpp,hpp,h,scala,v,sv,py --fullpath --not-match-d='csrc/tools/*|./build/*' --by-file .
 
 .PHONY: test verilog help reformat checkformat clean default build run count
+
 -include ../Makefile

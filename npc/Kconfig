@@ -1,0 +1,24 @@
+mainmenu "npc configuration menu"
+
+menu "Debugging and Tracing"
+
+config TRACE
+    bool "Enable trace"
+    default y
+
+config ITRACE
+    bool "Enable instruction trace"
+    depends on TRACE
+    default y
+
+config MTRACE
+    bool "Enable memory trace"
+    depends on TRACE
+    default y
+
+config FTRACE
+    bool "Enable function trace"
+    depends on TRACE
+    default y
+
+endmenu

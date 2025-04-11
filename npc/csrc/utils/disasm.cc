@@ -1,11 +1,11 @@
 /*
  * disasm.cc
- * // ported from core/
+ * // ported from nemu/tools/disasm.c
  *
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-10 21:18:46
- * @modified: 2025-04-11 00:02:03
+ * @modified: 2025-04-11 00:53:16
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */

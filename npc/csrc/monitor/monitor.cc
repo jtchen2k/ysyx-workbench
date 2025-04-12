@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-12 17:46:22
+ * @modified: 2025-04-12 23:52:45
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -67,6 +67,8 @@ void monitor_init(int argc, char **argv) {
 #ifdef CONFIG_DIFFTEST
     difftest_init(size, difftest_port);
 #endif
+
+    pmem_write(0x80000024, -1, 0x2);
 }
 
 int monitor_exit() {

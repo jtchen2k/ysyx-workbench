@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-12 20:40:50
+ * @modified: 2025-04-12 22:52:16
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -14,6 +14,7 @@
 #include "mem.h"
 #include "monitor.h"
 #include "utils.h"
+#include <ctime>
 
 #define PRINT_INST 0x01
 VerilatedVcdC    *g_trace = new VerilatedVcdC();
@@ -34,6 +35,10 @@ void core_init() {
     trace_init();
     g_core_context = new CoreContext();
     g_core_context->state = CORE_STATE_RUNNING;
+    g_core_context->cycle_until_stop = 0;
+    g_core_context->running_time = 0;
+    g_core_context->startup_time = clock();
+    g_core_context->exec_cycles = 0;
     reginfo_init();
     reset(10);
 }
@@ -48,9 +53,8 @@ void core_start() {
 
 /// execute a single cycle
 static void exec_once(uint32_t flags) {
-    // evaluate watchpoints
     wp_eval();
-    word_t pc = g_core->io_pc;
+    word_t pc = R(PC);
     word_t inst = pmem_read(pc, 4);
     g_core->io_inst = inst;
     single_cycle();
@@ -71,12 +75,14 @@ void core_exec(uint64_t n) {
     while (n--) {
         g_core_context->exec_cycles++;
         g_core_context->cycle_until_stop = n;
+        clock_t start_time = clock();
         exec_once(print_stdio ? PRINT_INST : 0);
+        clock_t end_time = clock();
         if (g_core_context->state != CORE_STATE_RUNNING)
             break;
-
+        g_core_context->running_time += (end_time - start_time);
 #ifdef CONFIG_DIFFTEST
-        difftest_step(g_core->io_pc);
+        difftest_step(R(PC));
 #endif
     }
 
@@ -88,6 +94,7 @@ void core_exec(uint64_t n) {
         break;
     case CORE_STATE_TERM:
         check_trap();
+        statistics();
         break;
     }
 }
@@ -122,12 +129,16 @@ void core_stop() {
     }
 }
 
-void statistics() {}
+void statistics() {
+    double inst_pers = (double)g_core_context->exec_cycles /
+                         ((double)g_core_context->running_time / (CLOCKS_PER_SEC));
+    LogInfo("statistics: %.3f inst/s", inst_pers);
+}
 
 int check_trap() {
     int code = R(10);
     if (code == 0) {
-        LogSuccess("hit good trap at pc: " FMT_ADDR, g_core->io_pc);
+        LogSuccess("hit good trap at pc: " FMT_ADDR, R(PC));
     } else {
         LogError("hit bad trap: %d", code);
     }

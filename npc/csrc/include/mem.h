@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:04:22
- * @modified: 2025-04-12 21:11:54
+ * @modified: 2025-04-12 23:37:42
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -21,20 +21,20 @@
 #include "core.h"
 #include "macro.h"
 
-static inline bool in_pmem(paddr_t addr) {
-    return (addr >= PMEM_LEFT) && (addr < PMEM_RIGHT);
-}
+static inline bool in_pmem(paddr_t addr) { return (addr >= PMEM_LEFT) && (addr < PMEM_RIGHT); }
 
 void reginfo_init();
 void reg_display();
 void reg_name(int i, char *name);
 
 /// register read via index or name (x0, x1 / zero, ra)
+#define PC 32
 word_t R(int i);
 word_t R(char *name, bool *success);
 word_t R(char *name);
 
 word_t pmem_read(paddr_t addr, int len);
+void   pmem_write(paddr_t addr, word_t data, uint8_t wmask);
 
 long pmem_init();
 long pmem_init(FILE *fp);

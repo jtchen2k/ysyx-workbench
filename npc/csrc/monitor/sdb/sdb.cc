@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-12 13:09:36
+ * @modified: 2025-04-12 23:54:32
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -61,8 +61,8 @@ static int cmd_c([[maybe_unused]] char *args) {
 static int cmd_i(char *args) {
     char *subcmd = strtok(args, " ");
     if (subcmd == nullptr) {
-        printf("[cycle = %8lu, pc = 0x%08x, inst = 0x%08x] \n",
-               g_vcontext->time(), g_core->io_pc, g_core->io_inst);
+        printf("[cycle = %8lu, pc = 0x%08x, inst = 0x%08x] \n", g_vcontext->time(), R(PC),
+               g_core->io_inst);
         return SDB_CONTINUE;
     }
     if (strcmp(subcmd, "r") == 0) {
@@ -83,7 +83,48 @@ static int cmd_i(char *args) {
     return SDB_INVALID;
 }
 
+static char print_formats[] = "duxt";
+static void fmtprint(word_t val, char fmt) {
+    switch (fmt) {
+    case 'd':
+        printf("%d", (int32_t)val);
+        break;
+    case 'u':
+        printf("%u", (uint32_t)val);
+        break;
+    case 't':
+        for (int i = 31; i >= 0; i--) {
+            printf("%d", (val >> i) & 1);
+            if (i % 4 == 0) {
+                printf(" ");
+            }
+        }
+        break;
+    default:
+        printf(FMT_WORD, (uint32_t)val);
+        break;
+    }
+}
+
+static char *get_format(char *args, char *fmt) {
+    if (strlen(args) > 0 && args[0] == '/') {
+        args++;
+        if (strchr(print_formats, args[0]) == nullptr) {
+            printf("invalid print format: %c\n", args[0]);
+            return nullptr;
+        }
+        *fmt = args[0];
+        args++;
+    }
+    return args;
+}
+
 static int cmd_x(char *args) {
+    char fmt = 'x';
+    args = get_format(args, &fmt);
+    if (!args) {
+        return SDB_INVALID;
+    }
     char *nstr = strtok(args, " ");
     if (nstr == nullptr) {
         printf("missing n. usage: x n EXPR\n");
@@ -107,13 +148,13 @@ static int cmd_x(char *args) {
     }
     for (int i = 0; i < n; i++) {
         if (!in_pmem(addr)) {
-            printf(ANSI_LG_RED "invalid memory address: " ANSI_NONE FMT_ADDR
-                               "\n",
-                   addr);
+            printf(ANSI_LG_RED "invalid memory address: " ANSI_NONE FMT_ADDR "\n", addr);
             return SDB_INVALID;
         }
         word_t val = pmem_read(addr, 4);
-        printf(ANSI_BOLD FMT_ADDR ANSI_NONE ": " FMT_WORD "\n", addr, val);
+        printf(ANSI_BOLD FMT_ADDR ANSI_NONE ": ", addr);
+        fmtprint(val, fmt);
+        printf("\n");
         addr += (reverse ? -4 : 4);
     }
     return SDB_CONTINUE;
@@ -124,45 +165,19 @@ static int cmd_p(char *args) {
         printf("missing EXPR\n");
         return SDB_INVALID;
     }
-    char formats[] = "duxt";
     char fmt = 'x';
-    if (strlen(args) > 0 && args[0] == '/') {
-        args++;
-        if (strchr(formats, args[0]) == nullptr) {
-            printf("invalid print format: %c\n", args[0]);
-            return SDB_INVALID;
-        }
-        fmt = args[0];
-        args++;
-    }
-    char  *e = args;
-    bool   success = false;
-    word_t res = expr_eval(e, &success);
-    if (!success) {
-        printf("failed to evaluate expression: %s\n", e);
+    args = get_format(args, &fmt);
+    if (!args) {
         return SDB_INVALID;
     }
-    switch (fmt) {
-    case 'd':
-        printf("%d\n", (int32_t)res);
-        break;
-    case 'u':
-        printf("%u\n", (uint32_t)res);
-        break;
-    case 't':
-        for (int i = 31; i >= 0; i--) {
-            printf("%d", (res >> i) & 1);
-            if (i % 4 == 0) {
-                printf(" ");
-            }
-        }
-        printf("\n");
-        break;
-    case 'x':
-    default:
-        printf(FMT_WORD "\n", (uint32_t)res);
-        break;
+    bool   success = false;
+    word_t res = expr_eval(args, &success);
+    if (!success) {
+        printf("failed to evaluate expression: %s\n", args);
+        return SDB_INVALID;
     }
+    fmtprint(res, fmt);
+    printf("\n");
     return SDB_CONTINUE;
 }
 
@@ -205,9 +220,11 @@ static std::vector<CommandInfo> sdb_commands{
      "\t\td: signed decimal, u: unsigned decimal, x: hexadecimal, t: binary\n"
      "\t\tthe default format is hexadecimal.",
      cmd_p},
-    {"step", "si", "step instructions. usage: si <n>, where n defaults to 1",
-     cmd_si},
-    {"scan", "x", "scan memory. usage: x n EXPR", cmd_x},
+    {"step", "si", "step instructions. usage: si <n>, where n defaults to 1", cmd_si},
+    {"scan", "x",
+     "scan memory. usage: x n EXPR, x/<format> n EXPR\n"
+     "\t\t<format> works the same as the print command.",
+     cmd_x},
     {"watch", "w", "set watchpoint. usage: w EXPR", cmd_w},
     {"unwatch", "d", "remove watchpoint. usage: d ID", cmd_d},
     {"info", "i",
@@ -262,8 +279,7 @@ void sdb_mainloop() {
         for (i = 0; i < sdb_commands.size(); i++) {
             if (strcmp(cmd, sdb_commands[i].name) == 0 ||
                 strcmp(cmd, sdb_commands[i].shortcut) == 0) {
-                Assert(sdb_commands[i].handler != nullptr,
-                       "command %s has no handler", cmd);
+                Assert(sdb_commands[i].handler != nullptr, "command %s has no handler", cmd);
                 ret = sdb_commands[i].handler(args);
                 if (ret == SDB_STOP) {
                     goto end;

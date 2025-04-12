@@ -5,7 +5,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-10 21:18:46
- * @modified: 2025-04-12 13:06:53
+ * @modified: 2025-04-12 22:34:36
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -53,7 +53,7 @@ void disasm(char *str, int size, uint64_t pc, uint8_t *code, int nbyte) {
     cs_insn *insn;
     size_t   count = cs_disasm_dl(handle, code, nbyte, pc, 0, &insn);
     Assert(count > 0, "failed to disasm");
-    int ret = snprintf(str, size, "%-5s", insn->mnemonic);
+    int ret = snprintf(str, size, "%-6s", insn->mnemonic);
     if (insn->op_str[0] != '\0') {
         ret += snprintf(str + ret, size - ret, " %s", insn->op_str);
     }

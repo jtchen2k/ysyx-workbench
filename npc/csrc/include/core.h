@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-12 17:45:23
+ * @modified: 2025-04-12 23:01:48
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -13,6 +13,7 @@
 #define __INCLUDE_CORE_H__
 
 #include "VTop.h"
+#include "VTop___024root.h"
 #include "common.h"
 #include "utils.h"
 #include <verilated.h>
@@ -26,8 +27,8 @@ enum core_state_t {
 
 struct CoreContext {
     core_state_t state;
-    time_t       startup_time;
-    time_t       running_time;
+    clock_t      startup_time;
+    clock_t      running_time;
     uint64_t     cycle_until_stop;
     uint64_t     exec_cycles;
 };
@@ -63,5 +64,6 @@ int check_trap();
 /// difftest
 void difftest_init(long img_size, int port);
 void difftest_step(paddr_t pc);
+void difftest_raise_intr(uint64_t NO);
 
 #endif // __INCLUDE_CORE_H__

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 20:46:57
- * @modified: 2025-04-12 21:13:42
+ * @modified: 2025-04-12 23:15:35
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -53,20 +53,44 @@ static word_t **regs;
 
 void reginfo_init() {
     regs = new word_t *[33]{
-        &g_core->io_regs_0,  &g_core->io_regs_1,  &g_core->io_regs_2,  &g_core->io_regs_3,
-        &g_core->io_regs_4,  &g_core->io_regs_5,  &g_core->io_regs_6,  &g_core->io_regs_7,
-        &g_core->io_regs_8,  &g_core->io_regs_9,  &g_core->io_regs_10, &g_core->io_regs_11,
-        &g_core->io_regs_12, &g_core->io_regs_13, &g_core->io_regs_14, &g_core->io_regs_15,
-        &g_core->io_regs_16, &g_core->io_regs_17, &g_core->io_regs_18, &g_core->io_regs_19,
-        &g_core->io_regs_20, &g_core->io_regs_21, &g_core->io_regs_22, &g_core->io_regs_23,
-        &g_core->io_regs_24, &g_core->io_regs_25, &g_core->io_regs_26, &g_core->io_regs_27,
-        &g_core->io_regs_28, &g_core->io_regs_29, &g_core->io_regs_30, &g_core->io_regs_31,
-        &g_core->io_pc,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_0,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_1,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_2,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_3,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_4,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_5,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_6,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_7,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_8,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_9,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_10,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_11,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_12,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_13,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_14,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_15,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_16,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_17,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_18,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_19,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_20,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_21,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_22,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_23,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_24,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_25,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_26,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_27,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_28,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_29,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_30,
+        &g_core->rootp->Top__DOT__rf__DOT__regs_31,
+        &g_core->rootp->Top__DOT__pc,
     };
 }
 
 word_t R(int i) {
-    Assert(i >= 0 && i < 32, "invalid register index: %d", i);
+    Assert(i >= 0 && i < 33, "invalid register index: %d", i);
     return *regs[i];
 }
 

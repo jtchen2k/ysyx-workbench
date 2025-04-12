@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-12 17:38:33
+ * @modified: 2025-04-12 23:36:56
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,14 +16,14 @@
 #include "utils.h"
 #include <cstring>
 
-static uint8_t  pmem[CONFIG_MSIZE] PG_ALIGN = {};
-static long     img_size = 0;
+static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
+static long    img_size = 0;
 
 word_t pmem_read(paddr_t addr, int len) {
     if (!in_pmem(addr)) {
         Panic("attempted illegal memory access: " FMT_ADDR, addr);
     }
-    uint8_t *base = pmem + addr - CONFIG_MBASE;
+    uint8_t *base = guest_to_host(addr);
     switch (len) {
     case 1:
         return *(uint8_t *)base;
@@ -33,6 +33,16 @@ word_t pmem_read(paddr_t addr, int len) {
         return *(uint32_t *)base;
     default:
         Panic("unsupported memory access length: %d", len);
+    }
+}
+
+void pmem_write(paddr_t addr, word_t data, uint8_t wmask) {
+    if (!in_pmem(addr)) {
+        Panic("attempted illegal memory access: " FMT_ADDR, addr);
+    }
+    uint8_t *base = guest_to_host(addr);
+    for (int i = 0; i < 4; i++) {
+        base[i] = (base[i] & ~wmask) | (data >> (i * 8) & wmask);
     }
 }
 
@@ -72,5 +82,5 @@ long pmem_init(FILE *fp) {
     return img_size;
 }
 
-paddr_t host_to_guest(uint8_t *haddr) { return CONFIG_MBASE + (haddr - pmem); }
+paddr_t  host_to_guest(uint8_t *haddr) { return CONFIG_MBASE + (haddr - pmem); }
 uint8_t *guest_to_host(paddr_t paddr) { return pmem + (paddr - CONFIG_MBASE); }

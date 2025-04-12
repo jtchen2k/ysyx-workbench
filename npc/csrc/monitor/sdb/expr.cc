@@ -424,8 +424,7 @@ word_t expr_eval(char *e, bool *success) {
         return 0;
     }
     if (strlen(e) == 0) {
-        printf("empty expression\n");
-        *success = false;
+        *success = true;
         return 0;
     }
     if (!make_token(e)) {

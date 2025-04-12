@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:15:33
- * @modified: 2025-04-11 14:54:11
+ * @modified: 2025-04-12 23:16:56
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -19,7 +19,6 @@ class Top extends Module {
     val regs = Output(Vec(32, UInt(32.W)))
   })
 
-  // val rf = Module(new RF)
   val pc   = RegInit("h80000000".U(32.W))
   val snpc = Wire(UInt(32.W))
   pc := Mux(reset.asBool, "h80000000".U, snpc)

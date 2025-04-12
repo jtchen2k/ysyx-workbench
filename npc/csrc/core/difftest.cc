@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-11 16:27:41
- * @modified: 2025-04-12 21:25:05
+ * @modified: 2025-04-12 22:51:52
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -32,7 +32,7 @@ static void make_dut_context(diffcontext_t *dutcontext) {
     for (int i = 0; i < 32; i++) {
         dutcontext->gpr[i] = R(i);
     }
-    dutcontext->pc = g_core->io_pc;
+    dutcontext->pc = R(PC);
 }
 
 void difftest_init(long img_size, int port) {
@@ -62,6 +62,8 @@ void difftest_init(long img_size, int port) {
     ref_difftest_regcpy(dutcontext, DIFFTEST_TO_REF);
     free(dutcontext);
 
+    // allocate refcontext
+    refcontext = (diffcontext_t *)malloc(sizeof(diffcontext_t));
     LogInfo("difftest enabled (ref_so=%s), performance may degrade.", ref_so);
 }
 
@@ -77,7 +79,6 @@ void difftest_step(paddr_t pc) {
     if (!is_inited)
         return;
     bool fail = false;
-    refcontext = (diffcontext_t *)malloc(sizeof(diffcontext_t));
     ref_difftest_regcpy(refcontext, DIFFTEST_TO_DUT);
     for (int i = 0; i < 32; i++) {
         if (refcontext->gpr[i] != R(i)) {

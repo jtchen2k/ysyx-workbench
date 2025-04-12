@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-09 11:29:12
+ * @modified: 2025-04-12 17:45:23
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -13,6 +13,7 @@
 #define __INCLUDE_CORE_H__
 
 #include "VTop.h"
+#include "common.h"
 #include "utils.h"
 #include <verilated.h>
 #include <verilated_vcd_c.h>
@@ -23,17 +24,18 @@ enum core_state_t {
     CORE_STATE_TERM     // terminated (cannot continue)
 };
 
-struct CoreState {
+struct CoreContext {
     core_state_t state;
     time_t       startup_time;
     time_t       running_time;
+    uint64_t     cycle_until_stop;
     uint64_t     exec_cycles;
 };
 
 extern VerilatedVcdC    *g_trace;
-extern VerilatedContext *g_context;
+extern VerilatedContext *g_vcontext;
 extern TOP_NAME         *g_core;
-extern CoreState        *g_core_state;
+extern CoreContext      *g_core_context;
 
 // core and trace initialization
 void core_init();
@@ -57,5 +59,9 @@ void core_stop();
 void statistics();
 
 int check_trap();
+
+/// difftest
+void difftest_init(long img_size, int port);
+void difftest_step(paddr_t pc);
 
 #endif // __INCLUDE_CORE_H__

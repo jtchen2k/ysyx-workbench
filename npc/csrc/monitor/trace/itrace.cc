@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 23:49:58
- * @modified: 2025-04-11 00:37:35
+ * @modified: 2025-04-12 17:15:27
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -46,7 +46,7 @@ void itrace_trace(word_t pc, word_t inst, const char *inst_str) {
 void itrace_display() {
     for (int i = 0; i < ITRACE_IRB_SIZE; i++) {
         auto p = irb + i;
-        printf("%4s [" FMT_WORD "] " FMT_WORD " %s\n", p->next == cur ? "->" : " ",
-               p->pc, p->inst, p->inst_str);
+        printf("%4s [" FMT_WORD "] " FMT_WORD " %s\n", p->next == cur ? "->" : " ", p->pc, p->inst,
+               p->inst_str);
     }
 }

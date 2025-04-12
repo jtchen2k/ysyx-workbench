@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-09 01:29:04
+ * @modified: 2025-04-12 17:38:33
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,7 +16,8 @@
 #include "utils.h"
 #include <cstring>
 
-static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
+static uint8_t  pmem[CONFIG_MSIZE] PG_ALIGN = {};
+static long     img_size = 0;
 
 word_t pmem_read(paddr_t addr, int len) {
     if (!in_pmem(addr)) {
@@ -49,22 +50,27 @@ static const uint32_t img_addi[] = {
 // Assert(R(3) == 36, "x3 = %d", R(3));
 // Assert(R(4) == 16, "x4 = %d", R(4));
 
-void pmem_init() {
+long pmem_init() {
     memset(pmem, 0, sizeof(pmem));
     memcpy(pmem, img_addi, sizeof(img_addi));
+    img_size = sizeof(img_addi);
     LogDebug("physical memory initialized.");
+    return img_size;
 }
 
-void pmem_init(FILE *fp) {
+long pmem_init(FILE *fp) {
     memset(pmem, 0, sizeof(pmem));
     fseek(fp, 0, SEEK_END);
-    auto size = ftell(fp);
+    img_size = ftell(fp);
 
-    LogInfo("image loaded. size: %lu", size);
+    LogInfo("image loaded. size: %lu", img_size);
     fseek(fp, 0, SEEK_SET);
-    int ret = fread(pmem, size, 1, fp);
+    int ret = fread(pmem, img_size, 1, fp);
 
     Assert(ret == 1, "failed to read image file: %s", strerror(errno));
     LogDebug("physical memory initialized.");
+    return img_size;
 }
 
+paddr_t host_to_guest(uint8_t *haddr) { return CONFIG_MBASE + (haddr - pmem); }
+uint8_t *guest_to_host(paddr_t paddr) { return pmem + (paddr - CONFIG_MBASE); }

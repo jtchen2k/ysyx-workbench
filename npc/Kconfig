@@ -35,4 +35,8 @@ config DIFFTEST
     bool "Enable diff test"
     default y
 
+config MAX_PRINT_INST
+    int "Max number of instructions to print in stdio"
+    default 10
+
 endmenu

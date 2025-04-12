@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:55:48
- * @modified: 2025-04-11 14:08:44
+ * @modified: 2025-04-12 13:18:34
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -17,8 +17,9 @@
 #define CONFIG_MBASE 0x80000000
 #define CONFIG_MSIZE 0x8000000 // = 128MB
 #define CONFIG_PC_RESET_OFFSET 0x0
+
+// max number of instructions to execute
 #define CONFIG_MAX_INST 1000
-#define CONFIG_MAX_PRINT_INST 10
 
 // runtime configurations
 #define TRACE_ENABLE true

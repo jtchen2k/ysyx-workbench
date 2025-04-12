@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-11 14:27:49
+ * @modified: 2025-04-12 17:46:22
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -17,6 +17,8 @@
 Arguments *g_args;
 FILE      *g_log_file;
 int        g_verbosity = 2;
+
+static int difftest_port = 1234;
 
 void Arguments::parse_args(int argc, char **argv) {
     try {
@@ -32,11 +34,10 @@ void Arguments::parse_args(int argc, char **argv) {
     }
 }
 
-void load_image() {
+long load_image() {
     if (g_args->image.empty()) {
         LogInfo("no image file specified, using default image.");
-        pmem_init();
-        return;
+        return pmem_init();
     }
     FILE *fp = fopen(g_args->image.c_str(), "rb");
     if (fp == nullptr) {
@@ -44,8 +45,9 @@ void load_image() {
         exit(-1);
     }
     LogInfo("loading image file: %s", g_args->image.c_str());
-    pmem_init(fp);
+    long size = pmem_init(fp);
     fclose(fp);
+    return size;
 }
 
 void monitor_init(int argc, char **argv) {
@@ -55,10 +57,15 @@ void monitor_init(int argc, char **argv) {
 
     g_log_file = fopen(g_args->log_file.c_str(), "w");
     Assert(g_log_file, "failed to open log file: %s", g_args->log_file.c_str());
-    load_image();
+    long size = load_image();
+
 #ifdef CONFIG_ITRACE
     itrace_init();
     LogInfo("instruction trace enabled.");
+#endif
+
+#ifdef CONFIG_DIFFTEST
+    difftest_init(size, difftest_port);
 #endif
 }
 

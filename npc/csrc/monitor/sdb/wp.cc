@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-09 00:05:49
- * @modified: 2025-04-10 23:03:50
+ * @modified: 2025-04-12 13:09:33
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -104,7 +104,7 @@ void wp_eval() {
             printf(ANSI_BOLD "hit" ANSI_NONE " watchpoint %d: %s (0x%08x -> 0x%08x)\n",
                    i + 1, wp_pool[i].expr, wp_pool[i].val, res);
             wp_pool[i].val = res;
-            g_core_state->state = CORE_STATE_STOP;
+            g_core_context->state = CORE_STATE_STOP;
         }
     }
 }

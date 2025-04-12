@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-11 14:15:55
+ * @modified: 2025-04-12 13:09:36
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -62,7 +62,7 @@ static int cmd_i(char *args) {
     char *subcmd = strtok(args, " ");
     if (subcmd == nullptr) {
         printf("[cycle = %8lu, pc = 0x%08x, inst = 0x%08x] \n",
-               g_context->time(), g_core->io_pc, g_core->io_inst);
+               g_vcontext->time(), g_core->io_pc, g_core->io_inst);
         return SDB_CONTINUE;
     }
     if (strcmp(subcmd, "r") == 0) {

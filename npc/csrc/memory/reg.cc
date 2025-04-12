@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 20:46:57
- * @modified: 2025-04-11 00:36:24
+ * @modified: 2025-04-12 21:13:42
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -53,17 +53,15 @@ static word_t **regs;
 
 void reginfo_init() {
     regs = new word_t *[33]{
-        &g_core->io_regs_0,  &g_core->io_regs_1,  &g_core->io_regs_2,
-        &g_core->io_regs_3,  &g_core->io_regs_4,  &g_core->io_regs_5,
-        &g_core->io_regs_6,  &g_core->io_regs_7,  &g_core->io_regs_8,
-        &g_core->io_regs_9,  &g_core->io_regs_10, &g_core->io_regs_11,
-        &g_core->io_regs_12, &g_core->io_regs_13, &g_core->io_regs_14,
-        &g_core->io_regs_15, &g_core->io_regs_16, &g_core->io_regs_17,
-        &g_core->io_regs_18, &g_core->io_regs_19, &g_core->io_regs_20,
-        &g_core->io_regs_21, &g_core->io_regs_22, &g_core->io_regs_23,
-        &g_core->io_regs_24, &g_core->io_regs_25, &g_core->io_regs_26,
-        &g_core->io_regs_27, &g_core->io_regs_28, &g_core->io_regs_29,
-        &g_core->io_regs_30, &g_core->io_regs_31, &g_core->io_pc,
+        &g_core->io_regs_0,  &g_core->io_regs_1,  &g_core->io_regs_2,  &g_core->io_regs_3,
+        &g_core->io_regs_4,  &g_core->io_regs_5,  &g_core->io_regs_6,  &g_core->io_regs_7,
+        &g_core->io_regs_8,  &g_core->io_regs_9,  &g_core->io_regs_10, &g_core->io_regs_11,
+        &g_core->io_regs_12, &g_core->io_regs_13, &g_core->io_regs_14, &g_core->io_regs_15,
+        &g_core->io_regs_16, &g_core->io_regs_17, &g_core->io_regs_18, &g_core->io_regs_19,
+        &g_core->io_regs_20, &g_core->io_regs_21, &g_core->io_regs_22, &g_core->io_regs_23,
+        &g_core->io_regs_24, &g_core->io_regs_25, &g_core->io_regs_26, &g_core->io_regs_27,
+        &g_core->io_regs_28, &g_core->io_regs_29, &g_core->io_regs_30, &g_core->io_regs_31,
+        &g_core->io_pc,
     };
 }
 
@@ -100,7 +98,14 @@ void reg_display() {
         if (reg_names[i].size() > 2) {
             abi_name += "/" + reg_names[i][2]; // Add fp alias for s0
         }
-        printf("x%-2d   %-6s   0x%08x   %-12u   %-12d\n", i,
-               abi_name.c_str(), (uint32_t)val, (uint32_t)val, (int32_t)val);
+        printf("x%-2d   %-6s   0x%08x   %-12u   %-12d\n", i, abi_name.c_str(), (uint32_t)val,
+               (uint32_t)val, (int32_t)val);
     }
+}
+
+void reg_name(int i, char *name) {
+    Assert(i >= 0 && i < 32, "invalid register index: %d", i);
+    std::string rname =
+        reg_names[i][0] + (reg_names[i].size() > 1 ? "(" + reg_names[i][1] + ")" : "");
+    strncpy(name, rname.c_str(), 10);
 }

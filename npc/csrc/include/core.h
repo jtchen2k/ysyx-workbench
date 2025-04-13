@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-12 23:01:48
+ * @modified: 2025-04-13 16:20:35
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -31,12 +31,17 @@ struct CoreContext {
     clock_t      running_time;
     uint64_t     cycle_until_stop;
     uint64_t     exec_cycles;
+    uint64_t     exec_insts;
 };
 
 extern VerilatedVcdC    *g_trace;
 extern VerilatedContext *g_vcontext;
 extern TOP_NAME         *g_core;
 extern CoreContext      *g_core_context;
+
+#ifdef CONFIG_DIFFTEST
+extern bool g_difftest_failed;
+#endif
 
 // core and trace initialization
 void core_init();

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-12 23:54:32
+ * @modified: 2025-04-13 13:44:47
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -61,8 +61,7 @@ static int cmd_c([[maybe_unused]] char *args) {
 static int cmd_i(char *args) {
     char *subcmd = strtok(args, " ");
     if (subcmd == nullptr) {
-        printf("[cycle = %8lu, pc = 0x%08x, inst = 0x%08x] \n", g_vcontext->time(), R(PC),
-               g_core->io_inst);
+        printf("[cycle = %8lu, pc = 0x%08x] \n", g_vcontext->time(), R(PC));
         return SDB_CONTINUE;
     }
     if (strcmp(subcmd, "r") == 0) {
@@ -106,6 +105,9 @@ static void fmtprint(word_t val, char fmt) {
     }
 }
 
+/// get the printing format (if applicable).
+/// return nullptr if print format is invalid. otherwise, return the rest of the
+/// command line arguments.
 static char *get_format(char *args, char *fmt) {
     if (strlen(args) > 0 && args[0] == '/') {
         args++;

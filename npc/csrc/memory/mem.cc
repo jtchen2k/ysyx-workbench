@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-12 23:36:56
+ * @modified: 2025-04-13 16:14:43
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -21,29 +21,42 @@ static long    img_size = 0;
 
 word_t pmem_read(paddr_t addr, int len) {
     if (!in_pmem(addr)) {
-        Panic("attempted illegal memory access: " FMT_ADDR, addr);
+        LogFatal("attempted illegal memory access: " FMT_ADDR, addr);
+        return 0;
     }
     uint8_t *base = guest_to_host(addr);
+    word_t   data = 0;
     switch (len) {
     case 1:
-        return *(uint8_t *)base;
+        data = *(uint8_t *)base;
+        break;
     case 2:
-        return *(uint16_t *)base;
+        data = *(uint16_t *)base;
+        break;
     case 4:
-        return *(uint32_t *)base;
+        data = *(uint32_t *)base;
+        break;
     default:
         Panic("unsupported memory access length: %d", len);
     }
+#ifdef CONFIG_MTRACE
+    mtrace_read(addr, data, len);
+#endif
+    return data;
 }
 
 void pmem_write(paddr_t addr, word_t data, uint8_t wmask) {
     if (!in_pmem(addr)) {
-        Panic("attempted illegal memory access: " FMT_ADDR, addr);
+        LogFatal("attempted illegal memory access: " FMT_ADDR, addr);
+        return;
     }
     uint8_t *base = guest_to_host(addr);
     for (int i = 0; i < 4; i++) {
         base[i] = (base[i] & ~wmask) | (data >> (i * 8) & wmask);
     }
+#ifdef CONFIG_MTRACE
+    mtrace_write(addr, data, wmask);
+#endif
 }
 
 static const uint32_t img_addi[] = {

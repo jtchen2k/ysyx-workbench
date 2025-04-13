@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:15:33
- * @modified: 2025-04-12 23:16:56
+ * @modified: 2025-04-13 16:06:00
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -14,7 +14,7 @@ import chisel3._
 
 class Top extends Module {
   val io = IO(new Bundle {
-    val inst = Input(UInt(32.W))
+    // val inst = Input(UInt(32.W))
     val pc   = Output(UInt(32.W))
     val regs = Output(Vec(32, UInt(32.W)))
   })
@@ -30,7 +30,7 @@ class Top extends Module {
   val exu = Module(new EXU)
   val ifu = Module(new IFU)
 
-  ifu.io.inst_in := io.inst
+  // ifu.io.inst_in := io.inst
   ifu.io.pc      := pc
 
   idu.io.inst := ifu.io.inst
@@ -42,7 +42,7 @@ class Top extends Module {
   exu.io.func7  := idu.io.func7
   exu.io.imm    := idu.io.imm
   exu.io.opcode := idu.io.opcode
-  exu.io.itype  := idu.io.itype
+  exu.io.ifmt   := idu.io.ifmt
   exu.io.pc     := pc
   snpc          := exu.io.snpc
 

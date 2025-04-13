@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:17:58
- * @modified: 2025-04-12 23:52:45
+ * @modified: 2025-04-13 16:18:33
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -16,14 +16,14 @@
 
 Arguments *g_args;
 FILE      *g_log_file;
-int        g_verbosity = 2;
+int        g_verbosity = 0;
 
 static int difftest_port = 1234;
 
 void Arguments::parse_args(int argc, char **argv) {
     try {
         parser.parse_args(argc, argv);
-        g_verbosity = parser.get<int>("--verbosity");
+        g_verbosity = this->verbosity;
     } catch (const std::exception &err) {
         LogError("failed to parse argument: %s", err.what());
         exit(-1);
@@ -64,15 +64,27 @@ void monitor_init(int argc, char **argv) {
     LogInfo("instruction trace enabled.");
 #endif
 
+#ifdef CONFIG_MTRACE
+    mtrace_init();
+    LogInfo("memory trace enabled.");
+#endif
+
 #ifdef CONFIG_DIFFTEST
     difftest_init(size, difftest_port);
 #endif
 
-    pmem_write(0x80000024, -1, 0x2);
+    // pmem_write(0x80000024, -1, 0x2);
 }
 
 int monitor_exit() {
     fclose(g_log_file);
     core_stop();
+
+#ifdef CONFIG_DIFFTEST
+    if (g_difftest_failed) {
+        LogError("difftest failed. exit with code 3.");
+        return 3;
+    }
+#endif
     return R(10);
 }

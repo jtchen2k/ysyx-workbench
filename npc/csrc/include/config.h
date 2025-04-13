@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:55:48
- * @modified: 2025-04-12 13:18:34
+ * @modified: 2025-04-13 13:57:30
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -21,9 +21,6 @@
 // max number of instructions to execute
 #define CONFIG_MAX_INST 1000
 
-// runtime configurations
-#define TRACE_ENABLE true
-#define TRACE_FILENAME "waveform.vcd"
-#define TRACE_FLUSH_CYCLE 10
+#define TRACE_FLUSH_CYCLE 1
 
 #endif /* __INCLUDE_CONFIG__ */

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-11 16:27:41
- * @modified: 2025-04-12 22:51:52
+ * @modified: 2025-04-13 01:13:53
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -15,9 +15,9 @@
 #include "utils.h"
 #include <dlfcn.h>
 
-static diffcontext_t *refcontext;
-
 #ifdef CONFIG_DIFFTEST
+
+static diffcontext_t *refcontext;
 
 static void *handle = nullptr;
 static bool  is_inited = false;
@@ -27,6 +27,8 @@ static ref_difftest_regcpy_t     ref_difftest_regcpy = nullptr;
 static ref_difftest_exec_t       ref_difftest_exec = nullptr;
 static ref_difftest_raise_intr_t ref_difftest_raise_intr = nullptr;
 static ref_difftest_init_t       ref_difftest_init = nullptr;
+
+bool g_difftest_failed = false;
 
 static void make_dut_context(diffcontext_t *dutcontext) {
     for (int i = 0; i < 32; i++) {
@@ -85,17 +87,18 @@ void difftest_step(paddr_t pc) {
             fail = true;
             char rname[10];
             reg_name(i, rname);
-            LogError("difftest: %s mismatch: ref=" FMT_WORD ", dut=" FMT_WORD, rname,
-                     refcontext->gpr[i], R(i));
+            LogError("%s mismatch: ref=" FMT_WORD ", dut=" FMT_WORD, rname, refcontext->gpr[i],
+                     R(i));
         }
     }
     if (refcontext->pc != pc) {
         fail = true;
-        LogError("difftest: pc mismatch: ref=" FMT_ADDR ", dut=" FMT_ADDR, refcontext->pc, pc);
+        LogError("pc mismatch: ref=" FMT_ADDR ", dut=" FMT_ADDR, refcontext->pc, pc);
     }
     if (fail) {
-        LogError("difftest failed. stop the core.");
+        LogError("difftest failed at pc " FMT_ADDR ".", pc);
         g_core_context->state = CORE_STATE_STOP;
+        g_difftest_failed = true;
     }
 }
 

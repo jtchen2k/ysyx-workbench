@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-12 23:18:36
- * @modified: 2025-04-12 23:19:49
+ * @modified: 2025-04-13 16:33:21
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -15,9 +15,14 @@ import chisel3.util.HasBlackBoxInline
 
 class DPI_MEM extends BlackBox with HasBlackBoxInline {
   val io = IO(new Bundle {
-    val ebreaken = Input(Bool())
-    val ecallen  = Input(Bool())
-    val out      = Output(UInt(32.W))
+    val valid    = Input(Bool())
+    val wen      = Input(Bool())
+    val waddr    = Input(UInt(32.W))
+    val wdata    = Input(UInt(32.W))
+    val wmask    = Input(UInt(8.W))
+    val raddr    = Input(UInt(32.W))
+    val rdata    = Output(UInt(32.W))
+
     val reset    = Input(Reset())
     val clock    = Input(Clock())
   })
@@ -25,28 +30,29 @@ class DPI_MEM extends BlackBox with HasBlackBoxInline {
   setInline(
     "DPI_MEM.sv",
     """
-import "DPI-C" context function int dpi_pmem_read(input int raddr);
-import "DPI-C" context function void dpi_pmem_write(input int waddr, input int wdata, input byte wmask);
 module DPI_MEM(
-    input ebreaken,
-    input ecallen,
-    output reg [31:0] out,
+    input valid,
+    input wen,
+    input [31:0] waddr,
+    input [31:0] wdata,
+    input [7:0] wmask,
+    input [31:0] raddr,
+    output reg [31:0] rdata,
+
     input reset,
     input clock
 );
+import "DPI-C" context function int dpi_pmem_read(input int raddr);
+import "DPI-C" context function void dpi_pmem_write(input int waddr, input int wdata, input byte wmask);
 
-always @(posedge clock) begin
-    if (reset) begin
-        out <= 0;
+always @(*) begin
+    if (valid && !reset) begin
+        rdata = dpi_pmem_read(raddr);
+        if (wen) begin
+            dpi_pmem_write(waddr, wdata, wmask);
+        end
     end else begin
-        if (ebreaken) begin
-            dpi_ebreak();
-            out <= 1;
-        end
-        if (ecallen) begin
-            dpi_ecall();
-            out <= 1;
-        end
+        rdata = 0;
     end
 end
 endmodule

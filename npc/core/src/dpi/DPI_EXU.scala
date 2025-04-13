@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-11 14:42:12
- * @modified: 2025-04-11 15:09:50
+ * @modified: 2025-04-13 11:55:06
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -26,8 +26,6 @@ class DPI_EXU extends BlackBox with HasBlackBoxInline {
   setInline(
     "DPI_EXU.sv",
     """
-import "DPI-C" context function void dpi_ebreak();
-import "DPI-C" context function void dpi_ecall();
 module DPI_EXU(
     input ebreaken,
     input ecallen,
@@ -35,6 +33,9 @@ module DPI_EXU(
     input reset,
     input clock
 );
+
+import "DPI-C" context function void dpi_ebreak();
+import "DPI-C" context function void dpi_ecall();
 
 always @(posedge clock) begin
     if (reset) begin

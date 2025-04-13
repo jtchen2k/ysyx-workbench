@@ -19,6 +19,7 @@
 enum TokenType {
     TK_NOTYPE = 256,
     TK_NEGATIVE,
+    TK_POSITIVE,
     TK_EQ,
     TK_NEQ,
     TK_AND,
@@ -72,8 +73,7 @@ void regex_init() {
         ret = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
         if (ret != 0) {
             regerror(ret, &re[i], error_msg, 128);
-            Panic("regex compilation failed: %s\n%s", error_msg,
-                  rules[i].regex);
+            Panic("regex compilation failed: %s\n%s", error_msg, rules[i].regex);
         }
     }
 }
@@ -96,8 +96,7 @@ static bool make_token(char *e) {
     while (e[position] != '\0') {
         /* Try all rules one by one. */
         for (i = 0; i < NR_REGEX; i++) {
-            if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 &&
-                pmatch.rm_so == 0) {
+            if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
                 char *substr_start = e + position;
                 int   substr_len = pmatch.rm_eo;
 
@@ -111,10 +110,8 @@ static bool make_token(char *e) {
                     return false;
                 }
 
-                LogTrace(
-                    "match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-                    i, rules[i].regex, position, substr_len, substr_len,
-                    substr_start);
+                LogTrace("match rules[%d] = \"%s\" at position %d with len %d: %.*s", i,
+                         rules[i].regex, position, substr_len, substr_len, substr_start);
 
                 position += substr_len;
 
@@ -132,8 +129,7 @@ static bool make_token(char *e) {
                 case TK_REG:
                     tokens[nr_token].type = rules[i].token_type;
                     // skip $
-                    strncpy(tokens[nr_token].str, substr_start + 1,
-                            substr_len - 1);
+                    strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
                     tokens[nr_token].str[substr_len - 1] = '\0';
                     break;
                 default:
@@ -146,8 +142,7 @@ static bool make_token(char *e) {
         }
 
         if (i == NR_REGEX) {
-            printf("no match at position %d\n%s\n%*.s^\n", position, e,
-                   position, "");
+            printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
             return false;
         }
     }
@@ -157,12 +152,13 @@ static bool make_token(char *e) {
 
     // if last_type is one of the unary_prevs, then the current token is a unary
     int unary_prevs[] = {
-        '+',      '-',         '*',   '/',   '(', TK_EQ, TK_NEQ, TK_AND,
-        TK_DEREF, TK_NEGATIVE, TK_GT, TK_LE, '>', '<',   '!',
+        '+',      '-',         '*',         '/',   '(',   TK_EQ, TK_NEQ, TK_AND,
+        TK_DEREF, TK_NEGATIVE, TK_POSITIVE, TK_GT, TK_LE, '>',   '<',    '!',
         TK_NOTYPE // first token
     };
     int unary_ops_map[][2] = {
         {'-', TK_NEGATIVE},
+        {'+', TK_POSITIVE},
         {'*', TK_DEREF},
     };
     for (int i = 0; i < nr_token; i++) {
@@ -183,8 +179,8 @@ static bool make_token(char *e) {
                 }
             }
             if (t->type == unary_type)
-                LogTrace("detected unary operator %c at position %d, after %c",
-                         op_type, i, last_type);
+                LogTrace("detected unary operator %c at position %d, after %c", op_type, i,
+                         last_type);
         }
 
         if (t->type != TK_NOTYPE)
@@ -277,8 +273,7 @@ static word_t eval(int p, int q, bool *success) {
             return R(tokens[p].str, success);
         default:
             *success = false;
-            printf("invalid expression: unexpected token. type: %d\n",
-                   tokens[p].type);
+            printf("invalid expression: unexpected token. type: %d\n", tokens[p].type);
             return 0;
         }
     } else if (check_parentheses(p, q)) {
@@ -294,14 +289,15 @@ static word_t eval(int p, int q, bool *success) {
         };
         int unary_ops[] = {
             TK_NEGATIVE,
+            TK_POSITIVE,
             TK_DEREF,
             '!',
         };
         std::unordered_map<int, uint8_t> precedence = {
-            {TK_EQ, 150},   {TK_NEQ, 150},     {TK_AND, 150},  {TK_LE, 130},
-            {TK_GE, 130},   {'>', 130},        {'<', 130},     {'+', 100},
-            {'-', 100},     {'/', 50},         {'*', 50},      {'!', 20},
-            {TK_DEREF, 20}, {TK_NEGATIVE, 20}, {TK_NOTYPE, 0},
+            {TK_EQ, 150},   {TK_NEQ, 150},     {TK_AND, 150},     {TK_LE, 130},
+            {TK_GE, 130},   {'>', 130},        {'<', 130},        {'+', 100},
+            {'-', 100},     {'/', 50},         {'*', 50},         {'!', 20},
+            {TK_DEREF, 20}, {TK_NEGATIVE, 20}, {TK_POSITIVE, 20}, {TK_NOTYPE, 0},
         };
         // stack for parentheses matching
         int stk = 0;
@@ -314,14 +310,12 @@ static word_t eval(int p, int q, bool *success) {
             if (stk)
                 continue;
             for (int b = 0; b < ARRLEN(binary_ops); b++) {
-                if (t.type == binary_ops[b] &&
-                    precedence[t.type] >= precedence[op_type]) {
+                if (t.type == binary_ops[b] && precedence[t.type] >= precedence[op_type]) {
                     op = i, op_type = t.type;
                 }
             }
             for (int b = 0; b < ARRLEN(unary_ops); b++) {
-                if (t.type == unary_ops[b] &&
-                    precedence[t.type] > precedence[op_type]) {
+                if (t.type == unary_ops[b] && precedence[t.type] > precedence[op_type]) {
                     op = i, op_type = t.type;
                 }
             }
@@ -329,8 +323,7 @@ static word_t eval(int p, int q, bool *success) {
 
         if (op_type == TK_NOTYPE) {
             *success = false;
-            printf("invalid expression (%d - %d): cannot find operator.\n\t", p,
-                   q);
+            printf("invalid expression (%d - %d): cannot find operator.\n\t", p, q);
             print_tokens(p, q);
             return 0;
         }
@@ -351,6 +344,8 @@ static word_t eval(int p, int q, bool *success) {
                 return !val;
             case TK_NEGATIVE:
                 return -val;
+            case TK_POSITIVE:
+                return val;
             case TK_DEREF:
                 if (!in_pmem(val)) {
                     *success = false;
@@ -378,8 +373,7 @@ static word_t eval(int p, int q, bool *success) {
             case '/':
                 if (val2 == 0) {
                     // *success = false;
-                    printf(
-                        "warning: divided by zero - returning uint32_max.\n");
+                    printf("warning: divided by zero - returning uint32_max.\n");
                     return UINT32_MAX; // return val1 to avoid the program crash
                 }
                 return val1 / val2;

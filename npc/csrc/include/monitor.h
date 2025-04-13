@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-07 14:23:54
- * @modified: 2025-04-11 14:12:01
+ * @modified: 2025-04-13 01:09:26
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -36,19 +36,17 @@ class Arguments {
         parser.add_argument("-i", "--image")
             .help("the binary image file to load")
             .store_into(image);
-        parser.add_argument("-e", "--elf")
-            .help("the elf file to load")
-            .store_into(elf);
+        parser.add_argument("-e", "--elf").help("the elf file to load").store_into(elf);
         parser.add_argument("-l", "--log")
             .help("the log file to write")
             .default_value("npc.log")
             .store_into(log_file);
-        parser.add_argument("-V", "--verbosity")
+        parser.add_argument("-V", "--verbose")
             .help("set the verbosity level")
-            .default_value(0)
-            .implicit_value(true)
             .action([this](const auto &) { ++this->verbosity; })
-            .append();
+            .append()
+            .default_value(0)
+            .implicit_value(true);
         parser.add_argument("-b", "--batch")
             .help("run in batch mode")
             .default_value(false)
@@ -100,5 +98,9 @@ void disasm(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 void itrace_init();
 void itrace_trace(word_t pc, word_t inst, const char *inst_str);
 void itrace_display();
+
+void mtrace_init();
+void mtrace_read(paddr_t addr, word_t data, int len);
+void mtrace_write(paddr_t addr, word_t data, uint8_t wmask);
 
 #endif // __INCLUDE_MONITOR__

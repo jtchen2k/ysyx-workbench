@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:27:15
- * @modified: 2025-04-12 23:56:17
+ * @modified: 2025-04-13 16:21:33
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -18,7 +18,7 @@
 #include "utils.h"
 
 extern "C" void dpi_ebreak() {
-    LogDebug("dpi call to ebreak");
+    LogDebug("dpi call to ebreak. core will terminate.");
     g_core_context->state = CORE_STATE_TERM;
 #ifdef CONFIG_DIFFTEST
     difftest_raise_intr(R(10));
@@ -37,14 +37,15 @@ extern "C" void dpi_ifetch(int inst) {
     char   inststr[64];
     word_t pc = R(PC);
     inststr[0] = '\0';
-    if (g_core_context->cycle_until_stop < CONFIG_MAX_PRINT_INST) {
+    g_core_context->exec_insts++;
+    if (g_core_context->cycle_until_stop < CONFIG_MAX_PRINT_INST || g_args->verbosity >= 1) {
         disasm(inststr, sizeof(inststr), pc, (uint8_t *)&inst, 4);
-        printf("[" FMT_ADDR "]: " FMT_WORD " %s\n", pc, inst, inststr);
+        printf(">> %lu [" FMT_ADDR "]: " FMT_WORD " %s\n", g_core_context->exec_insts, pc, inst, inststr);
     }
 #ifdef CONFIG_ITRACE
     if (strlen(inststr) == 0)
         disasm(inststr, sizeof(inststr), pc, (uint8_t *)&inst, 4);
-    LogPrintf("[" FMT_ADDR "]: " FMT_WORD " %s\n", pc, inst, inststr);
+    LogPrintf(">> %9lu [" FMT_ADDR "]: " FMT_WORD " %s\n", g_core_context->exec_insts, pc, inst, inststr);
     itrace_trace(R(PC), inst, inststr);
 #endif
 }

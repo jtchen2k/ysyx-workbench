@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-11 14:43:11
- * @modified: 2025-04-11 15:07:58
+ * @modified: 2025-04-13 11:44:04
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -25,7 +25,6 @@ class DPI_IFU extends BlackBox with HasBlackBoxInline {
   setInline(
     "DPI_IFU.sv",
     """
-import "DPI-C" context function void dpi_ifetch(input int inst);
 
 module DPI_IFU(
     input eifetch,
@@ -34,6 +33,8 @@ module DPI_IFU(
     input reset,
     input clock
 );
+
+import "DPI-C" context function void dpi_ifetch(input int inst);
 
 always @(posedge clock) begin
     if (reset) begin

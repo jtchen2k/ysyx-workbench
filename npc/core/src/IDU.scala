@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:14:28
- * @modified: 2025-04-07 17:31:46
+ * @modified: 2025-04-13 15:51:05
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -29,7 +29,7 @@ class IDU extends Module {
     val func3  = Output(UInt(3.W))
     val func7  = Output(UInt(7.W))
     val valid  = Output(Bool())
-    val itype  = Output(InstType())
+    val ifmt  = Output(IFmt())
   })
 
   val op = io.inst(6, 0)
@@ -53,32 +53,32 @@ class IDU extends Module {
   //     "b1110011".U -> InstType.I, // ecall, ebreak
   // ))
 
-  io.itype := Mux1H(
+  io.ifmt := Mux1H(
     Seq(
-      (op === "b0110011".U) -> InstType.R,
-      (op === "b0010011".U) -> InstType.I,
-      (op === "b0000011".U) -> InstType.I,
-      (op === "b0100011".U) -> InstType.S,
-      (op === "b1100011".U) -> InstType.B,
-      (op === "b1101111".U) -> InstType.J,
-      (op === "b0110111".U) -> InstType.U,
-      (op === "b0010111".U) -> InstType.U,
-      (op === "b1110011".U) -> InstType.I // ecall, ebreak
+      (op === "b0110011".U) -> IFmt.R,
+      (op === "b0010011".U) -> IFmt.I,
+      (op === "b0000011".U) -> IFmt.I,
+      (op === "b0100011".U) -> IFmt.S,
+      (op === "b1100011".U) -> IFmt.B,
+      (op === "b1101111".U) -> IFmt.J,
+      (op === "b0110111".U) -> IFmt.U,
+      (op === "b0010111".U) -> IFmt.U,
+      (op === "b1110011".U) -> IFmt.I // ecall, ebreak
     )
   )
 
-  io.valid := io.itype =/= InstType.X
+  io.valid := io.ifmt =/= IFmt.X
 
-  io.imm := MuxLookup(io.itype, 0.U)(
+  io.imm := MuxLookup(io.ifmt, 0.U)(
     Seq(
-      InstType.R -> 0.U,
-      InstType.I -> Cat(Fill(20, io.inst(31)), io.inst(31, 20)),
+      IFmt.R -> 0.U,
+      IFmt.I -> Cat(Fill(20, io.inst(31)), io.inst(31, 20)),
 
-      // not tested!
-      InstType.U -> Cat(io.inst(31, 12), 0.U(12.W)),
-      InstType.J -> Cat(Fill(12, io.inst(31)), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
-      InstType.S -> Cat(Fill(20, io.inst(31)), io.inst(31, 25), io.inst(11, 7)),
-      InstType.B -> Cat(Fill(19, io.inst(31)), io.inst(31), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
+      // these imms are not tested!
+      IFmt.U -> Cat(io.inst(31, 12), 0.U(12.W)),
+      IFmt.J -> Cat(Fill(12, io.inst(31)), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
+      IFmt.S -> Cat(Fill(20, io.inst(31)), io.inst(31, 25), io.inst(11, 7)),
+      IFmt.B -> Cat(Fill(19, io.inst(31)), io.inst(31), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
     )
   )
 }

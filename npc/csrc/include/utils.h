@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-11 00:45:22
+ * @modified: 2025-04-13 16:14:36
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -86,6 +86,7 @@ extern int g_verbosity;
 #define LogSuccess(fmt, ...) _LogColor(ANSI_FG_GREEN, "[success] " fmt, ##__VA_ARGS__)
 #define LogWarn(fmt, ...) _LogColor(ANSI_FG_YELLOW, "[warn] " fmt, ##__VA_ARGS__)
 #define LogError(fmt, ...) _LogColor(ANSI_FG_RED, "[error] " fmt, ##__VA_ARGS__)
+#define LogFatal(fmt, ...) _LogColor(ANSI_BG_RED, "[fatal] " fmt, ##__VA_ARGS__)
 #define LogPlain(fmt, ...) _LogColor(ANSI_NONE, fmt, ##__VA_ARGS__)
 
 #define Panic(fmt, ...) \

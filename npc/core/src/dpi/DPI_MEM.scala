@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-12 23:18:36
- * @modified: 2025-04-13 16:33:21
+ * @modified: 2025-04-15 00:05:38
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -48,11 +48,13 @@ import "DPI-C" context function void dpi_pmem_write(input int waddr, input int w
 always @(*) begin
     if (valid && !reset) begin
         rdata = dpi_pmem_read(raddr);
-        if (wen) begin
-            dpi_pmem_write(waddr, wdata, wmask);
-        end
     end else begin
         rdata = 0;
+    end
+end
+always @(posedge clock) begin
+    if (valid && !reset && wen) begin
+        dpi_pmem_write(waddr, wdata, wmask);
     end
 end
 endmodule

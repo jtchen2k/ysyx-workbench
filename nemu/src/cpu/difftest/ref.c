@@ -25,12 +25,13 @@ struct diff_context_t {
 
 __EXPORT void difftest_memcpy(paddr_t addr, void *buf, size_t n,
                               bool direction) {
-  printf("difftest_memcpy: addr = 0x%08x, buf = %p, n = %zu, direction = %d\n",
-         addr, buf, n, direction);
+  // printf("difftest_memcpy: addr = 0x%08x, buf = %p, n = %zu, direction =
+  // %d\n",
+  //  addr, buf, n, direction);
   if (direction == DIFFTEST_TO_REF) {
     memcpy(guest_to_host(addr), buf, n);
   } else {
-    assert(0);
+    memcpy(buf, guest_to_host(addr), n);
   }
 }
 

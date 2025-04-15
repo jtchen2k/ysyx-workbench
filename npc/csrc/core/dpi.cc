@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:27:15
- * @modified: 2025-04-13 16:21:33
+ * @modified: 2025-04-15 13:53:18
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -30,33 +30,46 @@ extern "C" void dpi_ecall() {
     return;
 }
 
+word_t dpi_ifetch_pc = 0;
 /// called by IFU, pass the current instruction to exec.
-extern "C" void dpi_ifetch(int inst) {
+extern "C" void dpi_ifetch(int inst, int dpi_pc) {
     // LogTrace("dpi call to ifetch: " FMT_WORD, inst);
     Assert(g_core != nullptr && g_core_context != nullptr, "core not initialized.");
     char   inststr[64];
-    word_t pc = R(PC);
+    word_t pc = (word_t)dpi_pc;
     inststr[0] = '\0';
     g_core_context->exec_insts++;
     if (g_core_context->cycle_until_stop < CONFIG_MAX_PRINT_INST || g_args->verbosity >= 1) {
         disasm(inststr, sizeof(inststr), pc, (uint8_t *)&inst, 4);
-        printf(">> %lu [" FMT_ADDR "]: " FMT_WORD " %s\n", g_core_context->exec_insts, pc, inst, inststr);
+        printf(">> %lu [" FMT_ADDR "]: " FMT_WORD " %s\n", g_core_context->exec_insts, pc, inst,
+               inststr);
     }
+    dpi_ifetch_pc = pc;
 #ifdef CONFIG_ITRACE
     if (strlen(inststr) == 0)
         disasm(inststr, sizeof(inststr), pc, (uint8_t *)&inst, 4);
-    LogPrintf(">> %9lu [" FMT_ADDR "]: " FMT_WORD " %s\n", g_core_context->exec_insts, pc, inst, inststr);
+    LogPrintf(">> %9lu [" FMT_ADDR "]: " FMT_WORD " %s\n", g_core_context->exec_insts, pc, inst,
+              inststr);
     itrace_trace(R(PC), inst, inststr);
 #endif
 }
 
 /// read 4 bytes from pmem at address `raddr & ~0x3u` (4-byte aligned)
+///@TODO: alignment not implemented
 extern "C" int dpi_pmem_read(int raddr) {
+    if (raddr & 0x3u) {
+        LogWarn("attempted unaligned memory access: " FMT_ADDR, raddr);
+    }
     return pmem_read(raddr & ~0x3u, 4);
 }
-
-/// write 4 bytes to pmem at address `waddr & ~0x3u` (4-byte aligned)
-/// wmask indicates which bits to write in a single byte (wmask = 0x3 means the last 2 bytes for each byte)
+/// write bytes to pmem at address `waddr & ~0x3u` (4-byte aligned)
+///@TODO: alignment not implemented
+/// wmask indicates which bytes to write (wmask = 0x3 means the last 2 bytes for each
+/// byte) each bit in the mask (b0000 - b1111) indicates whether the corresponding byte in the word
+/// should be written
 extern "C" void dpi_pmem_write(int waddr, int wdata, char wmask) {
+    if (waddr & 0x3u) {
+        LogWarn("attempted unaligned memory access: " FMT_ADDR, waddr);
+    }
     pmem_write(waddr & ~0x3u, wdata, wmask);
 }

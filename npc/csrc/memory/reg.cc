@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 20:46:57
- * @modified: 2025-04-12 23:15:35
+ * @modified: 2025-04-15 00:47:06
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -52,7 +52,7 @@ static std::vector<std::vector<std::string>> reg_names = {
 static word_t **regs;
 
 void reginfo_init() {
-    regs = new word_t *[33]{
+    regs = new word_t *[34]{
         &g_core->rootp->Top__DOT__rf__DOT__regs_0,
         &g_core->rootp->Top__DOT__rf__DOT__regs_1,
         &g_core->rootp->Top__DOT__rf__DOT__regs_2,
@@ -86,11 +86,14 @@ void reginfo_init() {
         &g_core->rootp->Top__DOT__rf__DOT__regs_30,
         &g_core->rootp->Top__DOT__rf__DOT__regs_31,
         &g_core->rootp->Top__DOT__pc,
+        &g_core->rootp->Top__DOT__pc,
+        // &g_core->rootp->Top_DOT__ifu,
+        // &g_core->rootp->Top__DOT__ifu__DOT__pc, // for difftest. pc of the current instruction
     };
 }
 
 word_t R(int i) {
-    Assert(i >= 0 && i < 33, "invalid register index: %d", i);
+    Assert(i >= 0 && i < 34, "invalid register index: %d", i);
     return *regs[i];
 }
 

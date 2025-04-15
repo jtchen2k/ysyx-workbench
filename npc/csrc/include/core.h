@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:05:30
- * @modified: 2025-04-13 16:20:35
+ * @modified: 2025-04-14 23:14:16
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -42,6 +42,9 @@ extern CoreContext      *g_core_context;
 #ifdef CONFIG_DIFFTEST
 extern bool g_difftest_failed;
 #endif
+
+/// the pc of the current instruction (just executed)
+extern word_t dpi_ifetch_pc;
 
 // core and trace initialization
 void core_init();

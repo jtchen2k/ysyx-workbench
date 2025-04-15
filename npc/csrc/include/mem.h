@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:04:22
- * @modified: 2025-04-13 00:05:41
+ * @modified: 2025-04-14 23:17:39
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -29,11 +29,13 @@ void reg_name(int i, char *name);
 
 /// register read via index or name (x0, x1 / zero, ra)
 #define PC 32
+#define IFPC 33
 word_t R(int i);
 word_t R(char *name, bool *success);
 word_t R(char *name);
 
 word_t pmem_read(paddr_t addr, int len);
+word_t _pmem_read_word_silent(paddr_t addr);
 void   pmem_write(paddr_t addr, word_t data, uint8_t wmask);
 
 long pmem_init();

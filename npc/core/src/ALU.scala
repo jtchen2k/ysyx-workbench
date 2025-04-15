@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:09:51
- * @modified: 2025-04-13 16:08:33
+ * @modified: 2025-04-15 01:22:29
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -26,22 +26,27 @@ class ALU extends Module {
     val sext  = Input(Bool())
   })
 
+  val in1 = io.in1
+  val in2 = Wire(UInt(32.W))
+
+  in2 := io.in2
+
   io.out := MuxLookup(io.aluop, 0.U)(
     Seq(
-      AluOp.ADD -> (io.in1 + io.in2),
-      AluOp.SUB -> (io.in1 - io.in2),
-      AluOp.AND -> (io.in1 & io.in2),
-      AluOp.OR  -> (io.in1 | io.in2),
-      AluOp.XOR -> (io.in1 ^ io.in2),
-      AluOp.SLL -> (io.in1 << io.in2(4, 0)),
-      AluOp.SRL -> (io.in1 >> io.in2(4, 0)),
-      AluOp.SRA -> (io.in1.asSInt >> io.in2(4, 0)).asUInt,
-      AluOp.LT  -> (io.in1.asSInt < io.in2.asSInt),
-      AluOp.LTU -> (io.in1 < io.in2),
-      AluOp.EQ  -> (io.in1 === io.in2),
-      AluOp.NE  -> (io.in1 =/= io.in2),
-      AluOp.GE  -> (io.in1.asSInt >= io.in2.asSInt),
-      AluOp.GEU -> (io.in1 >= io.in2)
+      AluOp.ADD -> (in1 + in2),
+      AluOp.SUB -> (in1 - in2),
+      AluOp.AND -> (in1 & in2),
+      AluOp.OR  -> (in1 | in2),
+      AluOp.XOR -> (in1 ^ in2),
+      AluOp.SLL -> (in1 << in2(4, 0)),
+      AluOp.SRL -> (in1 >> in2(4, 0)),
+      AluOp.SRA -> ((in1.asSInt >> in2(4, 0)).asUInt),
+      AluOp.LT  -> (in1.asSInt < in2.asSInt),
+      AluOp.LTU -> (in1 < in2),
+      AluOp.EQ  -> (in1 === in2),
+      AluOp.NE  -> (in1 =/= in2),
+      AluOp.GE  -> (in1.asSInt >= in2.asSInt),
+      AluOp.GEU -> (in1 >= in2),
     )
   )
 }

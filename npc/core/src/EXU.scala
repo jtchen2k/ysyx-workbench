@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:10:34
- * @modified: 2025-04-13 16:39:54
+ * @modified: 2025-04-15 15:07:15
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -42,7 +42,7 @@ class EXU extends Module {
     val wdata = Output(UInt(32.W))
 
     // Static next pc
-    val snpc = Output(UInt(32.W))
+    val nextpc = Output(UInt(32.W))
   })
 
   // io.raddr2 := io.rs1
@@ -52,7 +52,7 @@ class EXU extends Module {
   val rs2r = io.rdata2
 
   val rdval  = Wire(UInt(32.W))
-  val snpc   = Wire(UInt(32.W))
+  val nextpc = Wire(UInt(32.W))
   val aluval = Wire(UInt(32.W))
 
   val dpi_exu = Module(new DPI_EXU)
@@ -73,23 +73,41 @@ class EXU extends Module {
   dpi_exu.io.ebreaken := Mux(io.opcode === "b1110011".U && io.imm === 0x1.U, 1.B, 0.B)
   dpi_exu.io.ecallen  := Mux(io.opcode === "b1110011".U && io.imm === 0x0.U, 1.B, 0.B)
 
+  val mrdata   = Wire(UInt(32.W))
+  val mwdata   = Wire(UInt(32.W))
+  val mroffset = aluval & 3.U
+  val mwoffset = aluval & 3.U
+
   // load data dpi
-  dpi_mem.io.raddr := aluval
+  dpi_mem.io.raddr := aluval & "hfffffffc".U                                   // 4-byte aligned
   dpi_mem.io.valid := io.opcode === "b0000011".U || io.opcode === "b0100011".U // load or store
   dpi_mem.io.wen   := io.opcode === "b0100011".U                               // store
 
   // S-type, Store instructions
-  dpi_mem.io.waddr := aluval
+  dpi_mem.io.waddr := aluval & "hfffffffc".U // 4-byte aligned
   dpi_mem.io.wmask := MuxLookup(io.func3, 0.U)(
     Seq(
-      0x0.U -> "b00000001".U, // sb - byte
-      0x1.U -> "b00001111".U, // sh - half word
-      0x2.U -> "b11111111".U  // sw - word
+      0x0.U -> MuxLookup(mwoffset, 0.U)(
+        Seq(
+          0.U -> "b0001".U,
+          1.U -> "b0010".U,
+          2.U -> "b0100".U,
+          3.U -> "b1000".U
+        )
+      ), // sb - byte
+      0x1.U -> MuxLookup(mwoffset, 0.U)(
+        Seq(
+          0.U -> "b0011".U,
+          2.U -> "b1100".U
+        )
+      ), // sh - half word
+      0x2.U -> "b1111".U // sw - word
     )
   )
-  dpi_mem.io.wdata := rs2r
+  dpi_mem.io.wdata := mwdata
 
-  val mrdata = dpi_mem.io.rdata
+  mwdata := rs2r << ((mwoffset * 8.U)(5, 0))
+  mrdata := dpi_mem.io.rdata >> (mroffset * 8.U)(5, 0)
 
   // new rd value
   rdval := MuxLookup(io.opcode, 0.U)(
@@ -100,17 +118,14 @@ class EXU extends Module {
       // I-type, Register-Immediate Arithmetic Instructions
       "b0010011".U -> aluval,
 
-      // I-type, Load Instructions
-      "b0000011".U -> dpi_exu.io.out,
-
       // I-type, Load instructions
       "b0000011".U -> MuxLookup(io.func3, mrdata)(
         Seq(
           0x0.U -> Cat(Fill(24, mrdata(7)), mrdata(7, 0)),   // lb - sign extend
           0x1.U -> Cat(Fill(16, mrdata(15)), mrdata(15, 0)), // lh - sign extend
           0x2.U -> mrdata,                                   // lw
-          0x4.U -> mrdata(7, 0),                             // lbu
-          0x5.U -> mrdata(15, 0)                             // lhu
+          0x4.U -> Cat(0.U(24.W), mrdata(7, 0)),             // lbu - sign extend offset, then zero ext
+          0x5.U -> Cat(0.U(16.W), mrdata(15, 0))             // lhu - sign extend offset, then zero ext
         )
       ),
 
@@ -170,7 +185,7 @@ class EXU extends Module {
   io.wdata := rdval
 
   // update pc (defaults to pc + 4)
-  snpc    := MuxLookup(io.opcode, io.pc + 4.U)(
+  nextpc    := MuxLookup(io.opcode, io.pc + 4.U)(
     Seq(
       // J-type, Jump Instructions
       "b1101111".U -> (io.pc + io.imm), // jal
@@ -183,5 +198,5 @@ class EXU extends Module {
       "b1110011".U -> (io.pc)
     )
   )
-  io.snpc := snpc
+  io.nextpc := nextpc
 }

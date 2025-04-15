@@ -58,6 +58,40 @@ static struct rule {
     {"<", '<'},
     {">", '>'},
     {"!", '!'},
+    {"~", '~'}, // bitwise not
+    {"&", '&'}, // bitwise and
+    {"\\|", '|'}, // bitwise or
+    {"\\^", '^'}, // bitwise xor
+};
+
+static int binary_ops[] = {
+    '+', '-', '*', '/', '<', '>', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '&', '|', '^',
+};
+static int unary_ops[] = {
+    TK_NEGATIVE, TK_POSITIVE, TK_DEREF, '!', '~',
+};
+
+// smaller means higher precedence
+static std::unordered_map<int, uint8_t> precedence = {
+    {'|', 163},     {'^', 162},        {'&', 161}, // bitwise ops
+    {TK_EQ, 150},   {TK_NEQ, 150},     {TK_AND, 150},     {TK_LE, 130}, {TK_GE, 130},
+    {'>', 130},     {'<', 130}, // comparison ops
+    {'+', 100},     {'-', 100},        {'/', 50},         {'*', 50},    {'!', 20},
+    {TK_DEREF, 20}, {TK_NEGATIVE, 20}, {TK_POSITIVE, 20}, {'~', 20},    {TK_NOTYPE, 0},
+};
+
+/// these two arrays are used to distinguish unary and binary operators with the same character
+// if last_type is one of the unary_prevs, then the current token is a unary
+static int unary_prevs[] = {
+    '+',         '-',   '*',   '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF, TK_NEGATIVE,
+    TK_POSITIVE, TK_GT, TK_LE, '>', '<', '!',   '~',    '&',    '|',
+    TK_NOTYPE // first token
+};
+
+static int unary_ops_map[][2] = {
+    {'-', TK_NEGATIVE},
+    {'+', TK_POSITIVE},
+    {'*', TK_DEREF},
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -149,18 +183,6 @@ static bool make_token(char *e) {
 
     /* distinguish minus vs neg, mult vs deref */
     int last_type = TK_NOTYPE;
-
-    // if last_type is one of the unary_prevs, then the current token is a unary
-    int unary_prevs[] = {
-        '+',      '-',         '*',         '/',   '(',   TK_EQ, TK_NEQ, TK_AND,
-        TK_DEREF, TK_NEGATIVE, TK_POSITIVE, TK_GT, TK_LE, '>',   '<',    '!',
-        TK_NOTYPE // first token
-    };
-    int unary_ops_map[][2] = {
-        {'-', TK_NEGATIVE},
-        {'+', TK_POSITIVE},
-        {'*', TK_DEREF},
-    };
     for (int i = 0; i < nr_token; i++) {
         Token *t = &tokens[i];
         for (int o = 0; o < ARRLEN(unary_ops_map); o++) {
@@ -284,21 +306,6 @@ static word_t eval(int p, int q, bool *success) {
     } else {
         uint32_t op = 0;
         int      op_type = TK_NOTYPE;
-        int      binary_ops[] = {
-            '+', '-', '*', '/', '<', '>', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE,
-        };
-        int unary_ops[] = {
-            TK_NEGATIVE,
-            TK_POSITIVE,
-            TK_DEREF,
-            '!',
-        };
-        std::unordered_map<int, uint8_t> precedence = {
-            {TK_EQ, 150},   {TK_NEQ, 150},     {TK_AND, 150},     {TK_LE, 130},
-            {TK_GE, 130},   {'>', 130},        {'<', 130},        {'+', 100},
-            {'-', 100},     {'/', 50},         {'*', 50},         {'!', 20},
-            {TK_DEREF, 20}, {TK_NEGATIVE, 20}, {TK_POSITIVE, 20}, {TK_NOTYPE, 0},
-        };
         // stack for parentheses matching
         int stk = 0;
         for (int i = p; i <= q; i++) {
@@ -342,6 +349,8 @@ static word_t eval(int p, int q, bool *success) {
             switch (op_type) {
             case '!':
                 return !val;
+            case '~':
+                return ~val;
             case TK_NEGATIVE:
                 return -val;
             case TK_POSITIVE:
@@ -391,6 +400,12 @@ static word_t eval(int p, int q, bool *success) {
                 return val1 != val2;
             case TK_AND:
                 return val1 && val2;
+            case '|':
+                return val1 | val2;
+            case '^':
+                return val1 ^ val2;
+            case '&':
+                return val1 & val2;
             default:
                 *success = false;
                 printf("unknown optype.\n\t");

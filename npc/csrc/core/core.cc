@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-13 16:20:19
+ * @modified: 2025-04-15 00:41:42
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -78,11 +78,12 @@ void core_exec(uint64_t n) {
         g_core_context->cycle_until_stop = n;
         clock_t start_time = clock();
         exec_once(print_stdio ? PRINT_INST : 0);
-        clock_t end_time = clock();
-        g_core_context->running_time += (end_time - start_time);
+        // check difftest first. retaining the previous PC.
 #ifdef CONFIG_DIFFTEST
         difftest_step(R(PC));
 #endif
+        clock_t end_time = clock();
+        g_core_context->running_time += (end_time - start_time);
         if (g_core_context->state != CORE_STATE_RUNNING)
             break;
     }
@@ -111,16 +112,25 @@ void reset(uint64_t n) {
 void single_cycle() {
     g_core->clock = 0;
     g_core->eval();
-    g_core->clock = 1;
-    g_core->eval();
-    g_vcontext->timeInc(1);
 
 #ifdef CONFIG_WTRACE
-    auto t = g_vcontext->time();
+    uint64_t t = g_vcontext->time() * 2;
     g_trace->dump(t);
     if (t % TRACE_FLUSH_CYCLE == 0)
         g_trace->flush();
 #endif
+
+    g_core->clock = 1;
+    g_core->eval();
+
+#ifdef CONFIG_WTRACE
+    t = g_vcontext->time() * 2 + 1;
+    g_trace->dump(t);
+    if (t % TRACE_FLUSH_CYCLE == 0)
+        g_trace->flush();
+#endif
+
+    g_vcontext->timeInc(1);
 }
 
 void core_stop() {

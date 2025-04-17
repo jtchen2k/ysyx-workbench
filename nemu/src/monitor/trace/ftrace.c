@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-03-15 11:27:50
- * @modified: 2025-03-16 15:10:08
+ * @modified: 2025-04-17 23:44:55
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -99,7 +99,7 @@ void ftrace_call(Decode *s) {
     if (dnpc >= fsym->addr && dnpc < fsym->addr + fsym->size) {
       p += snprintf(p, 16, FMT_PADDR ":", pc);
       p += snprintf(p, 200, "%*s call [%s@" FMT_PADDR "]", ftrace_depth * 2, "", fsym->name, s->dnpc);
-      _Log("%% %s\n", buf);
+      log_write("%% %s\n", buf);
       ftrace_depth++;
       break;
     } else {
@@ -120,7 +120,7 @@ void ftrace_ret(Decode *s) {
       ftrace_depth--;
       p += snprintf(p, 16, FMT_PADDR ":", pc);
       p += snprintf(p, 200, "%*s ret [%s]", ftrace_depth * 2, "", fsym->name);
-      _Log("%% %s\n", buf);
+      log_write("%% %s\n", buf);
       break;
     } else {
       fsym = fsym->next;

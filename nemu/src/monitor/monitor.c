@@ -71,6 +71,7 @@ static long load_img() {
   return size;
 }
 
+#ifdef CONFIG_FTRACE
 static long load_elf() {
   if (elf_file == NULL) {
     Log("No ELF file is given. Skip loading ELF file.");
@@ -90,6 +91,7 @@ static long load_elf() {
 
   return 0;
 }
+#endif
 
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
@@ -148,8 +150,10 @@ void init_monitor(int argc, char *argv[]) {
   /* Load the image to memory. This will overwrite the built-in image. */
   long img_size = load_img();
 
+#ifdef CONFIG_FTRACE
   /* Load ELF file. Read function symbols for ftrace. */
   load_elf();
+#endif
 
   /* Initialize differential testing. */
   init_difftest(diff_so_file, img_size, difftest_port);

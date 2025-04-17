@@ -65,10 +65,12 @@ LINKAGE   = $(OBJS) \
 
 ## 3. General Compilation Flags
 
+BEAR      = bear --
+
 ### (Cross) compilers, e.g., mips-linux-gnu-g++
-AS        = $(CROSS_COMPILE)gcc
-CC        = $(CROSS_COMPILE)gcc
-CXX       = $(CROSS_COMPILE)g++
+AS        = $(BEAR) $(CROSS_COMPILE)gcc
+CC        = $(BEAR) $(CROSS_COMPILE)gcc
+CXX       = $(BEAR) $(CROSS_COMPILE)g++
 LD        = $(CROSS_COMPILE)ld
 AR        = $(CROSS_COMPILE)ar
 OBJDUMP   = $(CROSS_COMPILE)objdump
@@ -151,7 +153,7 @@ image-dep: $(LIBS) $(IMAGE).elf
 
 ### Clean a single project (remove `build/`)
 clean:
-	rm -rf Makefile.html $(WORK_DIR)/build/
+	rm -rf Makefile.html $(WORK_DIR)/build/ $(WORK_DIR)/compile_commands.json
 .PHONY: clean
 
 ### Clean all sub-projects within depth 2 (and ignore errors)

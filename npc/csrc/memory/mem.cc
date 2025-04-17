@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-15 14:05:41
+ * @modified: 2025-04-17 10:29:54
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -117,5 +117,5 @@ long pmem_init(FILE *fp) {
     return img_size;
 }
 
-paddr_t  host_to_guest(uint8_t *haddr) { return CONFIG_MBASE + (haddr - pmem); }
+paddr_t host_to_guest(uint8_t *haddr) { return CONFIG_MBASE + (haddr - pmem); }
 uint8_t *guest_to_host(paddr_t paddr) { return pmem + (paddr - CONFIG_MBASE); }

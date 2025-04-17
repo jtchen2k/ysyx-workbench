@@ -1,5 +1,12 @@
 mainmenu "npc configuration menu"
 
+menu "Architecture"
+
+# config ARCH
+
+
+endmenu
+
 menu "Debugging and Tracing"
 
 config TRACE

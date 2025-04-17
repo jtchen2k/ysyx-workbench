@@ -16,32 +16,38 @@
 #include <regex.h>
 #include <unordered_map>
 
+#define ARITY_UNARY 1
+#define ARITY_BINARY 2
+
 enum TokenType {
     TK_NOTYPE = 256,
+    TK_DECIMAL,
+    TK_HEX,
+    TK_REG,
+    TK_BINARY,
     TK_NEGATIVE,
     TK_POSITIVE,
     TK_EQ,
     TK_NEQ,
     TK_AND,
-    TK_DECIMAL,
-    TK_HEX,
-    TK_REG,
+    TK_OR,
     TK_DEREF,
     TK_GE,
     TK_LE,
     TK_GT,
     TK_LT,
+    TK_SL,
+    TK_SR,
 };
 
+/// pay attention to the precedence level of different rules
 static struct rule {
     const char *regex;
     int         token_type;
 } rules[] = {
-    /* TODO: Add more rules.
-     * Pay attention to the precedence level of different rules.
-     */
     {" +", TK_NOTYPE}, // spaces
     {"0x[0-9a-fA-F]+", TK_HEX},
+    {"0b[01]+", TK_BINARY},
     {"\\$[a-zA-Z0-9\\$]+", TK_REG},
     {"[0-9]+u?", TK_DECIMAL},
     {"\\(", '('},
@@ -50,7 +56,10 @@ static struct rule {
     {"/", '/'},   // divide
     {"\\+", '+'}, // plus
     {"-", '-'},   // minus
+    {"<<", TK_SL},
+    {">>", TK_SR},
     {"&&", TK_AND},
+    {"\\|\\|", TK_OR},
     {"!=", TK_NEQ},
     {"==", TK_EQ}, // equal
     {"<=", TK_LE},
@@ -58,36 +67,47 @@ static struct rule {
     {"<", '<'},
     {">", '>'},
     {"!", '!'},
-    {"~", '~'}, // bitwise not
-    {"&", '&'}, // bitwise and
+    {"~", '~'},   // bitwise not
+    {"&", '&'},   // bitwise and
     {"\\|", '|'}, // bitwise or
     {"\\^", '^'}, // bitwise xor
 };
 
-static int binary_ops[] = {
-    '+', '-', '*', '/', '<', '>', TK_EQ, TK_NEQ, TK_AND, TK_LE, TK_GE, '&', '|', '^',
-};
-static int unary_ops[] = {
-    TK_NEGATIVE, TK_POSITIVE, TK_DEREF, '!', '~',
+struct OpInfo {
+    short precedence;
+    short arity;
 };
 
-// smaller means higher precedence
-static std::unordered_map<int, uint8_t> precedence = {
-    {'|', 163},     {'^', 162},        {'&', 161}, // bitwise ops
-    {TK_EQ, 150},   {TK_NEQ, 150},     {TK_AND, 150},     {TK_LE, 130}, {TK_GE, 130},
-    {'>', 130},     {'<', 130}, // comparison ops
-    {'+', 100},     {'-', 100},        {'/', 50},         {'*', 50},    {'!', 20},
-    {TK_DEREF, 20}, {TK_NEGATIVE, 20}, {TK_POSITIVE, 20}, {'~', 20},    {TK_NOTYPE, 0},
+/// reference: https://en.cppreference.com/w/cpp/language/operator_precedence
+static std::unordered_map<int, OpInfo> opinfo = {
+    {TK_NOTYPE, {0, 0}},
+    {TK_NEGATIVE, {20, ARITY_UNARY}},
+    {TK_POSITIVE, {20, ARITY_UNARY}},
+    {TK_DEREF, {20, ARITY_UNARY}},
+    {'!', {20, ARITY_UNARY}},
+    {'~', {20, ARITY_UNARY}},
+    {'*', {50, ARITY_BINARY}},
+    {'/', {50, ARITY_BINARY}},
+    {'+', {100, ARITY_BINARY}},
+    {'-', {100, ARITY_BINARY}},
+    {TK_SL, {120, ARITY_BINARY}},
+    {TK_SR, {120, ARITY_BINARY}},
+    {'<', {130, ARITY_BINARY}},
+    {'>', {130, ARITY_BINARY}},
+    {TK_LE, {130, ARITY_BINARY}},
+    {TK_GE, {130, ARITY_BINARY}},
+    {TK_EQ, {150, ARITY_BINARY}},
+    {TK_NEQ, {150, ARITY_BINARY}},
+    {'&', {161, ARITY_BINARY}},
+    {'^', {162, ARITY_BINARY}},
+    {'|', {163, ARITY_BINARY}},
+    {TK_AND, {170, ARITY_BINARY}},
+    {TK_OR, {171, ARITY_BINARY}},
 };
 
 /// these two arrays are used to distinguish unary and binary operators with the same character
-// if last_type is one of the unary_prevs, then the current token is a unary
-static int unary_prevs[] = {
-    '+',         '-',   '*',   '/', '(', TK_EQ, TK_NEQ, TK_AND, TK_DEREF, TK_NEGATIVE,
-    TK_POSITIVE, TK_GT, TK_LE, '>', '<', '!',   '~',    '&',    '|',
-    TK_NOTYPE // first token
-};
-
+/// if last_type is not one of the valtypes, then the current token is a unary
+static int valtypes[] = {TK_DECIMAL, TK_HEX, TK_REG, TK_BINARY};
 static int unary_ops_map[][2] = {
     {'-', TK_NEGATIVE},
     {'+', TK_POSITIVE},
@@ -155,6 +175,7 @@ static bool make_token(char *e) {
                  */
                 switch (rules[i].token_type) {
                 case TK_DECIMAL:
+                case TK_BINARY:
                 case TK_HEX:
                     tokens[nr_token].type = rules[i].token_type;
                     strncpy(tokens[nr_token].str, substr_start, substr_len);
@@ -192,11 +213,15 @@ static bool make_token(char *e) {
                 if (i == 0) {
                     t->type = unary_type;
                 } else {
-                    for (int j = 0; j < ARRLEN(unary_prevs); j++) {
-                        if (last_type == unary_prevs[j]) {
-                            t->type = unary_type;
+                    bool is_unary = true;
+                    for (int j = 0; j < ARRLEN(valtypes); j++) {
+                        if (last_type == valtypes[j]) {
+                            is_unary = false;
                             break;
                         }
+                    }
+                    if (is_unary) {
+                        t->type = unary_type;
                     }
                 }
             }
@@ -291,6 +316,8 @@ static word_t eval(int p, int q, bool *success) {
             return atoi(tokens[p].str);
         case TK_HEX:
             return strtol(tokens[p].str + 2, NULL, 16);
+        case TK_BINARY:
+            return strtol(tokens[p].str + 2, NULL, 2);
         case TK_REG:
             return R(tokens[p].str, success);
         default:
@@ -316,13 +343,8 @@ static word_t eval(int p, int q, bool *success) {
                 stk--;
             if (stk)
                 continue;
-            for (int b = 0; b < ARRLEN(binary_ops); b++) {
-                if (t.type == binary_ops[b] && precedence[t.type] >= precedence[op_type]) {
-                    op = i, op_type = t.type;
-                }
-            }
-            for (int b = 0; b < ARRLEN(unary_ops); b++) {
-                if (t.type == unary_ops[b] && precedence[t.type] > precedence[op_type]) {
+            for (auto [cur_op_type, cur_info] : opinfo) {
+                if (t.type == cur_op_type && cur_info.precedence > opinfo[op_type].precedence) {
                     op = i, op_type = t.type;
                 }
             }
@@ -335,16 +357,7 @@ static word_t eval(int p, int q, bool *success) {
             return 0;
         }
 
-        // handle unary operators
-        bool is_unary = false;
-        for (int j = 0; j < ARRLEN(unary_ops); j++) {
-            if (op_type == unary_ops[j]) {
-                is_unary = true;
-                break;
-            }
-        }
-
-        if (is_unary) {
+        if (opinfo[op_type].arity == ARITY_UNARY) {
             word_t val = eval(op + 1, q, success);
             switch (op_type) {
             case '!':
@@ -400,15 +413,21 @@ static word_t eval(int p, int q, bool *success) {
                 return val1 != val2;
             case TK_AND:
                 return val1 && val2;
+            case TK_OR:
+                return val1 || val2;
             case '|':
                 return val1 | val2;
             case '^':
                 return val1 ^ val2;
             case '&':
                 return val1 & val2;
+            case TK_SL:
+                return val1 << val2;
+            case TK_SR:
+                return val1 >> val2;
             default:
                 *success = false;
-                printf("unknown optype.\n\t");
+                printf("unknown operator %c.\n\t", op_type);
                 print_tokens(op, op);
                 return 0;
             }

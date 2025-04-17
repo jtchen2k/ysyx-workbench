@@ -14,17 +14,17 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <utils.h>
 #include <cpu/difftest.h>
 #include "../local-include/reg.h"
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   for (int i = 0; i < MUXDEF(CONFIG_RV64, 32, 16); i++) {
     if (ref_r->gpr[i] != cpu.gpr[i]) {
-      Log("gpr[%d] difftest failed at pc " FMT_WORD
+      Log("gpr[%d] difftest " ANSI_FMT("failed", ANSI_FG_RED) " at pc " FMT_WORD
           ", ref = " FMT_WORD ", dut = " FMT_WORD ", diff = " FMT_WORD,
           i, pc, ref_r->gpr[i], cpu.gpr[i], ref_r->gpr[i] ^ cpu.gpr[i]);
       return false;
-    } else{
     }
   }
   return true;

@@ -1,10 +1,12 @@
 /*
  * dpi.cc
  *
+ *   Direct Programming Interfaces for the core
+ *
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:27:15
- * @modified: 2025-04-15 13:53:18
+ * @modified: 2025-04-15 16:20:41
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -55,21 +57,19 @@ extern "C" void dpi_ifetch(int inst, int dpi_pc) {
 }
 
 /// read 4 bytes from pmem at address `raddr & ~0x3u` (4-byte aligned)
-///@TODO: alignment not implemented
 extern "C" int dpi_pmem_read(int raddr) {
     if (raddr & 0x3u) {
-        LogWarn("attempted unaligned memory access: " FMT_ADDR, raddr);
+        LogWarn("attempted unaligned memory read: " FMT_ADDR, raddr);
     }
     return pmem_read(raddr & ~0x3u, 4);
 }
 /// write bytes to pmem at address `waddr & ~0x3u` (4-byte aligned)
-///@TODO: alignment not implemented
 /// wmask indicates which bytes to write (wmask = 0x3 means the last 2 bytes for each
 /// byte) each bit in the mask (b0000 - b1111) indicates whether the corresponding byte in the word
 /// should be written
 extern "C" void dpi_pmem_write(int waddr, int wdata, char wmask) {
     if (waddr & 0x3u) {
-        LogWarn("attempted unaligned memory access: " FMT_ADDR, waddr);
+        LogWarn("attempted unaligned memory write: " FMT_ADDR, waddr);
     }
     pmem_write(waddr & ~0x3u, wdata, wmask);
 }

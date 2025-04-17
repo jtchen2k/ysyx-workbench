@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-03-28 11:37:29
- * @modified: 2025-03-29 01:49:24
+ * @modified: 2025-04-17 23:18:31
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -18,7 +18,6 @@ static const char *data[] = {
 static const int nums[] = {1234,          5678,         91011,   0,
                            INT_MAX / 17,  INT_MAX,      INT_MIN, INT_MIN + 1,
                            UINT_MAX / 17, INT_MAX / 17, UINT_MAX};
-
 static const char *golden[] = {
     "126322567|2147483647|-2147483648|-2147483647|252645135|126322567|-1"};
 
@@ -79,6 +78,14 @@ void test_snprintf() {
   // printf("n = %d, [%s]\n", n, buf);
   assert(n = 67);
   assert(strcmp(buf, golden[0]) == 0);
+
+  n = snprintf(buf, sizeof(buf), "percent: %%");
+  assert(n == 10);
+  assert(strcmp(buf, "percent: %") == 0);
+
+  n = snprintf(buf, sizeof(buf), "char: %c", 'a');
+  assert(n == 7);
+  assert(strcmp(buf, "char: a") == 0);
 
   PASS("snprintf()");
 }

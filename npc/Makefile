@@ -111,7 +111,7 @@ clean-all:
 	-rm -f compile_commands.json
 
 NPCFLAGS += $(ARGS)
-NPCFLAGS += -b
+NPCFLAGS += -V
 run: $(BIN)
 	$(BIN) $(NPCFLAGS)
 

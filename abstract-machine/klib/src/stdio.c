@@ -21,7 +21,7 @@ enum format_state {
 };
 
 struct fmt {
-  const char   *str;
+  const char   *str;   // current position of the format string
   unsigned char state; // enum format_state
   unsigned char size;  // size of numbers
 };
@@ -55,6 +55,14 @@ format_decode(struct fmt fmt, struct printf_spec *spec) {
   fmt.str++; // skip the first '%'
   spec->field_width = -1;
 
+  // set field width
+  if (*fmt.str >= '0' && *fmt.str <= '9') {
+    spec->field_width = atoi(fmt.str);
+    while (*fmt.str >= '0' && *fmt.str <= '9') {
+      fmt.str++;
+    }
+  }
+
   static const struct format_state {
     unsigned char state;
     unsigned char size;
@@ -81,11 +89,15 @@ format_decode(struct fmt fmt, struct printf_spec *spec) {
       ['X'] = {FORMAT_STATE_NUM, 0, 0, 16},
       ['d'] = {FORMAT_STATE_NUM, 0, SIGN, 10},
       ['i'] = {FORMAT_STATE_NUM, 0, SIGN, 10},
-      ['u'] = {FORMAT_STATE_NUM, 0, 0, 10}};
+      ['u'] = {FORMAT_STATE_NUM, 0, 0, 10}
+
+  };
 
   const struct format_state *p = lookup_state + (uint8_t)*fmt.str;
   if (p->size) {
     fmt.size = p->size;
+    fmt.str++;
+    p = lookup_state + (uint8_t)*fmt.str;
   }
 
   if (p->state) {
@@ -101,20 +113,20 @@ format_decode(struct fmt fmt, struct printf_spec *spec) {
   return fmt;
 }
 
-// int printf(const char *fmt, ...) {
-//   // conversion specification:
-//   //  %[$][flags][width][.precision][length modifier]conversion
-//   // comment the entire function to use printf in glibc.
-//   va_list ap;
-//   va_start(ap, fmt);
-//   char print_buf[1024];
-//   vsnprintf(print_buf, 1024, fmt, ap);
-//   va_end(ap);
-//   for (int i = 0; print_buf[i]; i++) {
-//     putch(print_buf[i]);
-//   }
-//   return 0;
-// }
+int printf(const char *fmt, ...) {
+  // conversion specification:
+  //  %[$][flags][width][.precision][length modifier]conversion
+  // comment the entire function to use printf in glibc.
+  va_list ap;
+  va_start(ap, fmt);
+  char print_buf[2048];
+  vsnprintf(print_buf, 2048, fmt, ap);
+  va_end(ap);
+  for (int i = 0; print_buf[i]; i++) {
+    putch(print_buf[i]);
+  }
+  return 0;
+}
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   return vsnprintf(out, 0xffffffff, fmt, ap);
@@ -242,30 +254,22 @@ int vsnprintf(char *buf, size_t size, const char *fmt_str, va_list ap) {
       str += read;
       continue;
     }
+
+    case FORMAT_STATE_CHAR: {
+      char c = va_arg(ap, int);
+      if (str < end) {
+        *str++ = c;
+      }
+      continue;
     }
 
-    // if (*fmt != '%') {
-    //   if (str < end)
-    //     *str++ = *fmt;
-    //   fmt++;
-    //   continue;
-    // }
-    // fmt++;
-
-    // switch (*fmt) {
-    // case 'd': {
-    //   int32_t num = va_arg(ap, int32_t);
-    //   str = number(str, end - 1, num);
-    //   break;
-    // }
-    // case 's': {
-    //   char *s = va_arg(ap, char *);
-    //   str = stpcpy(str, s);
-    //   break;
-    // }
-    // }
-
-    // fmt++;
+    case FORMAT_STATE_PERCENT_CHAR: {
+      if (str < end) {
+        *str++ = '%';
+      }
+      continue;
+    }
+    }
   }
   if (size > 0) {
     if (str < end) {

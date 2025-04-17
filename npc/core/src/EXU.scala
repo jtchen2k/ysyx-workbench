@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:10:34
- * @modified: 2025-04-15 15:07:15
+ * @modified: 2025-04-15 15:20:00
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -121,11 +121,11 @@ class EXU extends Module {
       // I-type, Load instructions
       "b0000011".U -> MuxLookup(io.func3, mrdata)(
         Seq(
-          0x0.U -> Cat(Fill(24, mrdata(7)), mrdata(7, 0)),   // lb - sign extend
-          0x1.U -> Cat(Fill(16, mrdata(15)), mrdata(15, 0)), // lh - sign extend
-          0x2.U -> mrdata,                                   // lw
-          0x4.U -> Cat(0.U(24.W), mrdata(7, 0)),             // lbu - sign extend offset, then zero ext
-          0x5.U -> Cat(0.U(16.W), mrdata(15, 0))             // lhu - sign extend offset, then zero ext
+          0x0.U -> mrdata(7, 0).asSInt.pad(32).asUInt,  // lb - sign extend
+          0x1.U -> mrdata(15, 0).asSInt.pad(32).asUInt, // lh - sign extend
+          0x2.U -> mrdata,                              // lw
+          0x4.U -> mrdata(7, 0),                        // lbu - sign extend offset, then zero ext
+          0x5.U -> mrdata(15, 0)                        // lhu - sign extend offset, then zero ext
         )
       ),
 

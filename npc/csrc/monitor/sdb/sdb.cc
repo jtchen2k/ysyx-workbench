@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-13 13:44:47
+ * @modified: 2025-04-15 16:00:51
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -82,7 +82,7 @@ static int cmd_i(char *args) {
     return SDB_INVALID;
 }
 
-static char print_formats[] = "duxt";
+static char print_formats[] = "duxb";
 static void fmtprint(word_t val, char fmt) {
     switch (fmt) {
     case 'd':
@@ -91,7 +91,7 @@ static void fmtprint(word_t val, char fmt) {
     case 'u':
         printf("%u", (uint32_t)val);
         break;
-    case 't':
+    case 'b':
         for (int i = 31; i >= 0; i--) {
             printf("%d", (val >> i) & 1);
             if (i % 4 == 0) {
@@ -219,7 +219,7 @@ static std::vector<CommandInfo> sdb_commands{
     {"print", "p",
      "print expression. usage: p EXPR, p/<format> EXPR, where <format> is one "
      "of:\n"
-     "\t\td: signed decimal, u: unsigned decimal, x: hexadecimal, t: binary\n"
+     "\t\td: signed decimal, u: unsigned decimal, x: hexadecimal, b: binary\n"
      "\t\tthe default format is hexadecimal.",
      cmd_p},
     {"step", "si", "step instructions. usage: si <n>, where n defaults to 1", cmd_si},

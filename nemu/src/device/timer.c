@@ -15,15 +15,18 @@
 
 #include <device/map.h>
 #include <device/alarm.h>
+#include <stdint.h>
 #include <utils.h>
 
 static uint32_t *rtc_port_base = NULL;
 
 static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
   assert(offset == 0 || offset == 4);
+  // important: should first read the higher 4 bytes.
   if (!is_write && offset == 4) {
     uint64_t us = get_time();
-    rtc_port_base[0] = (uint32_t)us;
+    // printf("<nemu timer> invoke callback rtc_io_handler: low = %u, high = %d, us = %d\n", (uint32_t)us & 0xffffffff, (uint32_t)(us >> 32), (uint32_t)us);
+    rtc_port_base[0] = us;
     rtc_port_base[1] = us >> 32;
   }
 }

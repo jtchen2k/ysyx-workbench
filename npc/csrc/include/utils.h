@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-13 16:14:36
+ * @modified: 2025-04-17 14:25:26
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -100,7 +100,7 @@ extern int g_verbosity;
     do { \
         if (!(cond)) { \
             _LogColor(ANSI_BG_RED, "Assertion failed: " fmt, ##__VA_ARGS__); \
-            exit(1); \
+            assert(cond); \
             } \
     } while (0)
 

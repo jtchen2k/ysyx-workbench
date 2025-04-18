@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-03-15 11:27:50
- * @modified: 2025-04-17 23:44:55
+ * @modified: 2025-04-18 20:36:00
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef CONFIG_FTRACE
 static void *fread_chunk(FILE *fp, size_t offset, size_t size) {
   void *buf = malloc(size);
   fseek(fp, offset, SEEK_SET);
@@ -66,6 +67,7 @@ void fsym_load(FILE *fp) {
     if (ELF_ST_TYPE(sym->st_info) == STT_FUNC) {
       FuncSymbol *fsym = (FuncSymbol *)malloc(sizeof(FuncSymbol));
       strncpy(fsym->name, strtab_str + sym->st_name, sizeof(fsym->name));
+      fsym->name[sizeof(fsym->name) - 1] = '\0';
       fsym->addr = sym->st_value;
       fsym->size = sym->st_size;
       fsym->next = fsym_head;
@@ -127,3 +129,4 @@ void ftrace_ret(Decode *s) {
     }
   }
 }
+#endif

@@ -28,6 +28,11 @@ config FTRACE
     depends on TRACE
     default y
 
+config DTRACE
+    bool "Enable device trace"
+    depends on TRACE
+    default y
+
 config WTRACE
     bool "Enable waveform trace"
     depends on TRACE

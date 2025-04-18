@@ -47,6 +47,7 @@ static void init_keymap() {
 
 #define KEY_QUEUE_LEN 1024
 static int key_queue[KEY_QUEUE_LEN] = {};
+// front and rear
 static int key_f = 0, key_r = 0;
 
 static void key_enqueue(uint32_t am_scancode) {

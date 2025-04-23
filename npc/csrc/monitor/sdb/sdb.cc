@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-15 16:00:51
+ * @modified: 2025-04-23 21:06:23
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -153,7 +153,7 @@ static int cmd_x(char *args) {
             printf(ANSI_LG_RED "invalid memory address: " ANSI_NONE FMT_ADDR "\n", addr);
             return SDB_INVALID;
         }
-        word_t val = pmem_read(addr, 4);
+        word_t val = paddr_read(addr, 4);
         printf(ANSI_BOLD FMT_ADDR ANSI_NONE ": ", addr);
         fmtprint(val, fmt);
         printf("\n");
@@ -249,6 +249,11 @@ static int cmd_h([[maybe_unused]] char *args) {
     }
     printf("\n");
     return 0;
+}
+
+void exit_reporter() {
+    IFDEF(CONFIG_ITRACE, itrace_display());
+    reg_display();
 }
 
 void sdb_mainloop() {

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-15 00:41:42
+ * @modified: 2025-04-23 17:16:31
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -14,6 +14,7 @@
 #include "mem.h"
 #include "monitor.h"
 #include "utils.h"
+#include "device/map.h"
 #include <ctime>
 
 #define PRINT_INST 0x01

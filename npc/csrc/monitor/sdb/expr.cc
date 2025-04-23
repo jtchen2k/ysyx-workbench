@@ -374,7 +374,7 @@ static word_t eval(int p, int q, bool *success) {
                     printf("illegal memory access: " FMT_ADDR "\n", val);
                     return 0;
                 }
-                return pmem_read(val, 4);
+                return paddr_read(val, 4);
             default:
                 *success = false;
                 printf("unknown unary operator.\n\t");

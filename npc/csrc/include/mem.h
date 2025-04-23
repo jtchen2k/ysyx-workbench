@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:04:22
- * @modified: 2025-04-14 23:17:39
+ * @modified: 2025-04-23 20:45:17
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -34,9 +34,33 @@ word_t R(int i);
 word_t R(char *name, bool *success);
 word_t R(char *name);
 
-word_t pmem_read(paddr_t addr, int len);
+word_t paddr_read(paddr_t addr, int len);
+void   paddr_write(paddr_t addr, word_t data, uint8_t wmask);
+
+/// for debugging purpose in difftest.
 word_t _pmem_read_word_silent(paddr_t addr);
-void   pmem_write(paddr_t addr, word_t data, uint8_t wmask);
+
+inline word_t host_read(void *addr, int len) {
+    switch (len) {
+    case 1:
+        return *(uint8_t *)addr;
+    case 2:
+        return *(uint16_t *)addr;
+    case 4:
+        return *(uint32_t *)addr;
+    default:
+        Panic("unsupported host read length: %d", len);
+    }
+}
+
+inline void host_write(void *addr, word_t data, uint8_t wmask) {
+    uint8_t *base = (uint8_t *)addr;
+    for (int i = 0; i < 4; i++) {
+        if (wmask & (1 << i)) {
+            *(uint8_t *)(base + i) = (data >> (i * 8)) & 0xff;
+        }
+    }
+}
 
 long pmem_init();
 long pmem_init(FILE *fp);

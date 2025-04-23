@@ -13,5 +13,5 @@ object Elaborate extends App {
     // see https://github.com/chipsalliance/chisel/issues/3933#issuecomment-2000035088
     "--split-verilog",
   )
-  circt.stage.ChiselStage.emitSystemVerilogFile(new top.ALU(dw = 5), args ++ arg, firtoolOptions)
+  circt.stage.ChiselStage.emitSystemVerilogFile(new top.Top, args ++ arg, firtoolOptions)
 }

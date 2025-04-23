@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:27:15
- * @modified: 2025-04-15 16:20:41
+ * @modified: 2025-04-23 16:54:21
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -23,6 +23,7 @@ extern "C" void dpi_ebreak() {
     LogDebug("dpi call to ebreak. core will terminate.");
     g_core_context->state = CORE_STATE_TERM;
 #ifdef CONFIG_DIFFTEST
+    // R10 = a0. use a0 as the return code.
     difftest_raise_intr(R(10));
 #endif
 }
@@ -61,8 +62,9 @@ extern "C" int dpi_pmem_read(int raddr) {
     if (raddr & 0x3u) {
         LogWarn("attempted unaligned memory read: " FMT_ADDR, raddr);
     }
-    return pmem_read(raddr & ~0x3u, 4);
+    return paddr_read(raddr & ~0x3u, 4);
 }
+
 /// write bytes to pmem at address `waddr & ~0x3u` (4-byte aligned)
 /// wmask indicates which bytes to write (wmask = 0x3 means the last 2 bytes for each
 /// byte) each bit in the mask (b0000 - b1111) indicates whether the corresponding byte in the word
@@ -71,5 +73,5 @@ extern "C" void dpi_pmem_write(int waddr, int wdata, char wmask) {
     if (waddr & 0x3u) {
         LogWarn("attempted unaligned memory write: " FMT_ADDR, waddr);
     }
-    pmem_write(waddr & ~0x3u, wdata, wmask);
+    paddr_write(waddr & ~0x3u, wdata, wmask);
 }

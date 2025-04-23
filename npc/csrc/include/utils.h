@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-17 14:25:26
+ * @modified: 2025-04-23 21:06:11
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -92,6 +92,7 @@ extern int g_verbosity;
 #define Panic(fmt, ...) \
     do { \
         _LogColor(ANSI_BG_RED, "[panic] " fmt, ##__VA_ARGS__); \
+        exit_reporter(); \
         exit(1); \
     } while (0)
 
@@ -100,6 +101,7 @@ extern int g_verbosity;
     do { \
         if (!(cond)) { \
             _LogColor(ANSI_BG_RED, "Assertion failed: " fmt, ##__VA_ARGS__); \
+            exit_reporter(); \
             assert(cond); \
             } \
     } while (0)

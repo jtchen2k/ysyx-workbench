@@ -34,7 +34,6 @@ endif
 
 VFLAGS = --build -cc -O3 --x-assign fast --x-initial fast --noassert --trace --build-jobs $(shell nproc)
 
-
 INC_PATH += $(abspath csrc/include)
 INCFLAGS  = $(addprefix -I, $(INC_PATH))
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -Wall -Wextra
@@ -111,7 +110,7 @@ clean-all:
 	-rm -f compile_commands.json
 
 NPCFLAGS += $(ARGS)
-NPCFLAGS += -V
+NPCFLAGS +=
 run: $(BIN)
 	$(BIN) $(NPCFLAGS)
 

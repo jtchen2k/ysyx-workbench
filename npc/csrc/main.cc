@@ -4,7 +4,7 @@
  * @project: npc
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 17:14:02
- * @modified: 2025-04-09 11:30:08
+ * @modified: 2025-04-23 17:17:28
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -13,6 +13,7 @@
 
 #include "common.h"
 #include "core.h"
+#include "device/map.h"
 #include "mem.h"
 #include "monitor.h"
 
@@ -31,6 +32,9 @@ int main(int argc, char **argv) {
 
     // init sdb, expression evaluator
     sdb_init();
+
+    // init mmio devices
+    IFDEF(CONFIG_DEVICE, device_init());
 
     // start the core and enter main loop
     core_start();

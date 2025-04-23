@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:18:39
- * @modified: 2025-04-17 10:29:54
+ * @modified: 2025-04-23 21:12:43
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -12,6 +12,7 @@
 #include "mem.h"
 #include "config.h"
 #include "core.h"
+#include "device/mmio.h"
 #include "monitor.h"
 #include "utils.h"
 #include <cstring>
@@ -19,11 +20,7 @@
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 static long    img_size = 0;
 
-word_t pmem_read(paddr_t addr, int len) {
-    if (!in_pmem(addr)) {
-        LogFatal("attempted illegal memory access: " FMT_ADDR, addr);
-        return 0;
-    }
+static word_t pmem_read(paddr_t addr, int len) {
     uint8_t *base = guest_to_host(addr);
     word_t   data = 0;
     switch (len) {
@@ -39,10 +36,18 @@ word_t pmem_read(paddr_t addr, int len) {
     default:
         Panic("unsupported memory access length: %d", len);
     }
-#ifdef CONFIG_MTRACE
-    mtrace_read(addr, data, len);
-#endif
+    IFDEF(CONFIG_MTRACE, mtrace_read(addr, data, len));
     return data;
+}
+
+static void pmem_write(paddr_t addr, word_t data, uint8_t wmask) {
+    uint8_t *base = guest_to_host(addr);
+    for (int i = 0; i < 4; i++) {
+        if (wmask & (1 << i)) {
+            *(uint8_t *)(base + i) = (data >> (i * 8)) & 0xff;
+        }
+    }
+    IFDEF(CONFIG_MTRACE, mtrace_write(addr, data, wmask));
 }
 
 word_t _pmem_read_word_silent(paddr_t addr) {
@@ -50,21 +55,24 @@ word_t _pmem_read_word_silent(paddr_t addr) {
     return *(uint32_t *)guest_to_host(addr);
 }
 
-void pmem_write(paddr_t addr, word_t data, uint8_t wmask) {
-    if (!in_pmem(addr)) {
-        LogFatal("attempted illegal memory access: " FMT_ADDR, addr);
+word_t paddr_read(paddr_t addr, int len) {
+    if (in_pmem(addr))
+        return pmem_read(addr, len);
+#ifdef CONFIG_DEVICE
+    return mmio_read(addr, len);
+#endif
+    LogFatal("attempted illegal paddr access: " FMT_ADDR, addr);
+    return 0;
+}
+
+void paddr_write(paddr_t addr, word_t data, uint8_t wmask) {
+    if (in_pmem(addr)) {
+        pmem_write(addr, data, wmask);
         return;
     }
-    uint8_t *base = guest_to_host(addr);
-    for (int i = 0; i < 4; i++) {
-        if (wmask & (1 << i)) {
-            *(uint8_t *)(base + i) = (data >> (i * 8)) & 0xff;
-        }
-    }
-
-#ifdef CONFIG_MTRACE
-    mtrace_write(addr, data, wmask);
-#endif
+    IFDEF(CONFIG_DEVICE, mmio_write(addr, 4, data); return;);
+    LogFatal("attempted illegal paddr access: " FMT_ADDR, addr);
+    return;
 }
 
 static const uint32_t img_addi[] = {
@@ -117,5 +125,5 @@ long pmem_init(FILE *fp) {
     return img_size;
 }
 
-paddr_t host_to_guest(uint8_t *haddr) { return CONFIG_MBASE + (haddr - pmem); }
+paddr_t  host_to_guest(uint8_t *haddr) { return CONFIG_MBASE + (haddr - pmem); }
 uint8_t *guest_to_host(paddr_t paddr) { return pmem + (paddr - CONFIG_MBASE); }

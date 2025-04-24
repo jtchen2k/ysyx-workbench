@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:55:48
- * @modified: 2025-04-13 13:57:30
+ * @modified: 2025-04-24 15:16:01
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -22,5 +22,8 @@
 #define CONFIG_MAX_INST 1000
 
 #define TRACE_FLUSH_CYCLE 1
+
+/// device update frequency in Hz (screen refresh, keyboard events)
+#define TIMER_HZ 60
 
 #endif /* __INCLUDE_CONFIG__ */

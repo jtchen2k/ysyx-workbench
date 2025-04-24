@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-23 16:04:56
- * @modified: 2025-04-23 20:41:09
+ * @modified: 2025-04-24 15:19:17
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -33,8 +33,9 @@ extern mmio_map_t *iomaps;
 extern uint8_t    *iospace;
 
 void device_init();
+void device_update();
 
-mmio_map_t* add_mmio_map(const char *name, paddr_t paddr_base, int len, io_callback_t callback);
-mmio_map_t* get_mmio_map(paddr_t paddr);
+mmio_map_t *add_mmio_map(const char *name, paddr_t paddr_base, int len, io_callback_t callback);
+mmio_map_t *get_mmio_map(paddr_t paddr);
 
 #endif // __DEVICE_MAP__

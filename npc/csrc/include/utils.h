@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 20:08:42
- * @modified: 2025-04-23 21:06:11
+ * @modified: 2025-04-24 15:17:55
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -12,6 +12,7 @@
 #ifndef __INCLUDE_UTILS__
 #define __INCLUDE_UTILS__
 
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -109,5 +110,8 @@ extern int g_verbosity;
 inline void welcome() {
     Log("npc build time: %s %s", __DATE__, __TIME__);
 }
+
+// ----------- timer -----------
+uint64_t get_time();
 
 #endif /* __INCLUDE_UTILS__ */

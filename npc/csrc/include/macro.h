@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-01 19:35:07
- * @modified: 2025-04-23 17:13:51
+ * @modified: 2025-04-24 15:02:53
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -64,5 +64,14 @@
 #define IFONE(macro, ...) MUXONE(macro, __KEEP, __IGNORE)(__VA_ARGS__)
 // keep the code if a boolean macro is defined to 0
 #define IFZERO(macro, ...) MUXZERO(macro, __KEEP, __IGNORE)(__VA_ARGS__)
+
+
+// functional-programming-like macro (X-macro)
+// apply the function `f` to each element in the container `c`
+// NOTE1: `c` should be defined as a list like:
+//   f(a0) f(a1) f(a2) ...
+// NOTE2: each element in the container can be a tuple
+#define MAP(c, f) c(f)
+
 
 #endif /* __INCLUDE_MACRO__ */

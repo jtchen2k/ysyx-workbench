@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-23 17:16:31
+ * @modified: 2025-04-24 15:20:39
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -82,6 +82,9 @@ void core_exec(uint64_t n) {
         // check difftest first. retaining the previous PC.
 #ifdef CONFIG_DIFFTEST
         difftest_step(R(PC));
+#endif
+#ifdef CONFIG_DEVICE
+        device_update();
 #endif
         clock_t end_time = clock();
         g_core_context->running_time += (end_time - start_time);

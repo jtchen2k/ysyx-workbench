@@ -4,12 +4,13 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-23 17:05:03
- * @modified: 2025-04-24 15:14:24
+ * @modified: 2025-04-26 14:43:14
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
 
 #include "device/mmio.h"
+#include "core.h"
 #include "device/map.h"
 #include "mem.h"
 

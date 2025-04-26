@@ -6,7 +6,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:27:15
- * @modified: 2025-04-23 16:54:21
+ * @modified: 2025-04-26 16:59:12
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -57,12 +57,39 @@ extern "C" void dpi_ifetch(int inst, int dpi_pc) {
 #endif
 }
 
+/// This read cache is used to cache the read result of the previous read dpi calls.
+/// Current implementation of DPI_MEM uses comb logic. This cache is used to avoid multiple mmio
+/// read calls.
+#define DPI_RCACHE_SIZE 8
+static struct {
+    paddr_t raddr;
+    word_t  data;
+    long    cycle;
+} dpi_rcache[DPI_RCACHE_SIZE] = {};
+static int dpi_rcache_n = 0;
+
 /// read 4 bytes from pmem at address `raddr & ~0x3u` (4-byte aligned)
 extern "C" int dpi_pmem_read(int raddr) {
     if (raddr & 0x3u) {
         LogWarn("attempted unaligned memory read: " FMT_ADDR, raddr);
     }
+#ifndef CONFIG_DPIRCACHE
     return paddr_read(raddr & ~0x3u, 4);
+#else
+    // disable cache.
+    paddr_t paddr = raddr & ~0x3u;
+    long cur_cycle = g_vcontext->time();
+    for (int i = 0; i < DPI_RCACHE_SIZE; i++) {
+        auto &cache = dpi_rcache[i];
+        if (cache.raddr == paddr && cache.cycle == cur_cycle) {
+            return cache.data;
+        }
+    }
+    word_t data = paddr_read(paddr, 4);
+    dpi_rcache[dpi_rcache_n] = {paddr, data, cur_cycle};
+    dpi_rcache_n = (dpi_rcache_n + 1) % DPI_RCACHE_SIZE;
+    return data;
+#endif
 }
 
 /// write bytes to pmem at address `waddr & ~0x3u` (4-byte aligned)

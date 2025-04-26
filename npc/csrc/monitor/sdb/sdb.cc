@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-08 17:37:02
- * @modified: 2025-04-24 16:07:36
+ * @modified: 2025-04-26 14:27:39
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -306,7 +306,7 @@ end:
 static void handle_sigint(int sig) {
     if (sig == SIGINT) {
         static uint64_t last_sigint = 0;
-        uint64_t now = get_time();
+        uint64_t        now = get_time();
         if (now - last_sigint < 0.5e6) {
             LogInfo("SIGINT received again. exiting.");
             exit(monitor_exit());
@@ -321,9 +321,7 @@ static void handle_sigint(int sig) {
         rl_redisplay();
     }
 }
-static void signal_init() {
-    signal(SIGINT, handle_sigint);
-}
+static void signal_init() { signal(SIGINT, handle_sigint); }
 
 void sdb_init() {
     regex_init();

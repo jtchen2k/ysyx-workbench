@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-24 14:46:16
- * @modified: 2025-04-24 16:06:33
+ * @modified: 2025-04-26 14:47:34
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -68,7 +68,7 @@ void send_key(SDL_Scancode scancode, bool is_down) {
 }
 
 void i8042_io_handler(uint32_t offset, int len, bool is_write) {
-    LogTrace("i8042_io_handler: %d, %d, %d", offset, len, is_write);
+    // LogTrace("i8042_io_handler: %d, %d, %d", offset, len, is_write);
     Assert(offset == 0, "invalid offset: %d", offset);
     Assert(len == 4, "invalid len: %d", len);
     if (!is_write) {

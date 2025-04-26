@@ -66,7 +66,7 @@ LINKAGE   = $(OBJS) \
 ## 3. General Compilation Flags
 
 BEAR      = bear --
-
+MAKEFLAGS += -j 16
 ### (Cross) compilers, e.g., mips-linux-gnu-g++
 AS        = $(BEAR) $(CROSS_COMPILE)gcc
 CC        = $(BEAR) $(CROSS_COMPILE)gcc

@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-02-14 17:21:40
- * @modified: 2025-04-24 15:20:39
+ * @modified: 2025-04-26 17:01:35
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -84,7 +84,7 @@ void core_exec(uint64_t n) {
         difftest_step(R(PC));
 #endif
 #ifdef CONFIG_DEVICE
-        device_update();
+        // device_update();
 #endif
         clock_t end_time = clock();
         g_core_context->running_time += (end_time - start_time);

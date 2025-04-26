@@ -4,11 +4,12 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-04-23 21:37:38
- * @modified: 2025-04-24 15:17:32
+ * @modified: 2025-04-26 17:05:33
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
 #include "device/map.h"
+#include "monitor.h"
 #include <cstdint>
 #include <ctime>
 #include <sys/time.h>
@@ -39,7 +40,9 @@ void rtc_io_handler(uint32_t offset, int len, bool is_write) {
 }
 
 void init_timer() {
-    get_time();
+    if (g_args->batch) {
+        get_time(); // make device initialization time the boot time.
+    }
     rtc_map = add_mmio_map("timer", CONFIG_RTC_MMIO, 8, rtc_io_handler);
     LogInfo("timer device initialized");
 }

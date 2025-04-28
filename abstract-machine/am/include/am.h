@@ -1,12 +1,13 @@
 #ifndef AM_H__
 #define AM_H__
 
-#include <stdint.h>
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include ARCH_H // this macro is defined in $CFLAGS
                 // examples: "arch/x86-qemu.h", "arch/native.h", ...
 
+// clang-format off
 // Memory protection flags
 #define MMAP_NONE  0x00000000 // no access
 #define MMAP_READ  0x00000001 // can read
@@ -79,3 +80,4 @@ int      atomic_xchg (int *addr, int newval);
 #endif
 
 #endif
+

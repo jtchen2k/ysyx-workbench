@@ -179,6 +179,11 @@ config DTRACE_COND
   string "Only trace device access when the condition is true"
   default "true"
 
+config ETRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable interrupt tracer"
+  default y
+
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

@@ -1,19 +1,21 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
-*
-* NEMU is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*          http://license.coscl.org.cn/MulanPSL2
-*
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-*
-* See the Mulan PSL v2 for more details.
-***************************************************************************************/
+ * Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+ *
+ * NEMU is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan
+ *PSL v2. You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY
+ *KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ *NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ *
+ * See the Mulan PSL v2 for more details.
+ ***************************************************************************************/
 
+// clang-format off
 #include "common.h"
+#include "isa.h"
 #include "local-include/reg.h"
 #include "trace.h"
 #include <cpu/cpu.h>
@@ -24,6 +26,31 @@
 #define R(i) gpr(i)
 #define Mr vaddr_read
 #define Mw vaddr_write
+
+#define CSR_MSTATUS 0x0300
+#define CSR_MEPC 0x0341
+#define CSR_MTVEC 0x0305
+#define CSR_MCAUSE 0x0342
+
+static word_t csr_read(word_t csr) {
+  switch (csr) {
+    case CSR_MSTATUS: return cpu.mstatus;
+    case CSR_MEPC: return cpu.mepc;
+    case CSR_MTVEC: return cpu.mtvec;
+    case CSR_MCAUSE: return cpu.mcause;
+    default: panic("unsupported csr read: 0x%x", csr);
+  }
+}
+
+static void csr_write(word_t csr, word_t value) {
+  switch (csr) {
+    case CSR_MSTATUS: cpu.mstatus = value; break;
+    case CSR_MEPC: cpu.mepc = value; break;
+    case CSR_MTVEC: cpu.mtvec = value; break;
+    case CSR_MCAUSE: cpu.mcause = value; break;
+    default: panic("unsupported csr write: 0x%x", csr);
+  }
+}
 
 /**
  * I = Immediate, U = Upper Immediate (vairant of I)
@@ -148,8 +175,18 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 110 ????? 01100 11", rem    , R, R(rd) = (sword_t)src1 % (sword_t)src2);
   INSTPAT("0000001 ????? ????? 111 ????? 01100 11", remu   , R, R(rd) = src1 % src2);
 
-  /// Special
+  /// CSR Instructions
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw , I, R(rd) = csr_read(imm), csr_write(imm, src1));
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs , I, R(rd) = csr_read(imm), csr_write(imm, src1 | csr_read(imm)));
+
+  /// 3.3.1 Environment Call and Breakpoints
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(MUXDEF(__riscv_e, R(15), R(17)), s->pc));
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
+
+  /// Trap-Return Instructions
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret  , N, s->dnpc = csr_read(CSR_MEPC) + 4);
+
+  /// invalid instruction
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
 

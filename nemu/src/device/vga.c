@@ -68,12 +68,12 @@ static void init_screen() {}
 static inline void update_screen() {
   io_write(AM_GPU_FBDRAW, 0, 0, vmem, screen_width(), screen_height(), true);
 }
-#endif
-#endif
+#endif // CONFIG_TARGET_AM
+#endif // CONFIG_VGA_SHOW_SCREEN
 
 void vga_update_screen() {
   if (vgactl_port_base[1]) {
-    update_screen();
+    IFDEF(CONFIG_VGA_SHOW_SCREEN, update_screen());
     vgactl_port_base[1] = 0;
   }
 }

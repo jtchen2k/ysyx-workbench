@@ -23,13 +23,17 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+#define REG_PRINT_LINE(name, reg) printf(ANSI_FG_BLUE "%-12s " ANSI_NONE FMT_PADDR MUXDEF(CONFIG_ISA64, "%24llu\n", "%16u\n"), name, reg, reg)
+
 void isa_reg_display() {
   for (int i = 0; i < ARRLEN(regs); i++) {
-      printf(ANSI_FG_BLUE "%-12s " ANSI_NONE FMT_PADDR MUXDEF(CONFIG_ISA64, "%24llu\n", "%16u\n"),
-             reg_name(i), gpr(i), gpr(i));
+    REG_PRINT_LINE(reg_name(i), gpr(i));
   }
-  printf(ANSI_FG_BLUE "%-12s " ANSI_NONE FMT_PADDR MUXDEF(CONFIG_ISA64, "%24llu\n", "%16u\n"),
-         "pc", cpu.pc, cpu.pc);
+  REG_PRINT_LINE("pc", cpu.pc);
+  REG_PRINT_LINE("mepc", cpu.mepc);
+  REG_PRINT_LINE("mstatus", cpu.mstatus);
+  REG_PRINT_LINE("mcause", cpu.mcause);
+  REG_PRINT_LINE("mtvec", cpu.mtvec);
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

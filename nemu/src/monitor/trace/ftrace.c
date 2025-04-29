@@ -4,7 +4,7 @@
  * @project: ysyx
  * @author: Juntong Chen (dev@jtchen.io)
  * @created: 2025-03-15 11:27:50
- * @modified: 2025-04-18 20:36:00
+ * @modified: 2025-04-29 17:00:10
  *
  * Copyright (c) 2025 Juntong Chen. All rights reserved.
  */
@@ -66,7 +66,12 @@ void fsym_load(FILE *fp) {
     Elf_Sym *sym = (Elf_Sym *)fread_chunk(fp, symtab_off + i * sizeof(Elf_Sym), sizeof(Elf_Sym));
     if (ELF_ST_TYPE(sym->st_info) == STT_FUNC) {
       FuncSymbol *fsym = (FuncSymbol *)malloc(sizeof(FuncSymbol));
-      strncpy(fsym->name, strtab_str + sym->st_name, sizeof(fsym->name));
+      if (*(strtab_str + sym->st_name) == '\0') {
+        char unknown[] = "unknown";
+        strncpy(fsym->name, unknown, sizeof(fsym->name) - 1);
+      } else {
+        strncpy(fsym->name, strtab_str + sym->st_name, sizeof(fsym->name) - 1);
+      }
       fsym->name[sizeof(fsym->name) - 1] = '\0';
       fsym->addr = sym->st_value;
       fsym->size = sym->st_size;

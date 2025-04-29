@@ -22,7 +22,14 @@
   */
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   cpu.mepc = epc;
-  cpu.mcause = NO;
+  switch (NO) {
+    case -1:
+      cpu.mcause = 0x0000000b;
+      break;
+    default:
+      cpu.mcause = NO;
+      break;
+  }
 #ifdef CONFIG_ETRACE
   log_write("itr [" FMT_WORD "]: " FMT_WORD "\n", epc, NO);
 #endif

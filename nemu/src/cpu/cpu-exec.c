@@ -48,13 +48,15 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 
-#if CONFIG_WATCHPOINT && !CONFIG_TARGET_AM
+#ifdef CONFIG_WATCHPOINT
+#if !CONFIG_TARGET_AM
   int hit = -1;
   wp_update(&hit);
   if (hit != -1) {
     nemu_state.state = NEMU_STOP;
     printf("Hit watchpoint %d at pc = " FMT_WORD "\n", hit, cpu.pc);
   }
+#endif
 #endif
 }
 

@@ -197,7 +197,9 @@ static struct {
              "\tinfo w: Print information of watchpoints.", cmd_info},
     {"x", "Examine memory: x N EXPR", cmd_x},
     {"p", "Print value of expression EXPR: p EXPR. ", cmd_p},
+#ifdef CONFIG_WATCHPOINT
     {"w", "Set a watchpoint for an expression: w EXPR", cmd_w},
+#endif
     {"d", "Delete the watchpoint N: d N", cmd_d},
 #ifdef CONFIG_ITRACE
     {"ib", "Print the iringbuf (instruction ringbuffer)", cmd_ib},
